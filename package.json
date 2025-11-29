@@ -1,0 +1,22 @@
+{
+  "name": "footfall",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/outfit": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "leaflet": "^1.9.4",
+    "lenis": "^1.3.15",
+    "vite-plugin-pwa": "^1.2.0"
+  }
+}

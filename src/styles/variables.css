@@ -1,0 +1,33 @@
+:root {
+  /* Colors - Premium Dark Green & Gold Theme */
+  --color-bg-primary: #000000; /* Pure Black */
+  --color-bg-secondary: #0a0a0a; /* Off-Black */
+  --color-bg-tertiary: #111111; /* Dark Grey for cards */
+  
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0; /* Neutral Grey */
+  --color-text-muted: #666666;
+
+  --color-accent: #D4AF37; /* Gold/Champagne */
+  --color-accent-hover: #F4CF57;
+  --color-accent-dim: rgba(212, 175, 55, 0.1);
+
+  --color-border: #333333; /* Dark Grey border */
+  --color-overlay: rgba(0, 0, 0, 0.85);
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Playfair Display', serif;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 4rem;
+  --spacing-xl: 8rem;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.4s ease;
+  --transition-slow: 0.6s ease;
+}

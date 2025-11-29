@@ -1,0 +1,202 @@
+/* Services Split Layout */
+.services-section {
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.services-header {
+  position: absolute;
+  top: 100px;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  text-align: center;
+  pointer-events: none;
+  font-size: 2.5rem; /* Reduced from default h2 size */
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.services-split-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.split-section {
+  flex: 1;
+  position: relative;
+  transition: flex 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.6s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-right: 1px solid var(--color-border);
+}
+
+.split-section:last-child {
+  border-right: none;
+}
+
+/* Background Images with Blur */
+.split-section::before {
+  content: '';
+  position: absolute;
+  top: -20px; left: -20px; right: -20px; bottom: -20px; /* Oversize to prevent blur edges */
+  background-size: cover;
+  background-position: center;
+  filter: blur(3px); /* Slight blur */
+  z-index: 0;
+  transition: transform 0.6s ease;
+}
+
+.split-section.brands::before {
+  background-image: url('/services_brands_bg.png');
+}
+
+.split-section.landlords::before {
+  background-image: url('/services_landlords_bg.png');
+}
+
+/* Golden Animation / Glow */
+.split-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Trigger animation only when hovering content or active */
+.split-section:has(.section-content:hover)::after,
+.split-section.active::after {
+  opacity: 1;
+  animation: pulseGold 3s infinite alternate;
+}
+
+@keyframes pulseGold {
+  0% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Content Styling */
+.section-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem;
+  max-width: 600px;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  /* Add a dark backdrop to text for readability against images */
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-number {
+  font-family: var(--font-heading);
+  font-size: 0.9rem; /* Reduced */
+  letter-spacing: 2px;
+  color: var(--color-accent);
+  margin-bottom: 0.8rem;
+  display: block;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.service-type-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  font-style: italic;
+  line-height: 1;
+  color: #D4AF37; /* Golden color */
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+
+.section-desc {
+  font-size: 1.1rem; /* Slightly reduced */
+  color: #e0e0e0;
+  margin-top: 1.5rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Hover/Active States - Focused on Content Hover */
+.services-split-container:has(.section-content:hover) .split-section {
+  filter: brightness(0.4) grayscale(0.5);
+}
+
+.services-split-container .split-section:has(.section-content:hover) {
+  flex: 2;
+  filter: brightness(1) grayscale(0);
+}
+
+.services-split-container .split-section:has(.section-content:hover) .section-desc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Mobile Interaction (Active Class) */
+.split-section.active {
+  flex: 3 !important;
+  filter: brightness(1) grayscale(0) !important;
+}
+
+.split-section.active .section-desc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.services-split-container.has-active .split-section:not(.active) {
+  flex: 1;
+  filter: brightness(0.4) grayscale(0.5);
+}
+
+/* Decorative Elements */
+.overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+  pointer-events: none;
+  z-index: 1; /* Above background, below content */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .services-split-container {
+    flex-direction: column;
+  }
+  
+  
+  .services-header {
+    top: 40px;
+  }
+}
