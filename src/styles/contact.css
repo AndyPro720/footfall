@@ -26,6 +26,15 @@
   position: relative;
   perspective: 1000px;
   margin-bottom: 40px; /* Reduced margin */
+  max-width: 100%; /* Ensure it doesn't overflow */
+}
+
+@media (max-width: 600px) {
+  .contact-card-container {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 540/340;
+  }
 }
 
 /* The Card Itself */
@@ -126,6 +135,20 @@
   background-clip: text;
   color: transparent;
   animation: shimmerLogo 3s linear infinite;
+}
+
+@media (max-width: 600px) {
+  .logo-text {
+    font-size: 1.5rem;
+  }
+  
+  .quote {
+    font-size: 1.2rem;
+  }
+  
+  .card-face {
+    padding: 20px;
+  }
 }
 
 @keyframes shimmerLogo {

@@ -163,6 +163,15 @@ html, body {
   transition: all 0.5s ease;
 }
 
+.logo a img {
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.logo a:hover img {
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
+  transform: scale(1.05);
+}
+
 .logo.visible a {
   opacity: 1;
   transform: translateY(0);
@@ -240,11 +249,14 @@ html, body {
   font-family: var(--font-heading);
   font-size: 2rem;
   color: var(--color-text-secondary);
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: inline-block;
 }
 
 .menu-item:hover {
   color: var(--color-accent);
+  transform: scale(1.1);
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
 }
 
 /* Hero Section */
@@ -325,6 +337,21 @@ html, body {
   letter-spacing: 8px;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+    letter-spacing: 4px;
+  }
+  
+  .hero-logo {
+    height: 120px;
+  }
+  
+  .navbar {
+    padding: 20px;
+  }
 }
 
 /* Hero Search Section */
@@ -635,6 +662,24 @@ html, body {
   gap: 30px 50px;
 }
 
+@media (max-width: 768px) {
+  #clients .logo-grid {
+    gap: 20px 30px;
+    padding: 0 10px;
+  }
+  
+  #clients .section-title {
+    font-size: 2.5rem;
+    padding: 0 10px;
+    word-wrap: break-word; /* Ensure long words break */
+  }
+  
+  #clients .container {
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    width: 100%;
+  }
+}
+
 .section-dark {
   background-color: #000000;
   color: #fff;
@@ -703,6 +748,15 @@ html, body {
   flex-shrink: 0;
 }
 
+@media (max-width: 768px) {
+  #clients .testimonial-card {
+    min-width: unset;
+    width: 85vw;
+    max-width: 85vw;
+    padding: 20px;
+  }
+}
+
 #clients .testimonial-card:hover {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)); /* Stronger Platinum/Silver Glass */
   border-color: rgba(255, 255, 255, 0.5);
@@ -760,6 +814,12 @@ html, body {
   margin-top: 40px;
   perspective: 1000px;
   padding: 0 20px; /* Prevent edge touching on mobile */
+}
+
+@media (max-width: 768px) {
+  .logo-grid {
+    gap: 20px 30px;
+  }
 }
 
 .logo-item {
@@ -1114,3 +1174,23 @@ html, body {
   }
 }
 
+
+
+@media (max-width: 480px) {
+  .about-section {
+    padding: 80px 0;
+  }
+
+  .founder-heading {
+    font-size: 2rem;
+  }
+
+  .about-content-wrapper {
+    padding: 0 20px;
+  }
+  
+  .founder-image-wrapper {
+    max-width: 100%;
+    margin-left: 0;
+  }
+}

@@ -195,8 +195,24 @@
     flex-direction: column;
   }
   
+  .split-section {
+    width: 100%;
+    height: 50%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .split-section:last-child {
+    border-bottom: none;
+  }
+  
+  .split-section:first-child {
+    padding-top: 60px; /* Push content down to make room for header */
+  }
   
   .services-header {
-    top: 40px;
+    top: 100px; /* Adjusted to sit between menu and content */
+    font-size: 1.5rem; /* Slightly smaller to fit better */
+    padding: 0 20px;
   }
 }

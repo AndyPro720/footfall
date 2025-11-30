@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target); // Only animate once
+      } else {
+        entry.target.classList.remove('is-visible');
       }
     });
   }, observerOptions);
