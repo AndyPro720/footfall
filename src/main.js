@@ -1,3 +1,4 @@
+import { registerSW } from 'virtual:pwa-register';
 import './styles/global.css';
 import './styles/components.css';
 import './styles/contact.css';
@@ -106,4 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   mutationObserver.observe(app, { childList: true, subtree: true });
+
+  // Register PWA Service Worker
+  registerSW({ immediate: true });
 });
