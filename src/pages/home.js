@@ -372,6 +372,37 @@ export const Home = {
       }, 2000);
     }
 
+    // --- Landing Page Search Logic ---
+    const searchBtn = document.querySelector('.btn-search');
+    const searchInput = document.querySelector('.search-box input');
+
+    if (searchBtn && searchInput) {
+      searchBtn.addEventListener('click', () => {
+        const brandName = searchInput.value.trim();
+        if (brandName) {
+          localStorage.setItem('footfall_brand', brandName);
+          window.location.hash = '/intelligence'; // Use hash routing if that's what the Router uses, or pushState
+          // Since the Router likely listens to hashchange or we need to manually trigger it if it's history API
+          // Based on main.js, it seems to be a custom Router. Let's assume updating hash works or using history.pushState
+          // Checking router.js would be ideal, but standard anchor tags use href="/intelligence".
+          // Let's try simulating a click or just changing location.
+          window.history.pushState({}, '', '/intelligence');
+          // Manually trigger router if needed, but usually pushState needs a popstate event or manual dispatch.
+          // Safer bet:
+          const navEvent = new PopStateEvent('popstate');
+          window.dispatchEvent(navEvent);
+        } else {
+          searchInput.style.borderColor = '#ff4444';
+          setTimeout(() => searchInput.style.borderColor = 'rgba(212, 175, 55, 0.3)', 2000);
+        }
+      });
+      
+      // Allow Enter key
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchBtn.click();
+      });
+    }
+
     // Contact Page Logic (Flip & Modal)
     const card = document.querySelector('.contact-card');
     const modal = document.getElementById('contactModal');

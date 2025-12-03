@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive CRE Map - Professional Edition</title>
+    
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    
+    <!-- Leaflet.js JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Form Overlay */
+        #form-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #form-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #preload-form {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 3rem 3.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 100px rgba(255,255,255,0.1);
+            text-align: center;
+            width: 440px;
+            max-width: 90%;
+            animation: formSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #preload-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes formSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+        
+        #preload-form h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        #preload-form p {
+            margin: 0 0 2rem 0;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            text-align: left;
+            margin-bottom: 1.75rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fafafa;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #667eea;
+        }
+        
+        #start-exploring-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #start-exploring-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        #start-exploring-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        #start-exploring-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Map container */
+        #map {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        #map::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        #map.visible {
+            opacity: 1;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 420px;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            border-left: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        #sidebar.visible {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.75rem 2rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        #sidebar-title {
+            margin: 0;
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #close-sidebar-btn {
+            background: rgba(230, 78, 78, 0.1);
+            color: #e64e4e;
+            border: 2px solid #e64e4e;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #close-sidebar-btn:hover {
+            background: #e64e4e;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 78, 78, 0.3);
+        }
+
+        #sidebar-content {
+            padding: 2rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        #sidebar-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #sidebar-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        #sidebar-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+        
+        #sidebar-trade-type {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: -0.5rem;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: 16px;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .stat-card-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card-blue { 
+            background: linear-gradient(135deg, #667eea 0%, #4c63d2 100%);
+        }
+        .stat-card-green { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .stat-card-orange { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card-purple { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .sidebar-section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #667eea, #764ba2);
+            border-image-slice: 1;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .demo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .demo-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .demo-item-label {
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .demo-item-value {
+            font-weight: 600;
+            color: #667eea;
+            text-align: right;
+        }
+        
+        .brand-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .brand-list li {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+        }
+        
+        .brand-list li:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .sidebar-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .sidebar-btn {
+            flex: 1;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .sidebar-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .sidebar-btn-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sidebar-btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .sidebar-btn-share {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .sidebar-btn-share:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Back Button */
+        #back-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 800;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            color: #333;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 0.9rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #back-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        
+        #back-btn.visible {
+            display: flex;
+            align-items: center;
+            animation: slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        #back-btn-arrow {
+            font-size: 1.3rem;
+            margin-right: 0.75rem;
+            transition: transform 0.3s;
+        }
+        
+        #back-btn:hover #back-btn-arrow {
+            transform: translateX(-4px);
+        }
+        
+        #back-btn-crumbs {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        #back-btn-crumbs span {
+            color: #999;
+            font-weight: 600;
+            margin: 0 0.5rem;
+        }
+
+        /* Guide Box */
+        #guide-box {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 800;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #333;
+            display: none;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #guide-box.visible {
+            display: block;
+            animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        #guide-box::before {
+            content: '💡';
+            margin-right: 0.75rem;
+        }
+
+        /* Legend */
+        #legend {
+            position: fixed;
+            bottom: 30px;
+            left: 24px;
+            z-index: 800;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #legend:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+        
+        #legend h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #333;
+            transition: transform 0.2s;
+        }
+        
+        .legend-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .legend-color-box {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Country Marker Styles */
+        .country-marker-wrapper {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .country-marker-wrapper:hover {
+            transform: scale(1.15);
+            z-index: 1000 !important;
+        }
+        
+        .country-marker-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.25rem;
+            border: 5px solid white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: pulse-country 3s infinite;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .country-marker-wrapper:hover .country-marker-icon {
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+        
+        .country-marker-name {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            margin-top: 12px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        @keyframes pulse-country {
+            0% {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 0 0 rgba(102, 126, 234, 0.7);
+            }
+            70% {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 0 20px rgba(102, 126, 234, 0);
+            }
+            100% {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3), 0 0 0 0 rgba(102, 126, 234, 0);
+            }
+        }
+
+        /* City Polygon Glow */
+        @keyframes pulse-glow {
+            0% {
+                stroke-width: 4px;
+                opacity: 0.9;
+            }
+            50% {
+                stroke-width: 8px;
+                opacity: 0.5;
+            }
+            100% {
+                stroke-width: 4px;
+                opacity: 0.9;
+            }
+        }
+        
+        .city-polygon-glow {
+            fill: #11998e;
+            fill-opacity: 0.15;
+            stroke: #38ef7d;
+            stroke-width: 4px;
+            opacity: 0.9;
+            animation: pulse-glow 3s infinite ease-in-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .city-polygon-glow:hover {
+            fill-opacity: 0.3;
+            stroke-width: 6px;
+            filter: drop-shadow(0 0 20px rgba(56, 239, 125, 0.6));
+        }
+
+        /* Location Pin Styles */
+        .location-pin-wrapper {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .location-pin {
+            width: 36px;
+            height: 48px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .location-pin-wrapper:hover {
+            transform: scale(1.2) translateY(-5px);
+            z-index: 1000 !important;
+        }
+        
+        .location-pin-wrapper:hover .location-pin {
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+        }
+        
+        .location-pin-wrapper.selected .location-pin {
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+            animation: bounce-pin 0.6s ease;
+        }
+        
+        @keyframes bounce-pin {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .location-pin-name {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            margin-top: 6px;
+            border: 2px solid rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .location-pin-wrapper:hover .location-pin-name {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+        
+        .location-pin-wrapper.selected .location-pin-name {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        /* Recommended Pin Animation */
+        .location-pin-wrapper.recommended .location-pin {
+            animation: pulse-recommended 2s infinite ease-in-out;
+        }
+        
+        .location-pin-wrapper.recommended {
+            animation: float-recommended 2.5s infinite ease-in-out;
+            z-index: 1000 !important;
+        }
+        
+        @keyframes pulse-recommended {
+            0% {
+                filter: drop-shadow(0 4px 8px rgba(255, 193, 7, 0.4)) drop-shadow(0 0 8px #ffc107);
+            }
+            50% {
+                filter: drop-shadow(0 6px 16px rgba(255, 193, 7, 0.6)) drop-shadow(0 0 20px #ffc107);
+            }
+            100% {
+                filter: drop-shadow(0 4px 8px rgba(255, 193, 7, 0.4)) drop-shadow(0 0 8px #ffc107);
+            }
+        }
+
+        @keyframes float-recommended {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+        
+        .location-pin-wrapper.recommended .location-pin-name {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+            font-weight: 800;
+            border-color: transparent;
+            animation: glow-name 2s infinite ease-in-out;
+        }
+        
+        @keyframes glow-name {
+            0%, 100% {
+                box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+            }
+            50% {
+                box-shadow: 0 6px 20px rgba(255, 193, 7, 0.6);
+            }
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 2001;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        #toast.show {
+            bottom: 40px;
+        }
+        
+        #toast::before {
+            content: '✓ ';
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pre-load Form -->
+    <div id="form-overlay">
+        <form id="preload-form">
+            <h2>Find Your Location</h2>
+            <p>Discover premium commercial real estate opportunities</p>
+            <div class="form-group">
+                <label for="user-name">Your Name</label>
+                <input type="text" id="user-name" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+                <label for="trade-area-select">Preferred Trade Area Type</label>
+                <select id="trade-area-select">
+                    <option value="all">Show All</option>
+                    <option value="premium">Premium</option>
+                    <option value="mid-market">Mid-Market</option>
+                    <option value="emerging">Emerging</option>
+                    <option value="commercial">Commercial Hub</option>
+                </select>
+            </div>
+            <button type="submit" id="start-exploring-btn">Start Exploring</button>
+        </form>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+    
+    <!-- Guide Box -->
+    <div id="guide-box">
+        <span id="guide-text"></span>
+    </div>
+
+    <!-- Data Sidebar -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3 id="sidebar-title">Locality Data</h3>
+            <button id="close-sidebar-btn" aria-label="Close sidebar">Close</button>
+        </div>
+        <div id="sidebar-content">
+            <p>Click on a trade area to see its data.</p>
+        </div>
+    </div>
+    
+    <!-- Back Button -->
+    <button id="back-btn">
+        <span id="back-btn-arrow">&larr;</span>
+        <span id="back-btn-crumbs"></span>
+    </button>
+    
+    <!-- Legend -->
+    <div id="legend">
+        <h4>Trade Area Types</h4>
+        <div class="legend-item">
+            <span class="legend-color-box" style="background: #d7191c;"></span> Premium
+        </div>
+        <div class="legend-item">
+            <span class="legend-color-box" style="background: #fdae61;"></span> Mid-Market
+        </div>
+        <div class="legend-item">
+            <span class="legend-color-box" style="background: #abdda4;"></span> Emerging
+        </div>
+        <div class="legend-item">
+            <span class="legend-color-box" style="background: #2b83ba;"></span> Commercial Hub
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast">
+        This is a toast notification!
+    </div>
+
+    <script>
+        // --- MOCK DATA ---
+        
+        const mockGeoData = {
+            countries: {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": { "name": "India" },
+                        "geometry": { "type": "Point", "coordinates": [20.5937, 78.9629] }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { "name": "Dubai" },
+                        "geometry": { "type": "Point", "coordinates": [25.2048, 55.2708] }
+                    }
+                ]
+            },
+            cities: {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": { "name": "Mumbai", "country": "India" },
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[
+                                [72.78, 18.89], [72.85, 18.85], [72.98, 18.89], [73.0, 19.1], 
+                                [72.98, 19.27], [72.88, 19.3], [72.78, 19.27], [72.75, 19.1], 
+                                [72.78, 18.89]
+                            ]]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { "name": "Pune", "country": "India" },
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[
+                                [73.75, 18.45], [73.85, 18.42], [73.95, 18.45], [73.98, 18.55], 
+                                [73.95, 18.65], [73.85, 18.68], [73.75, 18.65], [73.72, 18.55], 
+                                [73.75, 18.45]
+                            ]]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { "name": "Downtown Dubai", "country": "Dubai" },
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[
+                                [55.269, 25.189], [55.280, 25.189], [55.280, 25.200], 
+                                [55.275, 25.203], [55.269, 25.200], [55.269, 25.189]
+                            ]]
+                        }
+                    }
+                ]
+            },
+            localities: {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Koregaon Park", "city": "Pune", "id": "pune-kp", "type": "premium", 
+                            "center": [18.535, 73.885]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Viman Nagar", "city": "Pune", "id": "pune-vn", "type": "mid-market", 
+                            "center": [18.568, 73.915]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Hinjewadi", "city": "Pune", "id": "pune-hj", "type": "commercial", 
+                            "center": [18.59, 73.74]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Wagholi", "city": "Pune", "id": "pune-wg", "type": "emerging", 
+                            "center": [18.59, 73.96]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Andheri", "city": "Mumbai", "id": "mum-an", "type": "commercial", 
+                            "center": [19.12, 72.84]
+                        }
+                    },
+                    {
+                        "type": "Feature",
+                        "properties": { 
+                            "name": "Burj Khalifa Area", "city": "Downtown Dubai", "id": "dub-bk", "type": "premium", 
+                            "center": [25.1972, 55.2744]
+                        }
+                    }
+                ]
+            }
+        };
+
+        const mockTradeData = {
+            "pune-kp": {
+                name: "Koregaon Park",
+                type: "Premium",
+                footfall: "32,000",
+                income: "₹8L+",
+                rent: "₹80",
+                vacancy: "12%",
+                audience: "30-50 years, Families",
+                spending: "Value retail, Family dining",
+                median_income: "₹8-12 Lakhs/year",
+                brands: ["Reliance Fresh", "Big Bazaar", "Dominos", "Cafe Coffee Day", "Metro Shoes"]
+            },
+            "pune-vn": {
+                name: "Viman Nagar",
+                type: "Mid-Market",
+                footfall: "25,000",
+                income: "₹6L+",
+                rent: "₹65",
+                vacancy: "8%",
+                audience: "22-40 years, Students, IT",
+                spending: "QSR, Malls, Electronics",
+                median_income: "₹6-9 Lakhs/year",
+                brands: ["McDonald's", "Croma", "Starbucks", "Taco Bell"]
+            },
+            "pune-hj": {
+                name: "Hinjewadi",
+                type: "Commercial Hub",
+                footfall: "45,000",
+                income: "₹7L+",
+                rent: "₹70",
+                vacancy: "15%",
+                audience: "25-45 years, IT Professionals",
+                spending: "Work lunches, Electronics",
+                median_income: "₹7-11 Lakhs/year",
+                brands: ["Subway", "D-Mart", "Pizza Hut", "Infosys", "Wipro"]
+            },
+            "pune-wg": {
+                name: "Wagholi",
+                type: "Emerging",
+                footfall: "18,000",
+                income: "₹4L+",
+                rent: "₹40",
+                vacancy: "5%",
+                audience: "25-40 years, Young Families",
+                spending: "Groceries, Local retail",
+                median_income: "₹4-6 Lakhs/year",
+                brands: ["Local Grocers", "MedPlus", "Bank of Maharashtra"]
+            },
+            "mum-an": {
+                name: "Andheri",
+                type: "Commercial Hub",
+                footfall: "60,000",
+                income: "₹9L+",
+                rent: "₹120",
+                vacancy: "10%",
+                audience: "25-55 years, Professionals",
+                spending: "Retail, Entertainment",
+                median_income: "₹9-15 Lakhs/year",
+                brands: ["Shoppers Stop", "PVR", "Bandra Kurla Complex"]
+            },
+            "dub-bk": {
+                name: "Burj Khalifa Area",
+                type: "Premium",
+                footfall: "90,000",
+                income: "AED 40k+",
+                rent: "AED 200",
+                vacancy: "5%",
+                audience: "Tourists, High-Net-Worth",
+                spending: "Luxury Retail, Fine Dining",
+                median_income: "AED 500k+/year",
+                brands: ["Gucci", "Rolex", "Armani", "Dubai Mall"]
+            }
+        };
+
+        // --- APPLICATION LOGIC ---
+
+        const mapElement = document.getElementById('map');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarTitle = document.getElementById('sidebar-title');
+        const sidebarContent = document.getElementById('sidebar-content');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const backBtn = document.getElementById('back-btn');
+        const backBtnCrumbs = document.getElementById('back-btn-crumbs');
+        const guideBox = document.getElementById('guide-box');
+        const guideText = document.getElementById('guide-text');
+        const legend = document.getElementById('legend');
+        const toast = document.getElementById('toast');
+        const formOverlay = document.getElementById('form-overlay');
+        const preloadForm = document.getElementById('preload-form');
+        
+        let map;
+        let currentLayer = null;
+        let selectedLayer = null;
+        let stateHistory = [];
+        let toastTimeout;
+        let userPreference = 'all';
+
+        const tradeAreaColors = {
+            "premium": "#d7191c",
+            "mid-market": "#fdae61",
+            "emerging": "#abdda4",
+            "commercial": "#2b83ba"
+        };
+        
+        const cityStyle = {
+            className: 'city-polygon-glow'
+        };
+        const cityHoverStyle = {
+            fillOpacity: 0.4
+        };
+
+        function getColorForTradeArea(type) {
+            return tradeAreaColors[type.toLowerCase()] || "#cccccc";
+        }
+        
+        function initMap() {
+            map = L.map(mapElement, {
+                zoomControl: false
+            }).setView([22, 78], 4);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            // Dark theme map for modern look
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+
+            const initialState = { level: 'world', data: {} };
+            stateHistory.push(initialState);
+            
+            loadCountries();
+            
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+            backBtn.addEventListener('click', goBack);
+        }
+
+        function clearMap() {
+            if (currentLayer) {
+                map.removeLayer(currentLayer);
+                currentLayer = null;
+            }
+            if (selectedLayer) {
+                selectedLayer = null;
+            }
+            closeSidebar();
+            legend.style.display = 'none';
+        }
+        
+        function updateGuideBox(level) {
+            switch(level) {
+                case 'world':
+                    guideText.innerText = 'Click a country to see serviceable cities.';
+                    break;
+                case 'country':
+                    guideText.innerText = 'Click a city to see trade areas.';
+                    break;
+                case 'city':
+                    guideText.innerText = 'Click a trade area to see details.';
+                    break;
+            }
+            guideBox.classList.add('visible');
+        }
+        
+        function updateBackButton() {
+            if (stateHistory.length <= 1) {
+                backBtn.classList.remove('visible');
+                return;
+            }
+            
+            let crumbs = stateHistory.slice(1).map(s => s.data.name).join(' <span>&gt;</span> ');
+            backBtnCrumbs.innerHTML = crumbs;
+            backBtn.classList.add('visible');
+        }
+
+        function loadCountries() {
+            clearMap();
+            updateGuideBox('world');
+            updateBackButton();
+            
+            const countryMarkers = [];
+            
+            mockGeoData.countries.features.forEach(feature => {
+                const markerHtml = `
+                    <div class="country-marker-wrapper">
+                        <div class="country-marker-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0M2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.797-1.67 4.657-4.505.21-.69.21-1.39.002-2.043-.307-1.165-1.112-2.31-2.54-3.234C9.57 3.611 8.225 3.31 8 3.31s-.225.301-.54 1.016Z"/>
+                            </svg>
+                        </div>
+                        <div class="country-marker-name">${feature.properties.name}</div>
+                    </div>
+                `;
+                
+                const customIcon = L.divIcon({
+                    className: '',
+                    html: markerHtml,
+                    iconAnchor: [36, 84]
+                });
+                
+                const marker = L.marker(feature.geometry.coordinates, { 
+                    icon: customIcon,
+                    feature: feature
+                });
+                
+                marker.on('click', (e) => {
+                    const countryName = e.target.options.feature.properties.name;
+                    stateHistory.push({ level: 'country', data: { name: countryName } });
+
+                    const citiesInCountry = mockGeoData.cities.features.filter(
+                        f => f.properties.country === countryName
+                    );
+                    const cityFeatures = citiesInCountry.map(cityGeoJSON => L.geoJSON(cityGeoJSON));
+                    const cityGroup = L.featureGroup(cityFeatures);
+                    const cityBounds = cityGroup.getBounds();
+
+                    if (cityBounds.isValid()) {
+                        map.flyToBounds(cityBounds, { padding: [50, 50], duration: 1.5 });
+                    }
+                    
+                    setTimeout(() => loadCities(countryName), 300);
+                });
+                
+                countryMarkers.push(marker);
+            });
+            
+            currentLayer = L.featureGroup(countryMarkers).addTo(map);
+            map.flyTo([22, 78], 4, { duration: 1.5 });
+        }
+
+        function loadCities(countryName) {
+            clearMap();
+            updateGuideBox('country');
+            updateBackButton();
+
+            currentLayer = L.geoJSON(mockGeoData.cities, {
+                filter: (feature) => feature.properties.country === countryName,
+                style: cityStyle,
+                onEachFeature: (feature, layer) => {
+                    layer.on({
+                        mouseover: (e) => e.target.setStyle(cityHoverStyle),
+                        mouseout: (e) => currentLayer.resetStyle(e.target)
+                    });
+                    
+                    layer.on('click', (e) => {
+                        const cityName = feature.properties.name;
+                        const bounds = e.target.getBounds();
+
+                        stateHistory.push({ level: 'city', data: { name: cityName } });
+                        
+                        map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+                        
+                        setTimeout(() => loadLocalities(cityName), 300);
+                    });
+                }
+            }).addTo(map);
+        }
+
+        function loadLocalities(cityName) {
+            clearMap();
+            updateGuideBox('city');
+            updateBackButton();
+            legend.style.display = 'block';
+
+            const localityMarkers = [];
+            
+            mockGeoData.localities.features.forEach(feature => {
+                if (feature.properties.city === cityName) {
+                    
+                    const markerColor = getColorForTradeArea(feature.properties.type);
+                    
+                    const isRecommended = feature.properties.type.toLowerCase() === userPreference;
+                    const recommendedClass = isRecommended ? 'recommended' : '';
+                    
+                    const markerHtml = `
+                        <div class="location-pin-wrapper ${recommendedClass}">
+                            <svg class="location-pin" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 0C8.268 0 2 6.268 2 14c0 10.5 14 26 14 26s14-15.5 14-26C30 6.268 23.732 0 16 0zm0 21c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7z" 
+                                      fill="${markerColor}" 
+                                      stroke="#fff" 
+                                      stroke-width="1.5"/>
+                            </svg>
+                            <div class="location-pin-name">${feature.properties.name}</div>
+                        </div>
+                    `;
+                    
+                    const customIcon = L.divIcon({
+                        className: '',
+                        html: markerHtml,
+                        iconAnchor: [18, 48]
+                    });
+                    
+                    const marker = L.marker(feature.properties.center, { 
+                        icon: customIcon,
+                        feature: feature 
+                    });
+
+                    marker.on('click', (e) => {
+                        const clickedMarker = e.target;
+                        const data = mockTradeData[clickedMarker.options.feature.properties.id];
+
+                        if (selectedLayer) {
+                            const oldEl = selectedLayer.getElement();
+                            if(oldEl) oldEl.classList.remove('selected');
+                        }
+                        
+                        selectedLayer = clickedMarker;
+                        const newEl = selectedLayer.getElement();
+                        if(newEl) newEl.classList.add('selected');
+                        
+                        map.flyTo(selectedLayer.getLatLng(), Math.max(map.getZoom(), 15), { duration: 1 });
+
+                        populateSidebar(data);
+                        openSidebar();
+                    });
+                    
+                    localityMarkers.push(marker);
+                }
+            });
+            
+            currentLayer = L.featureGroup(localityMarkers).addTo(map);
+        }
+
+        function populateSidebar(data) {
+            sidebarTitle.innerText = data.name;
+            
+            const brandsHtml = data.brands.map(brand => `<li>${brand}</li>`).join('');
+
+            sidebarContent.innerHTML = `
+                <h4 id="sidebar-trade-type">Trade Area: ${data.type}</h4>
+                
+                <div class="stat-grid">
+                    <div class="stat-card stat-card-blue">
+                        <div class="stat-card-label">Daily Footfall</div>
+                        <div class="stat-card-value">${data.footfall}</div>
+                    </div>
+                    <div class="stat-card stat-card-green">
+                        <div class="stat-card-label">Median Income</div>
+                        <div class="stat-card-value">${data.income}</div>
+                    </div>
+                    <div class="stat-card stat-card-orange">
+                        <div class="stat-card-label">Avg Rent/sq.ft</div>
+                        <div class="stat-card-value">${data.rent}</div>
+                    </div>
+                    <div class="stat-card stat-card-purple">
+                        <div class="stat-card-label">Vacancy Rate</div>
+                        <div class="stat-card-value">${data.vacancy}</div>
+                    </div>
+                </div>
+                
+                <h5 class="sidebar-section-title">Demographics & Behavior</h5>
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <span class="demo-item-label">Target Audience</span>
+                        <span class="demo-item-value">${data.audience}</span>
+                    </div>
+                    <div class="demo-item">
+                        <span class="demo-item-label">Spending Patterns</span>
+                        <span class="demo-item-value">${data.spending}</span>
+                    </div>
+                    <div class="demo-item">
+                        <span class="demo-item-label">Median Income</span>
+                        <span class="demo-item-value">${data.median_income}</span>
+                    </div>
+                </div>
+                
+                <h5 class="sidebar-section-title">Major Brands Present</h5>
+                <ul class="brand-list">
+                    ${brandsHtml}
+                </ul>
+                
+                <div class="sidebar-actions">
+                    <button class="sidebar-btn sidebar-btn-download">Download Report</button>
+                    <button class="sidebar-btn sidebar-btn-share">Share</button>
+                </div>
+            `;
+            
+            const downloadBtn = sidebarContent.querySelector('.sidebar-btn-download');
+            const shareBtn = sidebarContent.querySelector('.sidebar-btn-share');
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', () => {
+                    showToast('Preparing your report...');
+                });
+            }
+            
+            if (shareBtn) {
+                shareBtn.addEventListener('click', () => {
+                    showToast('Link copied to clipboard!');
+                });
+            }
+        }
+        
+        function showToast(message) {
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
+            toast.innerText = message;
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('visible');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('visible');
+            if (selectedLayer) {
+                const el = selectedLayer.getElement();
+                if(el) el.classList.remove('selected');
+                selectedLayer = null;
+            }
+        }
+
+        function goBack() {
+            if (stateHistory.length <= 1) return;
+            
+            stateHistory.pop();
+            const prevState = stateHistory[stateHistory.length - 1];
+
+            if (prevState.level === 'world') {
+                loadCountries();
+            } else if (prevState.level === 'country') {
+                const citiesInCountry = mockGeoData.cities.features.filter(
+                    f => f.properties.country === prevState.data.name
+                );
+                const cityFeatures = citiesInCountry.map(cityGeoJSON => L.geoJSON(cityGeoJSON));
+                const cityGroup = L.featureGroup(cityFeatures);
+                map.flyToBounds(cityGroup.getBounds(), { padding: [50, 50], duration: 1.5 });
+                
+                setTimeout(() => loadCities(prevState.data.name), 300);
+            }
+        }
+        
+        preloadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            userPreference = document.getElementById('trade-area-select').value;
+            
+            formOverlay.classList.add('hidden');
+            
+            mapElement.classList.add('visible');
+            
+            setTimeout(() => initMap(), 600);
+        });
+
+    </script>
+</body>
+</html>

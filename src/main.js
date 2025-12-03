@@ -3,6 +3,7 @@ import './styles/global.css';
 import './styles/components.css';
 import './styles/contact.css';
 import './styles/services.css';
+import './styles/intelligence.css';
 import { Router } from './router.js';
 import { Navbar } from './components/navbar.js';
 import { Home } from './pages/home.js';
