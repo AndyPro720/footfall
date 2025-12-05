@@ -1,5 +1,5 @@
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { geoData, tradeData } from '../data/geoData.js';
 import { DataManager } from '../data/dataManager.js';
 
@@ -87,9 +87,10 @@ export const Intelligence = {
     await DataManager.loadData();
 
     let map;
-    let currentLayer = null;
     let breadcrumbs = ['Global'];
     let userCriteria = {};
+    let currentLevel = 'Global'; // Global, Country, City
+    let markers = []; // Store active markers
 
     // --- DOM Elements ---
     const wizardOverlay = document.getElementById('wizard-overlay');
@@ -109,26 +110,268 @@ export const Intelligence = {
     const citySelect = document.getElementById('city-select');
     const btnNext2 = document.getElementById('btn-next-2');
 
-    // --- Map Preloading ---
+    // --- Helper: Calculate Bounds ---
+    const getBounds = (features) => {
+      const bounds = new maplibregl.LngLatBounds();
+      features.forEach(f => {
+        if (f.geometry.type === 'Point') {
+          bounds.extend(f.geometry.coordinates);
+        } else if (f.geometry.type === 'Polygon') {
+          f.geometry.coordinates[0].forEach(coord => bounds.extend(coord));
+        }
+      });
+      return bounds;
+    };
+
+    // --- Map Initialization ---
     const initMap = () => {
-      map = L.map('map-container', {
-        zoomControl: false,
-        attributionControl: false,
-        fadeAnimation: true,
-        zoomAnimation: true,
-        minZoom: 3,
-        maxZoom: 18
-      }).setView([20, 78], 4);
+      map = new maplibregl.Map({
+        container: 'map-container',
+        style: 'https://tiles.openfreemap.org/styles/liberty', // Free vector style
+        center: [78, 20],
+        zoom: 3,
+        pitch: 0,
+        bearing: 0,
+        antialias: true // Needed for 3D buildings
+      });
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20
-      }).addTo(map);
+      map.on('load', () => {
+        // Add Sources
+        map.addSource('countries', {
+          type: 'geojson',
+          data: geoData.countries
+        });
 
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
+        map.addSource('cities', {
+          type: 'geojson',
+          data: geoData.cities
+        });
+
+        map.addSource('tradeAreas', {
+          type: 'geojson',
+          data: geoData.tradeAreas
+        });
+
+        // --- Layers ---
+
+        // 1. Country View: City Borders
+        map.addLayer({
+          id: 'cities-fill',
+          type: 'fill',
+          source: 'cities',
+          paint: {
+            'fill-color': '#d4af37',
+            'fill-opacity': 0.05
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        // Border Casing (White outline for contrast)
+        map.addLayer({
+          id: 'cities-border-casing',
+          type: 'line',
+          source: 'cities',
+          paint: {
+            'line-color': '#ffffff',
+            'line-width': 4,
+            'line-opacity': 0.5
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        // Main Border (Red)
+        map.addLayer({
+          id: 'cities-border',
+          type: 'line',
+          source: 'cities',
+          paint: {
+            'line-color': '#ff3333', // Bright red
+            'line-width': 2,
+            'line-dasharray': [2, 1] // Dashed effect for "jagged" feel
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        map.addLayer({
+          id: 'cities-label',
+          type: 'symbol',
+          source: 'cities',
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['Noto Sans Regular'],
+            'text-size': 14,
+            'visibility': 'none'
+          },
+          paint: {
+            'text-color': '#000',
+            'text-halo-color': '#fff',
+            'text-halo-width': 2
+          }
+        });
+
+        // 3. City View: Colored Heatmap Blobs & Trade Areas
+        
+        // "Heatmap" Blobs (Diffuse Glow)
+        map.addLayer({
+          id: 'trade-blobs',
+          type: 'circle',
+          source: 'tradeAreas',
+          minzoom: 10,
+          paint: {
+            // Large radius for diffuse look
+            'circle-radius': [
+              'interpolate', ['linear'], ['zoom'],
+              10, 50,
+              14, 200,
+              16, 400
+            ],
+            'circle-color': ['get', 'color'],
+            'circle-blur': 1.0, // Max blur for "glow" effect
+            'circle-opacity': 0.5
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        // Trade Area Points (Interactive)
+        map.addLayer({
+          id: 'trade-points',
+          type: 'circle',
+          source: 'tradeAreas',
+          minzoom: 10,
+          paint: {
+            'circle-radius': 6,
+            'circle-color': ['get', 'color'],
+            'circle-stroke-color': '#fff',
+            'circle-stroke-width': 2,
+            'circle-opacity': 1
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        // 3D Buildings
+        if (!map.getLayer('building-3d')) {
+             try {
+                map.addLayer({
+                    'id': '3d-buildings',
+                    'source': 'openfreemap',
+                    'source-layer': 'building',
+                    'filter': ['==', 'extrude', 'true'],
+                    'type': 'fill-extrusion',
+                    'minzoom': 13,
+                    'paint': {
+                        'fill-extrusion-color': '#aaa',
+                        'fill-extrusion-height': [
+                            'interpolate', ['linear'], ['zoom'],
+                            13, 0,
+                            13.05, ['get', 'height']
+                        ],
+                        'fill-extrusion-base': [
+                            'interpolate', ['linear'], ['zoom'],
+                            13, 0,
+                            13.05, ['get', 'min_height']
+                        ],
+                        'fill-extrusion-opacity': 0.6
+                    }
+                });
+             } catch (e) {
+                 console.log("Could not add 3D buildings layer automatically", e);
+             }
+        }
+
+        // --- Interactions ---
+        
+        // Country -> City
+        map.on('click', 'cities-fill', (e) => {
+          const feature = e.features[0];
+          loadCityView(feature);
+        });
+        
+        // Also allow clicking on the border
+        map.on('click', 'cities-border', (e) => {
+            const feature = e.features[0];
+            loadCityView(feature);
+        });
+
+        // City -> Trade Area
+        map.on('click', 'trade-points', (e) => {
+          const feature = e.features[0];
+          const data = tradeData[feature.properties.id];
+          if (data) {
+            enterLocationLevel(feature, data);
+          }
+        });
+
+        // Cursor pointers
+        ['cities-fill', 'cities-border', 'trade-points'].forEach(layer => {
+          map.on('mouseenter', layer, () => map.getCanvas().style.cursor = 'pointer');
+          map.on('mouseleave', layer, () => map.getCanvas().style.cursor = '');
+        });
+
+        // Initial View
+        loadGlobalView();
+      });
     };
 
     initMap();
+
+    // --- Marker Management ---
+    const clearMarkers = () => {
+      markers.forEach(marker => marker.remove());
+      markers = [];
+    };
+
+    const createMarker = (feature, type) => {
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      
+      const pin = document.createElement('div');
+      pin.className = 'pin-pulse';
+      pin.style.color = feature.properties.color || '#d4af37';
+      
+      const label = document.createElement('div');
+      label.className = 'pin-label';
+      label.innerText = feature.properties.name;
+      
+      el.appendChild(pin);
+      el.appendChild(label);
+
+      el.style.zIndex = '1000'; // Ensure markers are on top
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent map click
+        if (type === 'country') {
+          loadCountryView(feature);
+        } else if (type === 'city') {
+          loadCityView(feature);
+        }
+      });
+
+      // For polygons (cities), find centroid
+      let lngLat;
+      if (feature.geometry.type === 'Point') {
+        lngLat = feature.geometry.coordinates;
+      } else {
+        const bounds = new maplibregl.LngLatBounds();
+        feature.geometry.coordinates[0].forEach(coord => bounds.extend(coord));
+        lngLat = bounds.getCenter();
+      }
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat(lngLat)
+        .addTo(map);
+      
+      markers.push(marker);
+    };
 
     // --- Legend Logic ---
     const updateLegend = (level) => {
@@ -136,19 +379,45 @@ export const Intelligence = {
       legendContent.innerHTML = '';
 
       if (level === 'Global') {
-        legendContent.innerHTML = `
-          <div class="legend-item"><div class="legend-dot" style="background: #d4af37;"></div>Countries</div>
-        `;
+        const items = [
+          { name: 'India', color: '#FF9933' },
+          { name: 'UAE', color: '#00732F' }
+        ];
+        
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'legend-item';
+          div.style.cursor = 'pointer';
+          div.innerHTML = `<div class="legend-dot" style="background: ${item.color};"></div>${item.name}`;
+          div.onclick = () => {
+            const country = geoData.countries.features.find(f => f.properties.name === item.name);
+            if (country) loadCountryView(country);
+          };
+          legendContent.appendChild(div);
+        });
+
       } else if (level === 'Country') {
-        legendContent.innerHTML = `
-          <div class="legend-item"><div class="legend-dot" style="background: #2b83ba;"></div>Major Cities</div>
-        `;
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+        div.innerHTML = `<div class="legend-dot" style="background: #ff3333;"></div>City Borders`;
+        legendContent.appendChild(div);
+
       } else if (level === 'City') {
-        legendContent.innerHTML = `
-          <div class="legend-item"><div class="legend-dot" style="background: #d4af37;"></div>Premium</div>
-          <div class="legend-item"><div class="legend-dot" style="background: #d4af37; opacity: 0.7;"></div>High Street</div>
-          <div class="legend-item"><div class="legend-dot" style="background: #d4af37; opacity: 0.4;"></div>Residential</div>
-        `;
+        // List ALL trade areas for this city
+        const cityName = breadcrumbs[2]; // Global > Country > City
+        const cityTradeAreas = geoData.tradeAreas.features.filter(f => f.properties.city === cityName);
+        
+        cityTradeAreas.forEach(area => {
+          const div = document.createElement('div');
+          div.className = 'legend-item';
+          div.style.cursor = 'pointer';
+          div.innerHTML = `<div class="legend-dot" style="background: ${area.properties.color};"></div>${area.properties.name}`;
+          div.onclick = () => {
+            const data = tradeData[area.properties.id];
+            if (data) enterLocationLevel(area, data);
+          };
+          legendContent.appendChild(div);
+        });
       }
     };
 
@@ -234,136 +503,107 @@ export const Intelligence = {
 
     // --- View Loaders ---
 
+    const setLayerVisibility = (layerIds, visibility) => {
+      layerIds.forEach(id => {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, 'visibility', visibility);
+        }
+      });
+    };
+
     const loadGlobalView = () => {
-      if (currentLayer) map.removeLayer(currentLayer);
+      currentLevel = 'Global';
       sidebar.classList.remove('visible');
       updateBreadcrumbs(['Global']);
       updateLegend('Global');
+      clearMarkers();
       
-      map.setMinZoom(2);
-      map.setMaxZoom(6);
+      // Add Country Markers
+      geoData.countries.features.forEach(f => createMarker(f, 'country'));
 
-      const markers = [];
-      geoData.countries.features.forEach(feature => {
-        const icon = L.divIcon({
-          className: 'custom-pin',
-          html: `
-            <div class="country-pin"></div>
-            <div class="pin-label">${feature.properties.name}</div>
-          `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
+      // Visibility
+      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label', 'trade-blobs', 'trade-points'], 'none');
 
-        const marker = L.marker(feature.geometry.coordinates, { icon }).addTo(map);
-        
-        marker.on('click', () => {
-          loadCountryView(feature);
-        });
-        markers.push(marker);
+      // Camera: Fit to all countries
+      const bounds = getBounds(geoData.countries.features);
+      map.fitBounds(bounds, {
+        padding: 300, // Increased padding for wider perspective
+        pitch: 0,
+        bearing: 0,
+        essential: true
       });
-
-      currentLayer = L.layerGroup(markers).addTo(map);
-      map.flyTo([20, 78], 4, { duration: 1.5 });
     };
 
     const loadCountryView = (countryFeature) => {
-      if (currentLayer) map.removeLayer(currentLayer);
+      currentLevel = 'Country';
       sidebar.classList.remove('visible');
       
       updateBreadcrumbs(['Global', countryFeature.properties.name]);
       updateLegend('Country');
+      clearMarkers();
 
-      map.setMinZoom(4);
-      map.setMaxZoom(8);
+      // Add City Markers
+      const countryCities = geoData.cities.features.filter(f => f.properties.country === countryFeature.properties.name);
+      countryCities.forEach(f => createMarker(f, 'city'));
 
-      const markers = [];
-      geoData.cities.features.forEach(feature => {
-        if (feature.properties.country !== countryFeature.properties.name) return;
+      // Visibility
+      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible');
+      setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
 
-        const icon = L.divIcon({
-          className: 'custom-pin',
-          html: `
-            <div class="city-pin"></div>
-            <div class="pin-label">${feature.properties.name}</div>
-          `,
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
-        });
+      // Filter cities by country
+      map.setFilter('cities-fill', ['==', 'country', countryFeature.properties.name]);
+      map.setFilter('cities-border', ['==', 'country', countryFeature.properties.name]);
+      map.setFilter('cities-border-casing', ['==', 'country', countryFeature.properties.name]);
+      map.setFilter('cities-label', ['==', 'country', countryFeature.properties.name]);
 
-        const bounds = L.geoJSON(feature).getBounds();
-        const center = bounds.getCenter();
-
-        const marker = L.marker(center, { icon }).addTo(map);
-        
-        marker.on('click', () => {
-          loadCityView(feature);
-        });
-        markers.push(marker);
+      // Camera: Fit to all cities in the country
+      const bounds = getBounds(countryCities);
+      map.fitBounds(bounds, {
+        padding: 150, // Increased padding
+        pitch: 0,
+        bearing: 0,
+        essential: true
       });
-
-      currentLayer = L.layerGroup(markers).addTo(map);
-      
-      if (markers.length > 0) {
-        const group = L.featureGroup(markers);
-        map.flyToBounds(group.getBounds(), { padding: [50, 50], duration: 1.5 });
-      } else {
-        map.flyTo(countryFeature.geometry.coordinates, 5, { duration: 1.5 });
-      }
     };
 
     const loadCityView = (cityFeature) => {
-      if (currentLayer) map.removeLayer(currentLayer);
+      currentLevel = 'City';
       sidebar.classList.remove('visible');
       
       updateBreadcrumbs(['Global', cityFeature.properties.country, cityFeature.properties.name]);
       updateLegend('City');
+      clearMarkers(); // No markers in city view, just trade areas
 
-      map.setMinZoom(10);
-      map.setMaxZoom(18);
+      // Visibility
+      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible'); 
+      setLayerVisibility(['trade-blobs', 'trade-points'], 'visible');
 
-      const recommendations = DataManager.getRecommendations(userCriteria);
-      const cityRecs = recommendations.filter(r => tradeData[r.id].city === cityFeature.properties.name || geoData.tradeAreas.features.find(f => f.properties.id === r.id)?.properties.city === cityFeature.properties.name);
+      // Filter trade areas by city
+      map.setFilter('trade-blobs', ['==', 'city', cityFeature.properties.name]);
+      map.setFilter('trade-points', ['==', 'city', cityFeature.properties.name]);
 
-      const markers = [];
-      
-      // Optimization: Render markers in chunks if too many, but for 20 it's fine.
-      // We can use requestAnimationFrame if list grows.
-      cityRecs.forEach((data) => {
-        const feature = geoData.tradeAreas.features.find(f => f.properties.id === data.id);
-        if (!feature) return;
+      // Camera - 3D View (Zoom INSIDE the city)
+      // Calculate centroid for flyTo
+      const bounds = getBounds([cityFeature]);
+      const center = bounds.getCenter();
 
-        const icon = L.divIcon({
-          className: 'custom-pin',
-          html: `
-            <div class="map-pin"></div>
-            <div class="pin-label">${data.name}</div>
-          `,
-          iconSize: [30, 42],
-          iconAnchor: [15, 42]
-        });
-
-        const marker = L.marker(feature.geometry.coordinates, { icon }).addTo(map);
-
-        marker.on('click', () => {
-          enterLocationLevel(feature, data);
-        });
-        markers.push(marker);
+      map.flyTo({
+        center: center,
+        zoom: 13.5, // Street level zoom
+        pitch: 50,
+        bearing: -10,
+        essential: true
       });
-
-      currentLayer = L.layerGroup(markers).addTo(map);
-      
-      if (markers.length > 0) {
-        const group = L.featureGroup(markers);
-        map.flyToBounds(group.getBounds(), { padding: [50, 50], duration: 1.5 });
-      } else {
-        const cityBounds = L.geoJSON(cityFeature).getBounds();
-        map.flyToBounds(cityBounds, { padding: [50, 50], duration: 1.5 });
-      }
     };
 
     const enterLocationLevel = (feature, data) => {
-      map.flyTo(feature.geometry.coordinates, 17, { duration: 1.5 });
+      map.flyTo({
+        center: feature.geometry.coordinates,
+        zoom: 16,
+        pitch: 60,
+        bearing: -30,
+        essential: true
+      });
       openSidebar(data);
     };
 
