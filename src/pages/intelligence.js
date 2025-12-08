@@ -241,20 +241,6 @@ export const Intelligence = {
           }
         });
 
-        // 1. Country View: City Borders
-        map.addLayer({
-          id: 'cities-fill',
-          type: 'fill',
-          source: 'cities',
-          paint: {
-            'fill-color': '#d4af37',
-            'fill-opacity': 0.05
-          },
-          layout: {
-            'visibility': 'none'
-          }
-        });
-
         // Border Casing (White outline for contrast)
         map.addLayer({
           id: 'cities-border-casing',
@@ -414,6 +400,46 @@ export const Intelligence = {
             1, 0.15,
             5, 0.25,
             8, 0.05
+          ]);
+          // Restore original legend
+          updateLegend(currentLevel);
+        });
+
+        // --- Interactions for India (OSM Layer) ---
+        map.on('mouseenter', 'india-fill', (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          
+          // Add scale animation effect
+          map.setPaintProperty('india-fill', 'fill-opacity', 0.35);
+          
+          // Get cities in India
+          const citiesInCountry = geoData.cities.features
+            .filter(c => c.properties.country === 'India');
+          
+          // Update legend
+          legendContent.innerHTML = `
+            <div class="legend-item" style="margin-bottom: 10px; font-weight: bold; color: #222;">
+              India - Cities
+            </div>
+            ${citiesInCountry.map(city => `
+              <div class="legend-item" style="padding-left: 10px;">
+                <div class="legend-dot" style="background: ${city.properties.color};"></div>
+                <span>${city.properties.name}</span>
+              </div>
+            `).join('')}
+          `;
+        });
+
+        map.on('mouseleave', 'india-fill', () => {
+          map.getCanvas().style.cursor = '';
+          // Reset fill opacity to default interpolation
+          map.setPaintProperty('india-fill', 'fill-opacity', [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              1, 0.15,
+              5, 0.25,
+              8, 0.05
           ]);
           // Restore original legend
           updateLegend(currentLevel);

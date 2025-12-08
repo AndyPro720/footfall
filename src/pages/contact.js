@@ -89,7 +89,7 @@ export const Contact = {
         <!-- Bottom Form Trigger -->
         <div class="form-trigger-section">
           <p style="margin-bottom: 20px; color: #888; letter-spacing: 1px;">Ready to transform your space?</p>
-          <button id="openFormBtn" class="btn-fill-form">Fill Form</button>
+          <button id="openFormBtn" class="btn-fill-form">Get in touch</button>
         </div>
 
         <!-- Modal Form -->
@@ -112,8 +112,12 @@ export const Contact = {
                 <input type="email" id="email" name="email" required>
               </div>
               <div class="form-group">
-                <label for="message">Message</label>
-                <textarea id="message" name="message" rows="4" required></textarea>
+                <label for="phone">Mobile Number (Optional)</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your mobile number">
+              </div>
+              <div class="form-group">
+                <label for="message">Message (Optional)</label>
+                <textarea id="message" name="message" rows="4"></textarea>
               </div>
               <button type="submit" class="btn-submit">Send Message</button>
             </form>
