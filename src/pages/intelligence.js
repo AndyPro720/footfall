@@ -23,7 +23,12 @@ export const Intelligence = {
 
         <!-- Tip Box -->
         <div id="tip-box">
-          <div class="tip-title">💡 Hover over countries to see cities • Click to navigate</div>
+          <div class="tip-title">💡 Hover over a countrs to see cities • Click to navigate</div>
+        </div>
+
+        <!-- Embedded Watermark Logo -->
+        <div class="watermark-logo" id="watermark-home">
+           <img src="/logo.png" alt="Footfall">
         </div>
 
         <!-- Wizard Overlay -->
@@ -41,7 +46,14 @@ export const Intelligence = {
 
             <!-- Slide 2: Geography -->
             <div class="wizard-slide" id="slide-2">
-              <h2 class="wizard-title">Select Market</h2>
+              <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
+                <button class="wizard-back" id="btn-back-2" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; margin-right:1rem; padding: 5px; display: flex; align-items: center; transition: color 0.3s;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+                <h2 class="wizard-title" style="margin:0;">Select Market</h2>
+              </div>
               <p class="wizard-subtitle">Where would you like to scout today?</p>
               <select class="wizard-input" id="country-select">
                 <option value="" disabled selected>Select Country</option>
@@ -58,7 +70,14 @@ export const Intelligence = {
 
             <!-- Slide 3: Criteria -->
             <div class="wizard-slide" id="slide-3">
-              <h2 class="wizard-title">Refine Search</h2>
+              <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
+                 <button class="wizard-back" id="btn-back-3" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; margin-right:1rem; padding: 5px; display: flex; align-items: center; transition: color 0.3s;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+                <h2 class="wizard-title" style="margin:0;">Refine Search</h2>
+              </div>
               <p class="wizard-subtitle">Customize intelligence parameters.</p>
               <select class="wizard-input" id="sector-select">
                 <option value="retail">Retail</option>
@@ -852,8 +871,36 @@ export const Intelligence = {
     };
 
     document.getElementById('btn-next-2').onclick = () => {
+      // Preload Map Logic
+      const selectedCityName = document.getElementById('city-select').value;
+      const selectedCountryName = document.getElementById('country-select').value;
+      
+      const city = geoData.cities.features.find(f => f.properties.name === selectedCityName);
+      const country = geoData.countries.features.find(f => f.properties.name === selectedCountryName);
+
+      if (city) {
+        loadCityView(city);
+      } else if (country) {
+        loadCountryView(country);
+      }
+
+      // Ensure wizard stays on top (loadCityView usually hides sidebar, checking wizard visibility)
+      // Since default loadCityView doesn't hide wizard-overlay, just sidebar, this is safe.
+      // But we just want to update the view in background.
+
       slide2.classList.remove('active');
       slide3.classList.add('active');
+    };
+
+    // Back Button Logic
+    document.getElementById('btn-back-2').onclick = () => {
+      slide2.classList.remove('active');
+      slide1.classList.add('active');
+    };
+
+    document.getElementById('btn-back-3').onclick = () => {
+      slide3.classList.remove('active');
+      slide2.classList.add('active');
     };
 
     document.getElementById('btn-explore-all').onclick = () => {
@@ -862,18 +909,60 @@ export const Intelligence = {
     };
 
     document.getElementById('btn-finish').onclick = () => {
+      const btnFinish = document.getElementById('btn-finish');
+      const originalText = btnFinish.innerText;
+      btnFinish.innerText = 'Initializing...';
+      btnFinish.disabled = true;
+
       userCriteria = {
         sector: document.getElementById('sector-select').value,
         aov: document.getElementById('aov-select').value
       };
       
       const selectedCity = document.getElementById('city-select').value;
-      wizardOverlay.classList.add('hidden');
-      
-      const city = geoData.cities.features.find(f => f.properties.name === selectedCity);
-      if (city) loadCityView(city);
+      const selectedCountry = document.getElementById('country-select').value;
+      const name = document.getElementById('input-name').value;
+      const brand = document.getElementById('input-brand').value;
+
+      // Prepare payload for FormSubmit
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('brand', brand);
+      formData.append('country', selectedCountry);
+      formData.append('city', selectedCity);
+      formData.append('sector', userCriteria.sector);
+      formData.append('aov', userCriteria.aov);
+      formData.append('_subject', `New Intelligence Lead: ${brand} (${name})`);
+
+      // Send Data
+      fetch("https://formsubmit.co/ajax/info@foottfall.com", {
+          method: "POST",
+          body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log('Lead captured successfully');
+      })
+      .catch(error => {
+          console.error('Error capturing lead:', error);
+      })
+      .finally(() => {
+          // Always proceed to dashboard
+          wizardOverlay.classList.add('hidden');
+          // Map is already preloaded, but just in case or if logic changes:
+          const city = geoData.cities.features.find(f => f.properties.name === selectedCity);
+          if (city && currentLevel !== 'City') loadCityView(city);
+          
+          btnFinish.innerText = originalText;
+          btnFinish.disabled = false;
+      });
     };
 
     document.getElementById('close-sidebar').onclick = () => sidebar.classList.remove('visible');
+    
+    // Watermark Home Link
+    document.getElementById('watermark-home').onclick = () => {
+      window.location.href = '/';
+    };
   }
 };

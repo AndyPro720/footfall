@@ -26,7 +26,7 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-bottom: none !important;
-  z-index: 2001 !important; /* Above Wizard */
+  z-index: 3001 !important; /* Above Wizard and Menu Overlay */
   pointer-events: none !important; /* Let clicks pass through */
 }
 
@@ -38,7 +38,7 @@
 .navbar .logo {
   opacity: 1 !important;
   visibility: visible !important;
-  z-index: 2002;
+  z-index: 3002;
 }
 
 /* --- Map Container --- */
@@ -54,7 +54,7 @@
 /* --- Top Bar (Breadcrumbs) --- */
 #top-bar {
   position: absolute;
-  top: 30px; /* Same as tip-box to align in same row */
+  top: 90px; /* Moved down to make room for logo */
   left: 50%;
   transform: translateX(-50%) translateY(-100px);
   z-index: 1000;
@@ -500,6 +500,7 @@ body[data-page="intelligence"] .navbar .menu-toggle:hover {
 
 /* Fix language menu visibility on intelligence page */
 body[data-page="intelligence"] .navbar .lang-container {
+  display: none !important;
   z-index: 9999;
   position: relative;
 }
@@ -519,4 +520,38 @@ body[data-page="intelligence"] .navbar .lang-toggle:hover {
 body[data-page="intelligence"] .navbar .lang-dropdown {
   z-index: 10000;
   pointer-events: auto;
+}
+
+
+/* --- Embedded Watermark Logo --- */
+.watermark-logo {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2501; /* Above Wizard (2000) */
+  width: 50px;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  filter: grayscale(100%);
+}
+
+.watermark-logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.watermark-logo:hover {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.1); /* Preserve centering */
+  filter: grayscale(0%) drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
+}
+
+/* Wizard Back Button Glow */
+.wizard-back:hover {
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
+  color: #d4af37 !important;
+  transform: scale(1.1);
 }

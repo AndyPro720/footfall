@@ -152,7 +152,8 @@
 }
 
 .services-split-container .split-section:has(.section-content:hover) {
-  flex: 2;
+  /* Removed flex expansion to prevent jitter when hovering edges of the moving box */
+  /* flex: 2; */ 
   filter: brightness(1) grayscale(0);
 }
 

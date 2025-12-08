@@ -27,7 +27,7 @@ html, body {
   width: 4px;
   height: 0%;
   background: var(--color-accent);
-  z-index: 1002;
+  z-index: 3002;
   transition: height 0.1s linear;
 }
 
@@ -40,7 +40,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
+  z-index: 3000;
   background: transparent; /* Completely transparent as requested */
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -184,7 +184,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  z-index: 1001;
+  z-index: 3001;
   cursor: pointer;
   padding: 12px;
   border-radius: 50%;
@@ -233,7 +233,7 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-medium);
-  z-index: 999;
+  z-index: 2500;
 }
 
 .menu-overlay.active {

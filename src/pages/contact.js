@@ -38,7 +38,7 @@ export const Contact = {
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22,6 12,13 2,6"></polyline>
                   </svg>
-                  info@footfall.com
+                  info@foottfall.com
                 </div>
                 <div class="contact-item">
                   <!-- Phone SVG -->
@@ -163,10 +163,32 @@ export const Contact = {
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        // Here you would typically handle the form submission
-        alert('Thank you for your message! We will get back to you soon.');
-        modal.classList.remove('active');
-        form.reset();
+        
+        const submitBtn = form.querySelector('.btn-submit');
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = 'Sending...';
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+        
+        fetch("https://formsubmit.co/ajax/info@foottfall.com", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Thank you! Your message has been sent successfully.');
+            modal.classList.remove('active');
+            form.reset();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Something went wrong. Please try again or email us manually at info@foottfall.com');
+        })
+        .finally(() => {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+        });
       });
     }
 
