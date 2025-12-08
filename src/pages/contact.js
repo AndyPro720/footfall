@@ -13,7 +13,7 @@ export const Contact = {
               <div class="shine-effect"></div>
 
               <div class="contact-logo">
-                <div class="logo-text">FOOTFALL</div>
+                <div class="logo-text">FOOTTFALL</div>
                 <div class="fingerprint-icon">
                   <img src="/fingerprint.png" alt="Fingerprint" class="fingerprint-img">
                 </div>

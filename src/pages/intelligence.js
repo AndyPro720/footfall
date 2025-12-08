@@ -115,6 +115,7 @@ export const Intelligence = {
     let userCriteria = {};
     let currentLevel = 'Global'; // Global, Country, City
     let markers = []; // Store active markers
+    let hoveredCityId = null; // Track hovered city for animations
 
     // --- DOM Elements ---
     const wizardOverlay = document.getElementById('wizard-overlay');
@@ -142,6 +143,10 @@ export const Intelligence = {
           bounds.extend(f.geometry.coordinates);
         } else if (f.geometry.type === 'Polygon') {
           f.geometry.coordinates[0].forEach(coord => bounds.extend(coord));
+        } else if (f.geometry.type === 'MultiPolygon') {
+            f.geometry.coordinates.forEach(polygon => {
+                polygon[0].forEach(coord => bounds.extend(coord));
+            });
         }
       });
       return bounds;
@@ -185,7 +190,8 @@ export const Intelligence = {
 
         map.addSource('cities', {
           type: 'geojson',
-          data: geoData.cities
+          data: geoData.cities,
+          promoteId: 'name'
         });
 
         map.addSource('tradeAreas', {
@@ -225,7 +231,7 @@ export const Intelligence = {
           type: 'fill',
           source: 'indiaOSM',
           paint: {
-            'fill-color': '#FF9933',
+            'fill-color': '#00732F',
             'fill-opacity': [
               'interpolate',
               ['linear'],
@@ -234,10 +240,46 @@ export const Intelligence = {
               5, 0.25,
               8, 0.05
             ],
-            'fill-outline-color': '#FF9933'
+            'fill-outline-color': '#00732F'
           },
           layout: {
             'visibility': 'visible'
+          }
+        });
+
+        // Cities Fill (Clickable Layer)
+        map.addLayer({
+          id: 'cities-fill',
+          type: 'fill',
+          source: 'cities',
+          paint: {
+            'fill-color': ['get', 'color'],
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.5,
+              0.2
+            ], // Light background normally, slightly more opaque on hover
+            'fill-outline-color': '#ffffff'
+          },
+          layout: {
+            'visibility': 'none'
+          }
+        });
+
+        // NEW: Glow for fancier borders
+        map.addLayer({
+          id: 'cities-glow',
+          type: 'line',
+          source: 'cities',
+          paint: {
+            'line-color': ['get', 'color'],
+            'line-width': 8,
+            'line-blur': 4,
+            'line-opacity': 0.5
+          },
+          layout: {
+            'visibility': 'none'
           }
         });
 
@@ -249,28 +291,29 @@ export const Intelligence = {
           paint: {
             'line-color': '#ffffff',
             'line-width': 4,
-            'line-opacity': 0.5
+            'line-opacity': 0.8
           },
           layout: {
             'visibility': 'none'
           }
         });
 
-        // Main Border (Red)
+        // Main Border (Solid & Strong)
         map.addLayer({
           id: 'cities-border',
           type: 'line',
           source: 'cities',
           paint: {
-            'line-color': '#ff3333', // Bright red
+            'line-color': ['get', 'color'], // Match city color
             'line-width': 2,
-            'line-dasharray': [2, 1] // Dashed effect for "jagged" feel
+            'line-opacity': 1
           },
           layout: {
             'visibility': 'none'
           }
         });
 
+        // City Labels
         map.addLayer({
           id: 'cities-label',
           type: 'symbol',
@@ -440,46 +483,6 @@ export const Intelligence = {
               1, 0.15,
               5, 0.25,
               8, 0.05
-          ]);
-          // Restore original legend
-          updateLegend(currentLevel);
-        });
-
-        // --- Interactions for India (OSM Layer) ---
-        map.on('mouseenter', 'india-fill', (e) => {
-          map.getCanvas().style.cursor = 'pointer';
-          
-          // Add scale animation effect
-          map.setPaintProperty('india-fill', 'fill-opacity', 0.35);
-          
-          // Get cities in India
-          const citiesInCountry = geoData.cities.features
-            .filter(c => c.properties.country === 'India');
-          
-          // Update legend
-          legendContent.innerHTML = `
-            <div class="legend-item" style="margin-bottom: 10px; font-weight: bold; color: #222;">
-              India - Cities
-            </div>
-            ${citiesInCountry.map(city => `
-              <div class="legend-item" style="padding-left: 10px;">
-                <div class="legend-dot" style="background: ${city.properties.color};"></div>
-                <span>${city.properties.name}</span>
-              </div>
-            `).join('')}
-          `;
-        });
-
-        map.on('mouseleave', 'india-fill', () => {
-          map.getCanvas().style.cursor = '';
-          // Reset fill opacity to default interpolation
-          map.setPaintProperty('india-fill', 'fill-opacity', [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              1, 0.15,
-              5, 0.25,
-              8, 0.05
             ]);
           // Restore original legend
           updateLegend(currentLevel);
@@ -516,7 +519,45 @@ export const Intelligence = {
         // Country -> City
         map.on('click', 'cities-fill', (e) => {
           const feature = e.features[0];
+          
+          // Animation removed to prevent overwriting hover expression
+          // map.setPaintProperty('cities-fill', 'fill-opacity', 0.4);
+          // setTimeout(() => {
+          //   map.setPaintProperty('cities-fill', 'fill-opacity', 0.2);
+          // }, 150);
+          
           loadCityView(feature);
+        });
+
+        // Hover effect for cities
+        // hoveredCityId is now defined in afterRender scope
+
+        map.on('mousemove', 'cities-fill', (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          if (e.features.length > 0) {
+            if (hoveredCityId) {
+              map.setFeatureState(
+                { source: 'cities', id: hoveredCityId },
+                { hover: false }
+              );
+            }
+            hoveredCityId = e.features[0].properties.name;
+            map.setFeatureState(
+              { source: 'cities', id: hoveredCityId },
+              { hover: true }
+            );
+          }
+        });
+
+        map.on('mouseleave', 'cities-fill', () => {
+          map.getCanvas().style.cursor = '';
+          if (hoveredCityId) {
+             map.setFeatureState(
+                { source: 'cities', id: hoveredCityId },
+                { hover: false }
+              );
+          }
+          hoveredCityId = null;
         });
         
         // Also allow clicking on the border
@@ -603,8 +644,8 @@ export const Intelligence = {
 
       if (level === 'Global') {
         const items = [
-          { name: 'India', color: '#FF9933' },
-          { name: 'UAE', color: '#00732F' }
+          { name: 'India', color: '#00732F' },
+          { name: 'UAE', color: '#E40D0D' }
         ];
         
         items.forEach(item => {
@@ -620,10 +661,17 @@ export const Intelligence = {
         });
 
       } else if (level === 'Country') {
-        const div = document.createElement('div');
-        div.className = 'legend-item';
-        div.innerHTML = `<div class="legend-dot" style="background: #ff3333;"></div>City Borders`;
-        legendContent.appendChild(div);
+        const countryName = breadcrumbs[1];
+        const cities = geoData.cities.features.filter(f => f.properties.country === countryName);
+        
+        cities.forEach(city => {
+          const div = document.createElement('div');
+          div.className = 'legend-item';
+          div.style.cursor = 'pointer';
+          div.innerHTML = `<div class="legend-dot" style="background: ${city.properties.color};"></div>${city.properties.name}`;
+          div.onclick = () => loadCityView(city);
+          legendContent.appendChild(div);
+        });
 
       } else if (level === 'City') {
         // List ALL trade areas for this city
@@ -742,12 +790,22 @@ export const Intelligence = {
       updateLegend('Global');
       clearMarkers();
       
+      // Clear any stuck hover state
+      if (hoveredCityId) {
+        map.setFeatureState(
+          { source: 'cities', id: hoveredCityId },
+          { hover: false }
+        );
+        hoveredCityId = null;
+      }
+      map.getCanvas().style.cursor = ''; // Reset cursor
+      
       // Pins removed as per user request
       // geoData.countries.features.forEach(f => createMarker(f, 'country'));
 
       // Visibility
       setLayerVisibility(['country-fill', 'india-fill'], 'visible');
-      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label', 'trade-blobs', 'trade-points'], 'none');
+      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-glow', 'cities-label', 'trade-blobs', 'trade-points'], 'none');
       
       // Show tip box in global view
       const tipBox = document.getElementById('tip-box');
@@ -771,12 +829,22 @@ export const Intelligence = {
       updateLegend('Country');
       clearMarkers();
 
+      // Clear any stuck hover state
+      if (hoveredCityId) {
+        map.setFeatureState(
+          { source: 'cities', id: hoveredCityId },
+          { hover: false }
+        );
+        hoveredCityId = null;
+      }
+      map.getCanvas().style.cursor = ''; // Reset cursor
+
       // Get cities for this country
       const countryCities = geoData.cities.features.filter(f => f.properties.country === countryFeature.properties.name);
 
       // Visibility
       setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
-      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible');
+      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible');
       setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
       
       // Hide tip box
@@ -787,12 +855,13 @@ export const Intelligence = {
       map.setFilter('cities-fill', ['==', 'country', countryFeature.properties.name]);
       map.setFilter('cities-border', ['==', 'country', countryFeature.properties.name]);
       map.setFilter('cities-border-casing', ['==', 'country', countryFeature.properties.name]);
+      map.setFilter('cities-glow', ['==', 'country', countryFeature.properties.name]);
       map.setFilter('cities-label', ['==', 'country', countryFeature.properties.name]);
 
       // Camera: Fit to all cities in the country
       const bounds = getBounds(countryCities);
       map.fitBounds(bounds, {
-        padding: 150, // Increased padding
+        padding: 50, // Reduced padding for deeper zoom
         pitch: 0,
         bearing: 0,
         essential: true
@@ -809,7 +878,8 @@ export const Intelligence = {
 
       // Visibility
       setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
-      setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible'); 
+      setLayerVisibility(['cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible'); 
+      setLayerVisibility(['cities-fill'], 'none'); // Hide fill color when inside city 
       setLayerVisibility(['trade-blobs', 'trade-points'], 'visible');
 
       // Filter trade areas by city

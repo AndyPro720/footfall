@@ -1,3 +1,5 @@
+import { cityBorders } from './cityBorders.js';
+
 export const geoData = {
   // Country Polygons (for gradient highlighting)
   countryPolygons: {
@@ -5,7 +7,7 @@ export const geoData = {
     "features": [
       {
         "type": "Feature",
-        "properties": { "name": "India", "color": "#FF9933" },
+        "properties": { "name": "India", "color": "#00732F" },
         "geometry": {
           "type": "Polygon",
           "coordinates": [[
@@ -142,7 +144,7 @@ export const geoData = {
       },
       {
         "type": "Feature",
-        "properties": { "name": "UAE", "color": "#00732F" },
+        "properties": { "name": "UAE", "color": "#E40D0D" },
         "geometry": {
           "type": "Polygon",
           "coordinates": [[
@@ -179,59 +181,17 @@ export const geoData = {
     "features": [
       {
         "type": "Feature",
-        "properties": { "name": "India", "color": "#FF9933" }, // Saffron
+        "properties": { "name": "India", "color": "#00732F" }, // Green
         "geometry": { "type": "Point", "coordinates": [78.9629, 20.5937] }
       },
       {
         "type": "Feature",
-        "properties": { "name": "UAE", "color": "#00732F" }, // Green
+        "properties": { "name": "UAE", "color": "#E40D0D" }, // Red
         "geometry": { "type": "Point", "coordinates": [53.8478, 23.4241] }
       }
     ]
   },
-  cities: {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": { "name": "Pune", "country": "India", "color": "#FF9933" },
-        "geometry": { 
-          "type": "Polygon", 
-          "coordinates": [[
-            [73.75, 18.45], 
-            [73.80, 18.42], 
-            [73.85, 18.44], 
-            [73.92, 18.41], 
-            [74.00, 18.45], 
-            [74.05, 18.50], 
-            [74.02, 18.58], 
-            [73.98, 18.62], 
-            [73.90, 18.65], 
-            [73.82, 18.63], 
-            [73.75, 18.60], 
-            [73.72, 18.52], 
-            [73.75, 18.45]
-          ]] 
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": { "name": "Mumbai", "country": "India", "color": "#138808" },
-        "geometry": { 
-          "type": "Polygon", 
-          "coordinates": [[[72.75, 18.85], [73.00, 18.85], [73.00, 19.30], [72.75, 19.30], [72.75, 18.85]]] 
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": { "name": "Dubai", "country": "UAE", "color": "#CE1126" },
-        "geometry": { 
-          "type": "Polygon", 
-          "coordinates": [[[55.10, 24.90], [55.40, 24.90], [55.40, 25.35], [55.10, 25.35], [55.10, 24.90]]] 
-        }
-      }
-    ]
-  },
+  cities: cityBorders,
   tradeAreas: {
     "type": "FeatureCollection",
     "features": [
