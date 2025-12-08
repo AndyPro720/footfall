@@ -99,55 +99,64 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   cursor: pointer;
-  z-index: 2000 !important; /* Force on top of everything */
-  pointer-events: auto !important; /* Ensure clickable */
+  z-index: 3000 !important; /* Higher than everything */
+  pointer-events: auto !important;
+  position: relative;
+  transform-origin: bottom center;
 }
 
 .pin-pulse {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   background: currentColor;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  box-shadow: -2px 2px 5px rgba(0,0,0,0.3);
-  border: 3px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  border: 4px solid white;
   position: relative;
-  margin-bottom: 10px; /* Space for label */
-  animation: pin-bounce 1s infinite alternate ease-in-out;
+  animation: pin-bounce 2s infinite alternate ease-in-out;
+  transition: transform 0.2s ease;
+}
+
+.custom-marker:hover .pin-pulse {
+  transform: rotate(-45deg) scale(1.2);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.5);
 }
 
 .pin-pulse::after {
   content: '';
-  width: 10px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
   background: white;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(45deg);
   border-radius: 50%;
 }
 
 .pin-label {
-  margin-top: 5px;
-  background: rgba(0, 0, 0, 0.8);
+  margin-top: -8px;
+  background: rgba(0, 0, 0, 0.85);
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   font-size: 13px;
   white-space: nowrap;
-  font-weight: bold;
-  text-shadow: 0 1px 2px black;
+  font-weight: 600;
+  text-shadow: none;
   z-index: 1001;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 @keyframes pin-bounce {
   0% {
-    transform: rotate(-45deg) translate(0, 0);
+    transform: rotate(-45deg) translateY(0);
   }
   100% {
-    transform: rotate(-45deg) translate(-5px, -5px);
+    transform: rotate(-45deg) translateY(-8px);
   }
 }

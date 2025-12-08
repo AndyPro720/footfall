@@ -23,6 +23,11 @@ export class Router {
 
   async handleRoute() {
     const path = window.location.pathname;
+    
+    // Set data-page attribute for global styling overrides
+    const pageName = path === '/' ? 'home' : path.substring(1);
+    document.body.dataset.page = pageName;
+
     const route = this.routes[path] || this.routes['/'];
     
     if (route) {

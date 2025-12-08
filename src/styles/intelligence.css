@@ -54,7 +54,7 @@
 /* --- Top Bar (Breadcrumbs) --- */
 #top-bar {
   position: absolute;
-  top: 100px;
+  top: 30px; /* Same as tip-box to align in same row */
   left: 50%;
   transform: translateX(-50%) translateY(-100px);
   z-index: 1000;
@@ -63,10 +63,11 @@
   padding: 10px 30px;
   border-radius: 50px;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  /* Use Glass Panel styles */
-  background: rgba(20, 20, 20, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Further increased transparency */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 
@@ -77,8 +78,8 @@
 .breadcrumb-back {
   margin-right: 15px;
   padding-right: 15px;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-  color: #d4af37;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  color: #222; /* Dark text for readability */
   font-weight: 600;
   cursor: pointer;
   font-size: 0.9rem;
@@ -86,13 +87,13 @@
 }
 
 .breadcrumb-back:hover {
-  color: #fff;
+  color: #d4af37;
 }
 
 .breadcrumb-item {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #aaa;
+  color: #333; /* Dark text for readability */
   cursor: pointer;
   transition: color 0.2s;
   display: flex;
@@ -100,18 +101,18 @@
 }
 
 .breadcrumb-item:hover {
-  color: #fff;
+  color: #d4af37;
 }
 
 .breadcrumb-item:last-child {
-  color: #fff;
+  color: #222; /* Dark text for readability */
   font-weight: 700;
   cursor: default;
 }
 
 .breadcrumb-separator {
   margin: 0 12px;
-  color: #555;
+  color: #666;
   font-size: 0.8rem;
 }
 
@@ -196,6 +197,13 @@
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
 }
 
+/* Style dropdown options for readability */
+.wizard-input option {
+  background: #1a1a1a;
+  color: #fbfbfb;
+  padding: 10px;
+}
+
 .wizard-btn {
   background: linear-gradient(135deg, #d4af37 0%, #c5a028 100%);
   color: #000;
@@ -240,10 +248,11 @@
   gap: 10px;
   min-width: 200px;
   
-  /* Glass Panel Styles */
-  background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Further increased transparency */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
@@ -256,7 +265,7 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #888;
+  color: #333; /* Dark for readability */
   margin-bottom: 5px;
   font-weight: 600;
 }
@@ -266,7 +275,7 @@
   align-items: center;
   gap: 10px;
   font-size: 0.9rem;
-  color: #fff;
+  color: #222; /* Dark for readability */
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
@@ -283,6 +292,47 @@
   border-radius: 50%;
   background: #ccc;
   box-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+/* --- Tip Box --- */
+#tip-box {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  z-index: 1000;
+  padding: 10px 20px;
+  border-radius: 25px;
+  display: none;
+  align-items: center;
+  gap: 15px;
+  
+  /* Further increased transparency */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+#tip-box.visible {
+  display: flex;
+  animation: fadeInDown 0.5s ease;
+}
+
+.tip-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #222; /* Dark for readability */
+  white-space: nowrap;
+}
+
+.tip-list {
+  display: none; /* Hidden for one-liner */
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- Pin Labels --- */
@@ -426,4 +476,47 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Intelligence Page: Golden Menu Toggle */
+/* Intelligence Page: Golden Menu Toggle */
+body[data-page="intelligence"] .navbar .menu-toggle {
+  background: rgba(224, 196, 105, 0.6) !important; /* Solid golden background */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+}
+
+body[data-page="intelligence"] .navbar .menu-toggle .bar {
+  background-color: #000 !important; /* Black bars on golden background */
+}
+
+body[data-page="intelligence"] .navbar .menu-toggle:hover {
+  background: #e5c048 !important;
+  box-shadow: 0 0 35px rgba(212, 175, 55, 0.8);
+  transform: scale(1.05);
+}
+
+/* Fix language menu visibility on intelligence page */
+body[data-page="intelligence"] .navbar .lang-container {
+  z-index: 9999;
+  position: relative;
+}
+
+body[data-page="intelligence"] .navbar .lang-toggle {
+  
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: #000;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+body[data-page="intelligence"] .navbar .lang-toggle:hover {
+  background: #e5c048 !important;
+}
+
+body[data-page="intelligence"] .navbar .lang-dropdown {
+  z-index: 10000;
+  pointer-events: auto;
 }

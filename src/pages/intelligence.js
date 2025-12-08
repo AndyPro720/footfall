@@ -21,6 +21,11 @@ export const Intelligence = {
           <div id="legend-content"></div>
         </div>
 
+        <!-- Tip Box -->
+        <div id="tip-box">
+          <div class="tip-title">💡 Hover over countries to see cities • Click to navigate</div>
+        </div>
+
         <!-- Wizard Overlay -->
         <div id="wizard-overlay">
           <div class="wizard-card">
@@ -28,7 +33,7 @@ export const Intelligence = {
             <!-- Slide 1: Identity -->
             <div class="wizard-slide active" id="slide-1">
               <h2 class="wizard-title">Welcome</h2>
-              <p class="wizard-subtitle">Enter your details to access market intelligence.</p>
+              <p class="wizard-subtitle">Enter details to access Footfall market intelligence™</p>
               <input type="text" class="wizard-input" id="input-name" placeholder="Your Name">
               <input type="text" class="wizard-input" id="input-brand" placeholder="Brand Name">
               <button class="wizard-btn" id="btn-next-1">Continue</button>
@@ -47,8 +52,8 @@ export const Intelligence = {
                 <option value="" disabled selected>Select City</option>
                 <!-- Populated dynamically -->
               </select>
-              <button class="wizard-btn" id="btn-next-2" disabled>Launch Satellite View</button>
-              <button class="wizard-btn secondary" id="btn-explore-all">Explore All Markets</button>
+              <button class="wizard-btn" id="btn-next-2" disabled>Personalize My View</button>
+              <button class="wizard-btn secondary" id="btn-explore-all">Launch Satellite View</button>
             </div>
 
             <!-- Slide 3: Criteria -->
@@ -135,8 +140,25 @@ export const Intelligence = {
         antialias: true // Needed for 3D buildings
       });
 
+      // Initialize Popup for tooltips
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 15
+      });
+
       map.on('load', () => {
-        // Add Sources
+        // Add source for detailed India boundary from OSM
+        map.addSource('indiaOSM', {
+          type: 'geojson',
+          data: '/india-osm.geojson'
+        });
+        
+        map.addSource('countryPolygons', {
+          type: 'geojson',
+          data: geoData.countryPolygons
+        });
+
         map.addSource('countries', {
           type: 'geojson',
           data: geoData.countries
@@ -153,6 +175,52 @@ export const Intelligence = {
         });
 
         // --- Layers ---
+
+        // 0. Global View: Country Gradient Fills (UAE only - India uses OSM)
+        map.addLayer({
+          id: 'country-fill',
+          type: 'fill',
+          source: 'countryPolygons',
+          filter: ['==', ['get', 'name'], 'UAE'], // Only show UAE, India uses indiaOSM source
+          paint: {
+            'fill-color': ['get', 'color'],
+            'fill-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              1, 0.15,
+              5, 0.25,
+              8, 0.05
+            ],
+            // Add subtle outline directly in fill
+            'fill-outline-color': ['get', 'color']
+          },
+          layout: {
+            'visibility': 'visible'
+          }
+        });
+
+        // India detailed outline from OSM data
+        map.addLayer({
+          id: 'india-fill',
+          type: 'fill',
+          source: 'indiaOSM',
+          paint: {
+            'fill-color': '#FF9933',
+            'fill-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              1, 0.15,
+              5, 0.25,
+              8, 0.05
+            ],
+            'fill-outline-color': '#FF9933'
+          },
+          layout: {
+            'visibility': 'visible'
+          }
+        });
 
         // 1. Country View: City Borders
         map.addLayer({
@@ -267,18 +335,18 @@ export const Intelligence = {
                     'source-layer': 'building',
                     'filter': ['==', 'extrude', 'true'],
                     'type': 'fill-extrusion',
-                    'minzoom': 13,
+                    'minzoom': 10, // Show buildings at city level
                     'paint': {
-                        'fill-extrusion-color': '#aaa',
+                        'fill-extrusion-color': '#e40d0dff',
                         'fill-extrusion-height': [
                             'interpolate', ['linear'], ['zoom'],
-                            13, 0,
-                            13.05, ['get', 'height']
+                            10, 0,
+                            10.5, ['get', 'height']
                         ],
                         'fill-extrusion-base': [
                             'interpolate', ['linear'], ['zoom'],
-                            13, 0,
-                            13.05, ['get', 'min_height']
+                            10, 0,
+                            10.5, ['get', 'min_height']
                         ],
                         'fill-extrusion-opacity': 0.6
                     }
@@ -289,6 +357,116 @@ export const Intelligence = {
         }
 
         // --- Interactions ---
+
+        // Hover on Country - Update Legend with Cities
+        map.on('mouseenter', 'country-fill', (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          const feature = e.features[0];
+          const countryName = feature.properties.name;
+          
+          // Add scale animation to country
+          map.setPaintProperty('country-fill', 'fill-opacity', 0.35);
+          
+          // Get cities in this country
+          const citiesInCountry = geoData.cities.features
+            .filter(c => c.properties.country === countryName);
+          
+          // Update legend with cities
+          legendContent.innerHTML = `
+            <div class="legend-item" style="margin-bottom: 10px; font-weight: bold; color: #222;">
+              ${countryName} - Cities
+            </div>
+            ${citiesInCountry.map(city => `
+              <div class="legend-item" style="padding-left: 10px;">
+                <div class="legend-dot" style="background: ${city.properties.color};"></div>
+                <span>${city.properties.name}</span>
+              </div>
+            `).join('')}
+          `;
+        });
+
+        map.on('mouseleave', 'country-fill', () => {
+          map.getCanvas().style.cursor = '';
+          // Reset fill opacity to default interpolation
+          map.setPaintProperty('country-fill', 'fill-opacity', [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            1, 0.15,
+            5, 0.25,
+            8, 0.05
+          ]);
+          // Restore original legend
+          updateLegend(currentLevel);
+        });
+
+        // --- Interactions for India (OSM Layer) ---
+        map.on('mouseenter', 'india-fill', (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          
+          // Add scale animation effect
+          map.setPaintProperty('india-fill', 'fill-opacity', 0.35);
+          
+          // Get cities in India
+          const citiesInCountry = geoData.cities.features
+            .filter(c => c.properties.country === 'India');
+          
+          // Update legend
+          legendContent.innerHTML = `
+            <div class="legend-item" style="margin-bottom: 10px; font-weight: bold; color: #222;">
+              India - Cities
+            </div>
+            ${citiesInCountry.map(city => `
+              <div class="legend-item" style="padding-left: 10px;">
+                <div class="legend-dot" style="background: ${city.properties.color};"></div>
+                <span>${city.properties.name}</span>
+              </div>
+            `).join('')}
+          `;
+        });
+
+        map.on('mouseleave', 'india-fill', () => {
+          map.getCanvas().style.cursor = '';
+          // Reset fill opacity to default interpolation
+          map.setPaintProperty('india-fill', 'fill-opacity', [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              1, 0.15,
+              5, 0.25,
+              8, 0.05
+            ]);
+          // Restore original legend
+          updateLegend(currentLevel);
+        });
+
+        map.on('click', 'india-fill', () => {
+           // Quick scale pop animation
+           map.setPaintProperty('india-fill', 'fill-opacity', 0.5);
+           setTimeout(() => {
+             map.setPaintProperty('india-fill', 'fill-opacity', 0.25);
+           }, 150);
+
+           // Navigate to India
+           const countryFeature = geoData.countries.features.find(c => c.properties.name === 'India');
+           if (countryFeature) loadCountryView(countryFeature);
+        });
+        
+        // Click on Country - Add pop animation and navigate
+        map.on('click', 'country-fill', (e) => {
+          const feature = e.features[0];
+          // Quick scale pop animation
+          map.setPaintProperty('country-fill', 'fill-opacity', 0.5);
+          setTimeout(() => {
+            map.setPaintProperty('country-fill', 'fill-opacity', 0.25);
+          }, 150);
+          
+          // Navigate to country
+          const countryFeature = geoData.countries.features.find(
+            c => c.properties.name === feature.properties.name
+          );
+          if (countryFeature) loadCountryView(countryFeature);
+        });
         
         // Country -> City
         map.on('click', 'cities-fill', (e) => {
@@ -422,7 +600,8 @@ export const Intelligence = {
     };
 
     // --- Logic: Check Incoming Data ---
-    const storedBrand = localStorage.getItem('footfall_brand');
+    // Only auto-populate brand if it was set in this session (not persisted across sessions)
+    const storedBrand = sessionStorage.getItem('footfall_brand');
     if (storedBrand) {
       inputBrand.value = storedBrand;
     }
@@ -518,16 +697,21 @@ export const Intelligence = {
       updateLegend('Global');
       clearMarkers();
       
-      // Add Country Markers
-      geoData.countries.features.forEach(f => createMarker(f, 'country'));
+      // Pins removed as per user request
+      // geoData.countries.features.forEach(f => createMarker(f, 'country'));
 
       // Visibility
+      setLayerVisibility(['country-fill', 'india-fill'], 'visible');
       setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label', 'trade-blobs', 'trade-points'], 'none');
+      
+      // Show tip box in global view
+      const tipBox = document.getElementById('tip-box');
+      if (tipBox) tipBox.classList.add('visible');
 
-      // Camera: Fit to all countries
-      const bounds = getBounds(geoData.countries.features);
+      // Camera: Fit to all countries - zoomed to keep India and UAE in focus
+      const bounds = getBounds(geoData.countryPolygons.features);
       map.fitBounds(bounds, {
-        padding: 300, // Increased padding for wider perspective
+        padding: 50, // Reduced padding for more zoom
         pitch: 0,
         bearing: 0,
         essential: true
@@ -542,13 +726,17 @@ export const Intelligence = {
       updateLegend('Country');
       clearMarkers();
 
-      // Add City Markers
+      // Get cities for this country
       const countryCities = geoData.cities.features.filter(f => f.properties.country === countryFeature.properties.name);
-      countryCities.forEach(f => createMarker(f, 'city'));
 
       // Visibility
+      setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
       setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible');
       setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
+      
+      // Hide tip box
+      const tipBox = document.getElementById('tip-box');
+      if (tipBox) tipBox.classList.remove('visible');
 
       // Filter cities by country
       map.setFilter('cities-fill', ['==', 'country', countryFeature.properties.name]);
@@ -572,9 +760,10 @@ export const Intelligence = {
       
       updateBreadcrumbs(['Global', cityFeature.properties.country, cityFeature.properties.name]);
       updateLegend('City');
-      clearMarkers(); // No markers in city view, just trade areas
+      clearMarkers(); // No markers in city view
 
       // Visibility
+      setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
       setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-label'], 'visible'); 
       setLayerVisibility(['trade-blobs', 'trade-points'], 'visible');
 
@@ -589,9 +778,9 @@ export const Intelligence = {
 
       map.flyTo({
         center: center,
-        zoom: 13.5, // Street level zoom
-        pitch: 50,
-        bearing: -10,
+        zoom: 12, // Street level zoom
+        pitch: 70,
+        bearing: -20,
         essential: true
       });
     };
@@ -600,8 +789,8 @@ export const Intelligence = {
       map.flyTo({
         center: feature.geometry.coordinates,
         zoom: 16,
-        pitch: 60,
-        bearing: -30,
+        pitch: 100,
+        bearing: -100,
         essential: true
       });
       openSidebar(data);

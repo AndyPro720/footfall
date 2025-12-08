@@ -380,7 +380,7 @@ export const Home = {
       searchBtn.addEventListener('click', () => {
         const brandName = searchInput.value.trim();
         if (brandName) {
-          localStorage.setItem('footfall_brand', brandName);
+          sessionStorage.setItem('footfall_brand', brandName);
           window.location.hash = '/intelligence'; // Use hash routing if that's what the Router uses, or pushState
           // Since the Router likely listens to hashchange or we need to manually trigger it if it's history API
           // Based on main.js, it seems to be a custom Router. Let's assume updating hash works or using history.pushState
