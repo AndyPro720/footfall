@@ -192,30 +192,43 @@ export const geoData = {
     ]
   },
   cities: cityBorders,
-  tradeAreas: {
+   tradeAreas: {
     "type": "FeatureCollection",
     "features": [
-      // --- Pune Locations (Corrected to [Lng, Lat]) ---
-      { "type": "Feature", "properties": { "id": "pune-kp", "name": "Koregaon Park", "city": "Pune", "type": "Premium", "color": "#FFD700" }, "geometry": { "type": "Point", "coordinates": [73.8939, 18.5362] } }, // Gold
-      { "type": "Feature", "properties": { "id": "pune-vn", "name": "Viman Nagar", "city": "Pune", "type": "High Street", "color": "#00BFFF" }, "geometry": { "type": "Point", "coordinates": [73.9143, 18.5679] } }, // Deep Sky Blue
-      { "type": "Feature", "properties": { "id": "pune-kn", "name": "Kalyani Nagar", "city": "Pune", "type": "Premium", "color": "#FF69B4" }, "geometry": { "type": "Point", "coordinates": [73.9033, 18.5463] } }, // Hot Pink
-      { "type": "Feature", "properties": { "id": "pune-kh", "name": "Kharadi", "city": "Pune", "type": "IT Hub", "color": "#32CD32" }, "geometry": { "type": "Point", "coordinates": [73.9348, 18.5514] } }, // Lime Green
-      { "type": "Feature", "properties": { "id": "pune-bb", "name": "Baner–Balewadi", "city": "Pune", "type": "High Street", "color": "#FF4500" }, "geometry": { "type": "Point", "coordinates": [73.7868, 18.5590] } }, // Orange Red
-      { "type": "Feature", "properties": { "id": "pune-hj", "name": "Hinjewadi", "city": "Pune", "type": "IT Hub", "color": "#8A2BE2" }, "geometry": { "type": "Point", "coordinates": [73.7389, 18.5913] } }, // Blue Violet
-      { "type": "Feature", "properties": { "id": "pune-au", "name": "Aundh", "city": "Pune", "type": "Residential", "color": "#20B2AA" }, "geometry": { "type": "Point", "coordinates": [73.8075, 18.5580] } }, // Light Sea Green
-      { "type": "Feature", "properties": { "id": "pune-wk", "name": "Wakad", "city": "Pune", "type": "Residential", "color": "#9370DB" }, "geometry": { "type": "Point", "coordinates": [73.7658, 18.5987] } }, // Medium Purple
-      { "type": "Feature", "properties": { "id": "pune-dg", "name": "Deccan Gymkhana", "city": "Pune", "type": "Central", "color": "#DC143C" }, "geometry": { "type": "Point", "coordinates": [73.8422, 18.5158] } }, // Crimson
-      { "type": "Feature", "properties": { "id": "pune-sn", "name": "Shivajinagar", "city": "Pune", "type": "Central", "color": "#00008B" }, "geometry": { "type": "Point", "coordinates": [73.8446, 18.5314] } }, // Dark Blue
-      { "type": "Feature", "properties": { "id": "pune-hd", "name": "Hadapsar", "city": "Pune", "type": "IT Hub", "color": "#2E8B57" }, "geometry": { "type": "Point", "coordinates": [73.9259, 18.5089] } }, // Sea Green
-      { "type": "Feature", "properties": { "id": "pune-bg", "name": "Bund Garden", "city": "Pune", "type": "Central", "color": "#B8860B" }, "geometry": { "type": "Point", "coordinates": [73.8777, 18.5367] } }, // Dark Goldenrod
-      { "type": "Feature", "properties": { "id": "pune-cp", "name": "Camp", "city": "Pune", "type": "High Street", "color": "#FF6347" }, "geometry": { "type": "Point", "coordinates": [73.8777, 18.5133] } }, // Tomato
-      { "type": "Feature", "properties": { "id": "pune-nb", "name": "NIBM", "city": "Pune", "type": "Residential", "color": "#4682B4" }, "geometry": { "type": "Point", "coordinates": [73.8980, 18.4760] } }, // Steel Blue
-      { "type": "Feature", "properties": { "id": "pune-er", "name": "Erandwane", "city": "Pune", "type": "Residential", "color": "#D2691E" }, "geometry": { "type": "Point", "coordinates": [73.8327, 18.5074] } }, // Chocolate
-      { "type": "Feature", "properties": { "id": "pune-ch", "name": "Chinchwad", "city": "Pune", "type": "Industrial", "color": "#708090" }, "geometry": { "type": "Point", "coordinates": [73.7997, 18.6298] } }, // Slate Gray
-      { "type": "Feature", "properties": { "id": "pune-kt", "name": "Kothrud", "city": "Pune", "type": "Residential", "color": "#CD5C5C" }, "geometry": { "type": "Point", "coordinates": [73.8077, 18.5074] } }, // Indian Red
-      { "type": "Feature", "properties": { "id": "pune-sb", "name": "SB / University", "city": "Pune", "type": "Institutional", "color": "#4B0082" }, "geometry": { "type": "Point", "coordinates": [73.8286, 18.5390] } }, // Indigo
-      { "type": "Feature", "properties": { "id": "pune-bv", "name": "Bavdhan", "city": "Pune", "type": "Residential", "color": "#556B2F" }, "geometry": { "type": "Point", "coordinates": [73.7747, 18.5123] } }, // Dark Olive Green
-      { "type": "Feature", "properties": { "id": "pune-bw", "name": "Bibwewadi", "city": "Pune", "type": "Residential", "color": "#8B4513" }, "geometry": { "type": "Point", "coordinates": [73.8641, 18.4690] } }  // Saddle Brown
+      // --- Pune Locations ---
+      // Premium: Gold (#D4AF37)
+      { "type": "Feature", "properties": { "id": "pune-kp", "name": "Koregaon Park", "city": "Pune", "type": "Premium", "color": "#D4AF37" }, "geometry": { "type": "Point", "coordinates": [73.8939, 18.5362] } },
+      { "type": "Feature", "properties": { "id": "pune-kn", "name": "Kalyani Nagar", "city": "Pune", "type": "Premium", "color": "#D4AF37" }, "geometry": { "type": "Point", "coordinates": [73.9033, 18.5463] } },
+      
+      // High Street: Coral Red (#FF6B6B)
+      { "type": "Feature", "properties": { "id": "pune-vn", "name": "Viman Nagar", "city": "Pune", "type": "High Street", "color": "#FF6B6B" }, "geometry": { "type": "Point", "coordinates": [73.9143, 18.5679] } },
+      { "type": "Feature", "properties": { "id": "pune-bb", "name": "Baner–Balewadi", "city": "Pune", "type": "High Street", "color": "#FF6B6B" }, "geometry": { "type": "Point", "coordinates": [73.7868, 18.5590] } },
+      { "type": "Feature", "properties": { "id": "pune-cp", "name": "Camp", "city": "Pune", "type": "High Street", "color": "#FF6B6B" }, "geometry": { "type": "Point", "coordinates": [73.8777, 18.5133] } },
+      
+      // IT Hub: Teal (#00D1B2)
+      { "type": "Feature", "properties": { "id": "pune-kh", "name": "Kharadi", "city": "Pune", "type": "IT Hub", "color": "#00D1B2" }, "geometry": { "type": "Point", "coordinates": [73.9348, 18.5514] } },
+      { "type": "Feature", "properties": { "id": "pune-hj", "name": "Hinjewadi", "city": "Pune", "type": "IT Hub", "color": "#00D1B2" }, "geometry": { "type": "Point", "coordinates": [73.7389, 18.5913] } },
+      { "type": "Feature", "properties": { "id": "pune-hd", "name": "Hadapsar", "city": "Pune", "type": "IT Hub", "color": "#00D1B2" }, "geometry": { "type": "Point", "coordinates": [73.9259, 18.5089] } },
+      
+      // Residential: Blue (#4A90E2)
+      { "type": "Feature", "properties": { "id": "pune-au", "name": "Aundh", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.8075, 18.5580] } },
+      { "type": "Feature", "properties": { "id": "pune-wk", "name": "Wakad", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.7658, 18.5987] } },
+      { "type": "Feature", "properties": { "id": "pune-nb", "name": "NIBM", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.8980, 18.4760] } },
+      { "type": "Feature", "properties": { "id": "pune-er", "name": "Erandwane", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.8327, 18.5074] } },
+      { "type": "Feature", "properties": { "id": "pune-kt", "name": "Kothrud", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.8077, 18.5074] } },
+      { "type": "Feature", "properties": { "id": "pune-bv", "name": "Bavdhan", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.7747, 18.5123] } },
+      { "type": "Feature", "properties": { "id": "pune-bw", "name": "Bibwewadi", "city": "Pune", "type": "Residential", "color": "#4A90E2" }, "geometry": { "type": "Point", "coordinates": [73.8641, 18.4690] } },
+      
+      // Central: Purple (#9B59B6)
+      { "type": "Feature", "properties": { "id": "pune-dg", "name": "Deccan Gymkhana", "city": "Pune", "type": "Central", "color": "#9B59B6" }, "geometry": { "type": "Point", "coordinates": [73.8422, 18.5158] } },
+      { "type": "Feature", "properties": { "id": "pune-sn", "name": "Shivajinagar", "city": "Pune", "type": "Central", "color": "#9B59B6" }, "geometry": { "type": "Point", "coordinates": [73.8446, 18.5314] } },
+      { "type": "Feature", "properties": { "id": "pune-bg", "name": "Bund Garden", "city": "Pune", "type": "Central", "color": "#9B59B6" }, "geometry": { "type": "Point", "coordinates": [73.8777, 18.5367] } },
+      
+      // Industrial: Grey (#7F8C8D)
+      { "type": "Feature", "properties": { "id": "pune-ch", "name": "Chinchwad", "city": "Pune", "type": "Industrial", "color": "#7F8C8D" }, "geometry": { "type": "Point", "coordinates": [73.7997, 18.6298] } },
+      
+      // Institutional: Orange (#E67E22)
+      { "type": "Feature", "properties": { "id": "pune-sb", "name": "SB / University", "city": "Pune", "type": "Institutional", "color": "#E67E22" }, "geometry": { "type": "Point", "coordinates": [73.8286, 18.5390] } }
     ]
   }
 };

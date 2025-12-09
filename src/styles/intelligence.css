@@ -54,7 +54,7 @@
 /* --- Top Bar (Breadcrumbs) --- */
 #top-bar {
   position: absolute;
-  top: 90px; /* Moved down to make room for logo */
+  top: 40px; /* Aligned with menu height */
   left: 50%;
   transform: translateX(-50%) translateY(-100px);
   z-index: 1000;
@@ -243,9 +243,9 @@
   z-index: 1000;
   padding: 15px 20px;
   border-radius: 16px;
+  /* Container for layout */
   display: none;
   flex-direction: column;
-  gap: 10px;
   min-width: 200px;
   
   /* Further increased transparency */
@@ -254,6 +254,60 @@
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  /* Added top/bottom padding to container so header isn't cut off */
+  padding: 15px 0; 
+  overflow: hidden; /* Hide overflow of main container */
+}
+
+.legend-scroll-wrapper {
+  /* Only horizontal padding inside the scroll area */
+  padding: 0 20px;
+  max-height: 55vh; /* reserving space for arrow */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+.legend-scroll-indicator {
+  text-align: center;
+  color: #555;
+  font-size: 0.8rem; /* Reduced from 1.2rem */
+  padding: 2px 0;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: default;
+  animation: bounce 2s infinite;
+  display: block;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-3px);}
+  60% {transform: translateY(-2px);}
+}
+
+/* Custom scrollbar for legend wrapper */
+.legend-scroll-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+.legend-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.legend-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+}
+
+/* Custom scrollbar for legend */
+#legend::-webkit-scrollbar {
+  width: 4px;
+}
+#legend::-webkit-scrollbar-track {
+  background: transparent;
+}
+#legend::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
 }
 
 #legend.visible {
@@ -270,6 +324,11 @@
   font-weight: 600;
 }
 
+/* Specific padding for the main header to align with scroll content */
+#legend > .legend-title {
+  padding: 0 20px;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
@@ -280,7 +339,10 @@
   padding: 4px 8px;
   border-radius: 6px;
   transition: background 0.2s;
+  flex-shrink: 0; /* Prevent items from shrinking */
 }
+
+/* ... wrapper ... */
 
 .legend-item:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -360,7 +422,10 @@
   right: 0;
   height: 100%;
   width: 450px;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.05); /* Match legend transparency */
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(255, 255, 255, 0.12); /* Match legend border */
   z-index: 1500;
   transform: translateX(100%);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -377,11 +442,11 @@
 /* ... (Sidebar Content styles same as V6) ... */
 .sidebar-header {
   padding: 2rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fafafa;
+  background: transparent; /* Remove solid bg */
 }
 
 .sidebar-title {
@@ -398,12 +463,14 @@
 }
 
 .metric-card {
-  background: #fff;
-  border: 1px solid #eee;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(5px); /* Subtle nested blur */
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   transition: box-shadow 0.3s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .metric-title {
@@ -430,7 +497,8 @@
 
 .brand-tag {
   display: inline-block;
-  background: #f5f5f5;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0,0,0,0.05);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -549,9 +617,110 @@ body[data-page="intelligence"] .navbar .lang-dropdown {
   filter: grayscale(0%) drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
 }
 
-/* Wizard Back Button Glow */
 .wizard-back:hover {
   filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
   color: #d4af37 !important;
   transform: scale(1.1);
+}
+
+/* --- Location Pin Markers --- */
+/* Ensure MapLibre marker containers are visible and above map layers */
+.maplibregl-marker {
+  z-index: 10 !important;
+  pointer-events: auto !important;
+}
+
+/* Wrapper for separating MapLibre positioning from internal animations */
+.pin-wrapper {
+  width: 24px;
+  height: 34px;
+  pointer-events: auto;
+}
+
+.location-pin {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  
+  /* Critical for visibility */
+  display: block;
+  opacity: 1;
+  
+  /* Animation Base */
+  transform-origin: bottom center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.location-pin svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible; /* Allow shadow to spill */
+}
+
+/* Hover Effect - gentle scale and lift */
+.pin-wrapper:hover .location-pin {
+  transform: scale(1.2) translateY(-8px);
+  filter: drop-shadow(0 12px 12px rgba(0,0,0,0.4));
+  z-index: 100; /* Bring to front */
+}
+
+/* Active/Click Effect - slight press down */
+.pin-wrapper:active .location-pin {
+  transform: scale(0.95) translateY(-4px);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: transform 0.1s ease;
+}
+
+.location-pin .pin-label {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 10, 0.85); /* Darker backdrop */
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  transform: translateX(-50%) translateY(5px);
+}
+
+.pin-wrapper:hover .pin-label {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Animation for pins entering the map */
+@keyframes pinDrop {
+  0% {
+    transform: translateY(-40px) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(5px) scale(1.1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-2px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.location-pin.animate-in {
+  /* Ensure animation fills forwards to keep final state */
+  animation: pinDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

@@ -23,7 +23,7 @@ export const Intelligence = {
 
         <!-- Tip Box -->
         <div id="tip-box">
-          <div class="tip-title">💡 Hover over a countrs to see cities • Click to navigate</div>
+          <div class="tip-title">💡 Hover over a country to see cities • Click to navigate</div>
         </div>
 
         <!-- Embedded Watermark Logo -->
@@ -113,9 +113,10 @@ export const Intelligence = {
     let map;
     let breadcrumbs = ['Global'];
     let userCriteria = {};
-    let currentLevel = 'Global'; // Global, Country, City
+    let currentLevel = 'Global'; // Global, Country, City, TradeArea
     let markers = []; // Store active markers
     let hoveredCityId = null; // Track hovered city for animations
+    let currentTradeArea = null; // Track selected trade area
 
     // --- DOM Elements ---
     const wizardOverlay = document.getElementById('wizard-overlay');
@@ -389,12 +390,12 @@ export const Intelligence = {
                         'fill-extrusion-height': [
                             'interpolate', ['linear'], ['zoom'],
                             10, 0,
-                            10.5, ['get', 'height']
+                            10.5, ['coalesce', ['get', 'height'], 10] // Default to 10m if height missing
                         ],
                         'fill-extrusion-base': [
                             'interpolate', ['linear'], ['zoom'],
                             10, 0,
-                            10.5, ['get', 'min_height']
+                            10.5, ['coalesce', ['get', 'min_height'], 0] // Default to 0m if min_height missing
                         ],
                         'fill-extrusion-opacity': 0.6
                     }
@@ -566,13 +567,10 @@ export const Intelligence = {
             loadCityView(feature);
         });
 
-        // City -> Trade Area
+        // City -> Trade Area (backup for trade-points layer if visible)
         map.on('click', 'trade-points', (e) => {
           const feature = e.features[0];
-          const data = tradeData[feature.properties.id];
-          if (data) {
-            enterLocationLevel(feature, data);
-          }
+          loadTradeAreaView(feature);
         });
 
         // Cursor pointers
@@ -637,10 +635,56 @@ export const Intelligence = {
       markers.push(marker);
     };
 
+    // --- Location Pin Creation (for Trade Areas) ---
+    const createLocationPin = (feature, index = 0) => {
+      // Wrapper for MapLibre positioning
+      const container = document.createElement('div');
+      container.className = 'pin-wrapper';
+      container.style.cursor = 'pointer';
+
+      // Actual animated pin
+      const el = document.createElement('div');
+      el.className = 'location-pin animate-in';
+      el.style.animationDelay = `${index * 0.05}s`;
+      
+      const color = feature.properties.color || '#d4af37';
+      
+      // Professional Teardrop SVG Pin
+      el.innerHTML = `
+        <svg viewBox="0 0 30 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+          <path d="M15 0C6.716 0 0 6.716 0 15C0 26.25 15 42 15 42S30 26.25 30 15C30 6.716 23.284 0 15 0Z" fill="${color}" stroke="white" stroke-width="2"/>
+          <circle cx="15" cy="15" r="5" fill="white"/>
+        </svg>
+      `;
+      
+      const label = document.createElement('div');
+      label.className = 'pin-label';
+      label.innerText = feature.properties.name;
+      el.appendChild(label);
+      
+      container.appendChild(el);
+
+      container.addEventListener('click', (e) => {
+        e.stopPropagation();
+        loadTradeAreaView(feature);
+      });
+      
+      const marker = new maplibregl.Marker({ element: container, anchor: 'bottom' })
+        .setLngLat(feature.geometry.coordinates)
+        .addTo(map);
+      
+      markers.push(marker);
+    };
+
     // --- Legend Logic ---
     const updateLegend = (level) => {
       legend.classList.add('visible');
       legendContent.innerHTML = '';
+      
+      // Wrapper for scrolling content (applies padding & max-height)
+      const wrapper = document.createElement('div');
+      wrapper.className = 'legend-scroll-wrapper';
+      legendContent.appendChild(wrapper);
 
       if (level === 'Global') {
         const items = [
@@ -657,7 +701,7 @@ export const Intelligence = {
             const country = geoData.countries.features.find(f => f.properties.name === item.name);
             if (country) loadCountryView(country);
           };
-          legendContent.appendChild(div);
+          wrapper.appendChild(div);
         });
 
       } else if (level === 'Country') {
@@ -670,25 +714,93 @@ export const Intelligence = {
           div.style.cursor = 'pointer';
           div.innerHTML = `<div class="legend-dot" style="background: ${city.properties.color};"></div>${city.properties.name}`;
           div.onclick = () => loadCityView(city);
-          legendContent.appendChild(div);
+          wrapper.appendChild(div);
         });
 
       } else if (level === 'City') {
-        // List ALL trade areas for this city
-        const cityName = breadcrumbs[2]; // Global > Country > City
+        const cityName = breadcrumbs && breadcrumbs.length >= 3 ? breadcrumbs[2] : 'Pune';
         const cityTradeAreas = geoData.tradeAreas.features.filter(f => f.properties.city === cityName);
         
+        // Group by Type
+        const grouped = {};
         cityTradeAreas.forEach(area => {
-          const div = document.createElement('div');
-          div.className = 'legend-item';
-          div.style.cursor = 'pointer';
-          div.innerHTML = `<div class="legend-dot" style="background: ${area.properties.color};"></div>${area.properties.name}`;
-          div.onclick = () => {
-            const data = tradeData[area.properties.id];
-            if (data) enterLocationLevel(area, data);
-          };
-          legendContent.appendChild(div);
+          const type = area.properties.type || 'Other';
+          if (!grouped[type]) grouped[type] = [];
+          grouped[type].push(area);
         });
+
+        // Generate HTML with grouping
+        wrapper.innerHTML = Object.keys(grouped).map(type => `
+          <div style="margin-bottom: 15px;">
+            <div class="legend-title" style="color: #666; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; margin-bottom: 8px; letter-spacing: 1px; font-weight: 700;">
+              ${type.toUpperCase()}
+            </div>
+            ${grouped[type].map(area => `
+              <div class="legend-item" data-area-id="${area.properties.id}">
+                <div class="legend-dot" style="background: ${area.properties.color}; box-shadow: 0 0 6px ${area.properties.color}80;"></div>
+                <span style="font-weight: 500;">${area.properties.name}</span>
+              </div>
+            `).join('')}
+          </div>
+        `).join('');
+
+        // Provide scroll indicator arrow
+        const arrow = document.createElement('div');
+        arrow.className = 'legend-scroll-indicator';
+        arrow.innerHTML = '▼'; 
+        arrow.title = "Scroll for more";
+        legendContent.appendChild(arrow);
+
+        // Attach event listeners
+        const items = wrapper.querySelectorAll('.legend-item');
+        items.forEach(item => {
+          item.addEventListener('click', () => {
+             const areaId = item.getAttribute('data-area-id');
+             const feature = geoData.tradeAreas.features.find(f => f.properties.id === areaId);
+             if (feature) loadTradeAreaView(feature); 
+          });
+        });
+
+      } else if (level === 'TradeArea') {
+        // Show trade area details in legend
+        if (currentTradeArea) {
+          const areaData = tradeData[currentTradeArea.properties.id];
+          if (areaData) {
+            // Area type header
+            const typeDiv = document.createElement('div');
+            typeDiv.className = 'legend-item';
+            typeDiv.style.fontWeight = 'bold';
+            typeDiv.style.color = '#444';
+            typeDiv.innerHTML = `<div class="legend-dot" style="background: ${currentTradeArea.properties.color};"></div>${currentTradeArea.properties.type}`;
+            wrapper.appendChild(typeDiv);
+            
+            // Stats section
+            const statsDiv = document.createElement('div');
+            statsDiv.style.padding = '8px 0';
+            statsDiv.style.borderTop = '1px solid rgba(0,0,0,0.1)';
+            statsDiv.style.marginTop = '8px';
+            statsDiv.innerHTML = `
+              <div style="font-size: 0.8rem; color: #666; margin-bottom: 4px;">📊 Footfall: <strong>${areaData.stats.footfall}</strong></div>
+              <div style="font-size: 0.8rem; color: #666;">👥 ${areaData.demographics.segment}</div>
+            `;
+            wrapper.appendChild(statsDiv);
+            
+            // Brands
+            if (areaData.brands && areaData.brands.length > 0) {
+              const brandsDiv = document.createElement('div');
+              brandsDiv.style.padding = '8px 0';
+              brandsDiv.style.borderTop = '1px solid rgba(0,0,0,0.1)';
+              brandsDiv.innerHTML = `<div style="font-size: 0.75rem; color: #888; margin-bottom: 6px;">Nearby Brands</div>`;
+              areaData.brands.slice(0, 4).forEach(brand => {
+                const brandSpan = document.createElement('span');
+                brandSpan.style.cssText = 'display: inline-block; background: rgba(255,255,255,0.5); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; margin: 2px; color: #222; font-weight: 500; border: 1px solid rgba(0,0,0,0.05);';
+                brandSpan.innerText = brand;
+                brandsDiv.appendChild(brandSpan);
+              });
+              wrapper.appendChild(brandsDiv);
+            }
+          }
+        }
       }
     };
 
@@ -763,6 +875,9 @@ export const Intelligence = {
       } else if (levelIndex === 2) { // City Level
         const city = geoData.cities.features.find(f => f.properties.name === target);
         if (city) loadCityView(city);
+      } else if (levelIndex === 3) { // Trade Area Level
+        const tradeArea = geoData.tradeAreas.features.find(f => f.properties.name === target);
+        if (tradeArea) loadTradeAreaView(tradeArea);
       }
     };
 
@@ -870,34 +985,86 @@ export const Intelligence = {
 
     const loadCityView = (cityFeature) => {
       currentLevel = 'City';
+      currentTradeArea = null;
       sidebar.classList.remove('visible');
       
       updateBreadcrumbs(['Global', cityFeature.properties.country, cityFeature.properties.name]);
       updateLegend('City');
-      clearMarkers(); // No markers in city view
+      clearMarkers();
 
       // Visibility
       setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
       setLayerVisibility(['cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible'); 
       setLayerVisibility(['cities-fill'], 'none'); // Hide fill color when inside city 
-      setLayerVisibility(['trade-blobs', 'trade-points'], 'visible');
+      setLayerVisibility(['trade-blobs'], 'visible'); // Keep heatmap effect
+      setLayerVisibility(['trade-points'], 'none'); // Hide circle points, use pins instead
 
-      // Filter trade areas by city
+      // Filter trade blobs by city
       map.setFilter('trade-blobs', ['==', 'city', cityFeature.properties.name]);
-      map.setFilter('trade-points', ['==', 'city', cityFeature.properties.name]);
 
       // Camera - 3D View (Zoom INSIDE the city)
-      // Calculate centroid for flyTo
-      const bounds = getBounds([cityFeature]);
-      const center = bounds.getCenter();
+      // Calculate centroid based on TRADE AREAS (if any), otherwise City Polygon
+      const cityTradeAreas = geoData.tradeAreas.features.filter(f => f.properties.city === cityFeature.properties.name);
+      
+      let center;
+      
+      if (cityTradeAreas.length > 0) {
+         // Focus on the cluster of trade areas
+         const tradeBounds = getBounds(cityTradeAreas);
+         center = tradeBounds.getCenter();
+         // If points are very spread out, we might want to adjust zoom, but 11.3 fixed is what user requested
+      } else {
+         // Fallback to city geometry
+         const bounds = getBounds([cityFeature]);
+         center = bounds.getCenter();
+      }
 
       map.flyTo({
         center: center,
-        zoom: 12, // Street level zoom
-        pitch: 70,
-        bearing: -20,
+        zoom: 11.6,
+        pitch: 45, // Reduced pitch for better pin visibility
+        bearing: 0,
         essential: true
       });
+
+      // Create location pins immediately - MapLibre markers track position automatically
+      // Reuse existing cityTradeAreas variable
+      cityTradeAreas.forEach((area, index) => createLocationPin(area, index));
+    };
+
+    const loadTradeAreaView = (tradeFeature) => {
+      currentLevel = 'TradeArea';
+      currentTradeArea = tradeFeature;
+      
+      const cityName = tradeFeature.properties.city;
+      const cityFeature = geoData.cities.features.find(c => c.properties.name === cityName);
+      const countryName = cityFeature?.properties.country || 'India';
+      
+      updateBreadcrumbs(['Global', countryName, cityName, tradeFeature.properties.name]);
+      updateLegend('TradeArea');
+      clearMarkers();
+      
+      // Create single pin for the selected trade area
+      createLocationPin(tradeFeature, 0);
+      
+      // Visibility - show 3D buildings
+      setLayerVisibility(['country-fill', 'india-fill'], 'none');
+      setLayerVisibility(['cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible');
+      setLayerVisibility(['cities-fill'], 'none');
+      setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
+      
+      // Fly to trade area with deep zoom
+      map.flyTo({
+        center: tradeFeature.geometry.coordinates,
+        zoom: 16, // Deeper zoom for trade area
+        pitch: 60,
+        bearing: -30,
+        essential: true
+      });
+      
+      // Open sidebar with trade details
+      const data = tradeData[tradeFeature.properties.id];
+      if (data) openSidebar(data);
     };
 
     const enterLocationLevel = (feature, data) => {
@@ -905,7 +1072,7 @@ export const Intelligence = {
         center: feature.geometry.coordinates,
         zoom: 16,
         pitch: 100,
-        bearing: -100,
+        bearing: -30,
         essential: true
       });
       openSidebar(data);
