@@ -25,7 +25,11 @@ export const Intelligence = {
 
         <!-- Tip Box -->
         <div id="tip-box">
-          <div class="tip-title">💡 Hover over a country to see cities • Click to navigate</div>
+          <div class="tip-header">
+            <div class="tip-title">💡 Hover over a country to see cities • Click to navigate</div>
+            <div class="tip-toggle">▼</div>
+          </div>
+          <div class="tip-details"></div>
         </div>
 
         <!-- Embedded Watermark Logo -->
@@ -137,6 +141,66 @@ export const Intelligence = {
     const countrySelect = document.getElementById('country-select');
     const citySelect = document.getElementById('city-select');
     const btnNext2 = document.getElementById('btn-next-2');
+
+    // Tip Box Elements
+    const tipBox = document.getElementById('tip-box');
+    const tipTitle = tipBox?.querySelector('.tip-title');
+    const tipDetails = tipBox?.querySelector('.tip-details');
+
+    // --- Tip Box: Click to expand/collapse ---
+    if (tipBox) {
+      tipBox.addEventListener('click', () => {
+        tipBox.classList.toggle('expanded');
+      });
+    }
+
+    // --- Tip Box: Update content based on view level ---
+    const updateTipBox = (level, contextData = {}) => {
+      if (!tipBox || !tipTitle || !tipDetails) return;
+      
+      tipBox.classList.add('visible');
+      tipBox.classList.remove('expanded'); // Collapse when changing views
+      
+      const tipContent = {
+        Global: {
+          title: '💡 Hover over a country...',
+          details: `<ul>
+            <li>India and UAE markets available</li>
+            <li>Click to zoom into cities</li>
+            <li>Use legend for quick navigation</li>
+          </ul>`
+        },
+        Country: {
+          title: `💡 Click a city to explore...`,
+          details: `<ul>
+            <li>Each city has trade areas</li>
+            <li>Hover for city highlights</li>
+            <li>Colored borders indicate zones</li>
+          </ul>`
+        },
+        City: {
+          title: `💡 Click pins for details...`,
+          details: `<ul>
+            <li>Pins show key trade areas</li>
+            <li>Legend lists all locations</li>
+            <li>Drag map to explore, scroll/tap to zoom</li>
+            <li>Right click and drag to adjust z axis</li>
+          </ul>`
+        },
+        TradeArea: {
+          title: `💡 Viewing trade area...`,
+          details: `<ul>
+            <li>Full metrics in sidebar</li>
+            <li>Charts show comparisons</li>
+            <li>Click back to see other areas</li>
+          </ul>`
+        }
+      };
+      
+      const content = tipContent[level] || tipContent.Global;
+      tipTitle.textContent = content.title;
+      tipDetails.innerHTML = content.details;
+    };
 
     // --- Helper: Calculate Bounds ---
     const getBounds = (features) => {
@@ -924,9 +988,8 @@ export const Intelligence = {
       setLayerVisibility(['country-fill', 'india-fill'], 'visible');
       setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-glow', 'cities-label', 'trade-blobs', 'trade-points'], 'none');
       
-      // Show tip box in global view
-      const tipBox = document.getElementById('tip-box');
-      if (tipBox) tipBox.classList.add('visible');
+      // Update tip box for global view
+      updateTipBox('Global');
 
       // Camera: Fit to all countries - zoomed to keep India and UAE in focus
       const bounds = getBounds(geoData.countryPolygons.features);
@@ -964,9 +1027,9 @@ export const Intelligence = {
       setLayerVisibility(['cities-fill', 'cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible');
       setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
       
-      // Hide tip box
-      const tipBox = document.getElementById('tip-box');
-      if (tipBox) tipBox.classList.remove('visible');
+      // Update tip box for country view
+      const countryCityCount = countryCities.length;
+      updateTipBox('Country', { countryName: countryFeature.properties.name, cityCount: countryCityCount });
 
       // Filter cities by country
       map.setFilter('cities-fill', ['==', 'country', countryFeature.properties.name]);
@@ -1032,6 +1095,9 @@ export const Intelligence = {
       // Create location pins immediately - MapLibre markers track position automatically
       // Reuse existing cityTradeAreas variable
       cityTradeAreas.forEach((area, index) => createLocationPin(area, index));
+
+      // Update tip box for city view
+      updateTipBox('City', { cityName: cityFeature.properties.name, tradeAreaCount: cityTradeAreas.length });
     };
 
     const loadTradeAreaView = (tradeFeature) => {
@@ -1067,6 +1133,9 @@ export const Intelligence = {
       // Open sidebar with trade details
       const data = tradeData[tradeFeature.properties.id];
       if (data) openSidebar(data);
+
+      // Update tip box for trade area view
+      updateTipBox('TradeArea', { areaName: tradeFeature.properties.name });
     };
 
     const enterLocationLevel = (feature, data) => {

@@ -225,7 +225,7 @@ export const geoData = {
       { "type": "Feature", "properties": { "id": "pune-bg", "name": "Bund Garden", "city": "Pune", "type": "Central", "color": "#9B59B6" }, "geometry": { "type": "Point", "coordinates": [73.8777, 18.5367] } },
       
       // Industrial: Grey (#7F8C8D)
-      { "type": "Feature", "properties": { "id": "pune-ch", "name": "Chinchwad", "city": "Pune", "type": "Industrial", "color": "#7F8C8D" }, "geometry": { "type": "Point", "coordinates": [73.7997, 18.6298] } },
+      { "type": "Feature", "properties": { "id": "pune-ch", "name": "Chinchwad", "city": "Pune", "type": "Industrial", "color": "#CD7F32" }, "geometry": { "type": "Point", "coordinates": [73.7997, 18.6298] } },
       
       // Institutional: Orange (#E67E22)
       { "type": "Feature", "properties": { "id": "pune-sb", "name": "SB / University", "city": "Pune", "type": "Institutional", "color": "#E67E22" }, "geometry": { "type": "Point", "coordinates": [73.8286, 18.5390] } }
