@@ -56,7 +56,7 @@ export const Intelligence = {
               <!-- Slide 2 -->
               <div class="wizard-slide" id="slide-2">
                 <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
-                  <button class="wizard-back" id="btn-back-2" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; margin-right:1rem; padding: 5px; display: flex; align-items: center; transition: color 0.3s;">
+                  <button class="wizard-back" id="btn-back-2">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                   </button>
                   <h2 class="wizard-title" style="margin:0;">Select Market</h2>
@@ -76,7 +76,7 @@ export const Intelligence = {
               <!-- Slide 3 -->
               <div class="wizard-slide" id="slide-3">
                  <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
-                   <button class="wizard-back" id="btn-back-3" style="background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; margin-right:1rem; padding: 5px; display: flex; align-items: center; transition: color 0.3s;">
+                   <button class="wizard-back" id="btn-back-3">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                   </button>
                   <h2 class="wizard-title" style="margin:0;">Refine Search</h2>
@@ -119,20 +119,185 @@ export const Intelligence = {
         <!-- SCROLLABLE CONTAINER -->
         <div id="main-scroll-container">
           
-          <!-- Landing Section (100vh) -->
-          <div id="landing-hero-section">
-            <div class="landing-content">
-              <div class="hero-logo-wrapper">
-                <img src="/logo.png" alt="FOOTTFALL" class="hero-logo-large">
-              </div>
-              <h2 class="hero-tagline">Real Estate Intelligence Re-imagined.</h2>
-              <div class="country-selector">
-                <button class="btn-country" data-country="India">India</button>
-                <button class="btn-country" data-country="UAE">UAE</button>
+          <!-- Landing Section (100vh) - Split View Layout -->
+          <div id="landing-hero-section" class="landing-split-view">
+            
+            <!-- LEFT PANEL: Hero Content -->
+            <div class="landing-left-panel" id="landing-left-panel">
+              <div class="landing-hero-content">
+                <!-- Full Loader Animation (scaled down) -->
+                <div class="hero-logo-animated" id="hero-logo-animated">
+                  <div class="landing-loader-wrapper">
+                    <div class="logo-container">
+                      <!-- F -->
+                      <div class="letter-slot slot-f">
+                        <div class="f-scanner-box">
+                          <div class="f-outline">F</div>
+                          <div class="scan-line"></div>
+                        </div>
+                        <div class="final-letter">F</div>
+                      </div>
+
+                      <!-- OO -->
+                      <div class="letter-slot slot-o1">
+                        <div class="person-shape p1" style="left: 10px;">
+                          <div class="p-head"></div>
+                          <div class="p-body"></div>
+                        </div>
+                        <div class="final-letter">O</div>
+                      </div>
+                      <div class="letter-slot slot-o2">
+                        <div class="person-shape p2" style="right: 10px;">
+                          <div class="p-head"></div>
+                          <div class="p-body"></div>
+                        </div>
+                        <div class="match-flash"></div>
+                        <div class="final-letter">O</div>
+                      </div>
+
+                      <!-- TT -->
+                      <div class="letter-slot slot-t1">
+                        <div class="letter-mask">
+                          <div class="final-letter t1-static" style="opacity: 0;">T</div>
+                        </div>
+                      </div>
+                      <div class="letter-slot slot-t2">
+                        <div class="map-block-container">
+                          <div class="map-road road-1"></div>
+                          <div class="map-road road-2"></div>
+                          <div class="map-road road-3"></div>
+                          <div class="map-road road-4"></div>
+                          <div class="map-pin-small" style="top: 20px; left: 30px;"></div>
+                          <div class="map-pin-small" style="bottom: 25px; right: 35px;"></div>
+                          <div class="map-pin-small" style="top: 15px; right: 20px;"></div>
+                        </div>
+                        <div class="letter-mask">
+                          <div class="final-letter t2-static" style="opacity: 0;">T</div>
+                        </div>
+                      </div>
+
+                      <div class="letter-slot slot-f2">
+                        <div class="graph-group">
+                          <div class="g-bar"></div>
+                          <div class="g-bar"></div>
+                          <div class="g-bar"></div>
+                          <div class="g-bar"></div>
+                        </div>
+                        <div class="final-letter">F</div>
+                      </div>
+                      <div class="letter-slot slot-a">
+                        <div class="network-group">
+                          <div class="n-node node1" style="bottom: 15px; left: 10px;"></div>
+                          <div class="n-node node2" style="bottom: 40px; left: 25px;"></div>
+                          <div class="n-node node3" style="bottom: 20px; left: 40px;"></div>
+                          <div class="n-line line1" style="bottom: 18px; left: 14px; width: 22px; transform: rotate(-55deg);"></div>
+                          <div class="n-line line2" style="bottom: 42px; left: 28px; width: 22px; transform: rotate(55deg);"></div>
+                        </div>
+                        <div class="final-letter">A</div>
+                      </div>
+
+                      <!-- LL Custom Merge -->
+                      <div class="letter-slot slot-l1">
+                        <div class="pin-shape">
+                          <div class="pin-head">
+                            <div class="pin-dot"></div>
+                          </div>
+                        </div>
+                        <div class="pin-shadow"></div>
+                        <div class="l1-custom-shape">
+                          <div class="l1-v-bar"></div>
+                          <div class="l1-h-bar"></div>
+                        </div>
+                      </div>
+
+                      <div class="letter-slot slot-l2">
+                        <div class="l2-forklift-mechanism">
+                          <div class="l2-vertical-stem"></div>
+                          <div class="l2-forks"></div>
+                          <div class="shop-block">
+                            <div class="shop-roof"></div>
+                            <div class="shop-door"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <h1 class="landing-headline">
+                  Trade Area Intelligence<br>
+                  <span class="headline-highlight">Reimagined.</span>
+                </h1>
+                <p class="landing-subtitle">
+                  Curating spaces that people want to be in — with the brands that belong in them.
+                </p>
+                
+                <div class="country-selector">
+                  <button class="btn-country" data-country="India">India</button>
+                  <button class="btn-country" data-country="UAE">UAE</button>
+                </div>
+                
+                <!-- Features removed for minimalism -->
               </div>
             </div>
-            <div class="scroll-hint">
-              <span>Scroll to learn more</span>
+            
+            <!-- Map Overlay Elements (Stats, Pause Indicator) -->
+            <!-- MOVED outside of landing-map-panel to ensure visibility -->
+            
+            <!-- Tour Pause Indicator -->
+            <div class="tour-pause-indicator" id="tour-pause-indicator">
+              <span class="pause-text" id="tour-pause-text">Tour paused</span>
+            </div>
+            
+            <!-- Always-visible Stats Card -->
+            <div class="stats-card" id="stats-card">
+              <div class="stats-header">
+                <span class="stats-pin">📍</span>
+                <div class="stats-location">
+                  <h3 class="area-name" id="stats-area-name">Koregaon Park</h3>
+                  <span class="area-city" id="stats-area-city">Pune, India</span>
+                </div>
+              </div>
+              
+              <div class="stats-body">
+                <div class="stats-period">
+                  <span class="label">Trade Area Insights</span>
+                  <span class="dates" id="stats-dates">Dec 2024</span>
+                </div>
+                
+                <div class="category-pills" id="stats-categories">
+                  <span class="pill active">Retail</span>
+                  <span class="pill">F&B</span>
+                  <span class="pill">Fashion</span>
+                </div>
+                
+                <div class="stats-footfall-chart" id="stats-footfall-chart">
+                  <div class="footfall-header">
+                    <span class="footfall-label">Est. Daily Footfall</span>
+                    <span class="footfall-value" id="stats-footfall">25,000+</span>
+                  </div>
+                  <div class="footfall-bar-container">
+                    <div class="footfall-bar" id="stats-footfall-bar" style="width: 70%;"></div>
+                  </div>
+                  <div class="footfall-scale">
+                    <span>Low</span>
+                    <span>High</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="stats-footer">
+                <button class="btn-get-insights" id="btn-stats-explore">Find me my location</button>
+              </div>
+            </div>
+
+            <!-- RIGHT PANEL: Hidden but kept for structure if needed -->
+            <div class="landing-map-panel" id="landing-map-panel">
+               <!-- Empty now -->
+            </div>
+            
+            <!-- Scroll Indicator (bottom center) -->
+            <div class="scroll-indicator" id="scroll-indicator">
+              <span class="scroll-text">Explore more about us</span>
               <div class="scroll-arrow">↓</div>
             </div>
           </div>
@@ -155,7 +320,7 @@ export const Intelligence = {
                       <svg class="scribble-underline" viewBox="0 0 500 150" preserveAspectRatio="none">
                         <path d="M5,125 Q30,155 60,125 T120,125 T180,125 T250,125 T490,125" fill="none" stroke="#D4AF37" stroke-width="8" stroke-linecap="round" />
                       </svg>
-                    </h2>
+            <!-- Services Section REMOVED as per request -->
                     <div class="founder-bio">
                       <p><strong style="color: #fff;">Rahul Ahuja</strong> believes that real estate is the physical language of economics. With over 15 years in high-volume acquisitions, he steers the firm's macro-strategy, identifying undervalued corridors before they hit the institutional radar.</p>
                     </div>
@@ -164,28 +329,8 @@ export const Intelligence = {
               </div>
             </section>
 
-            <!-- Services Section -->
-            <section id="services" class="services-section">
-              <h2 class="section-title services-header animate-on-scroll">Offerings</h2>
-              <div class="services-split-container">
-                <div class="split-section brands" id="section-brands">
-                  <div class="overlay-gradient"></div>
-                  <div class="section-content">
-                    <span class="section-number">01 — Strategy</span>
-                    <h2 class="service-type-title">Brands</h2>
-                    <p class="section-desc">Use AI to find your next flagship location. Analyze footfall, demographics, and competition to minimize risk.</p>
-                  </div>
-                </div>
-                <div class="split-section landlords" id="section-landlords">
-                  <div class="overlay-gradient"></div>
-                  <div class="section-content">
-                    <span class="section-number">02 — Assets</span>
-                    <h2 class="service-type-title">Landlords</h2>
-                    <p class="section-desc">Optimize tenant mix for maximum yield. Identify the right brand mix for your property using real-world data.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <!-- Services Section REMOVED as per request -->
+
 
             <!-- Clients Section -->
             <section id="clients" class="section-dark">
@@ -278,6 +423,530 @@ export const Intelligence = {
     let markers = []; // Store active markers
     let hoveredCityId = null; // Track hovered city for animations
     let currentTradeArea = null; // Track selected trade area
+    let viewMode = 'landing'; // 'landing' | 'dashboard'
+    let mapTourController = null; // Will be initialized after map loads
+    const mapContainer = document.getElementById('map-container'); // Ref for mode switching
+
+    // --- Landing Page Logo Animation Controller ---
+    const LandingLogoAnimator = {
+      tl: null,
+      isRunning: false,
+      container: null,
+      
+      init() {
+        this.container = document.querySelector('.landing-loader-wrapper');
+        if (!this.container || !window.gsap) return;
+        this.start();
+      },
+      
+      start() {
+        if (this.isRunning || !window.gsap) return;
+        this.isRunning = true;
+        this.runAnimation();
+      },
+      
+      stop() {
+        this.isRunning = false;
+        if (this.tl) this.tl.kill();
+      },
+      
+      runAnimation() {
+        const gsap = window.gsap;
+        const wrapper = this.container;
+        if (!wrapper) return;
+        
+        // Reset function
+        const resetUI = () => {
+          gsap.set(wrapper.querySelectorAll('.final-letter'), { opacity: 0, clearProps: 'transform' });
+          gsap.set(wrapper.querySelectorAll('.f-scanner-box, .map-block-container, .graph-group, .network-group, .pin-shape, .l1-custom-shape, .l2-forklift-mechanism'), { opacity: 0 });
+          gsap.set(wrapper.querySelectorAll('.p1, .p2, .match-flash'), { opacity: 0, x: 0, scale: 1 });
+          gsap.set(wrapper.querySelectorAll('.t1-static, .t2-static'), { opacity: 0, y: 0 });
+        };
+        
+        const startTimeline = () => {
+          if (!this.isRunning) return;
+          
+          this.tl = gsap.timeline({
+            defaults: { duration: 0.8 },
+            onComplete: () => {
+              if (this.isRunning) {
+                gsap.delayedCall(2, () => startTimeline());
+              }
+            }
+          }).timeScale(1.0);
+          
+          // Reset at start
+          this.tl.call(resetUI);
+          
+          // 1. F Scanner
+          this.tl.to(wrapper.querySelector('.f-scanner-box'), { opacity: 1, duration: 0.1 })
+            .fromTo(wrapper.querySelector('.scan-line'), { top: '0%' }, { top: '100%', duration: 0.5, ease: 'linear' })
+            .to(wrapper.querySelector('.f-scanner-box'), { opacity: 0, duration: 0.2 })
+            .to(wrapper.querySelector('.slot-f .final-letter'), { opacity: 1, duration: 0.2 }, '<');
+          
+          // 2. OO People
+          this.tl.to(wrapper.querySelectorAll('.p1, .p2'), { opacity: 1, duration: 0.2 })
+            .to(wrapper.querySelector('.p1'), { x: 15, duration: 0.3, ease: 'back.in(1.5)' })
+            .to(wrapper.querySelector('.p2'), { x: -15, duration: 0.3, ease: 'back.in(1.5)' }, '<')
+            .to(wrapper.querySelector('.match-flash'), { opacity: 1, scale: 1.2, duration: 0.1 })
+            .to(wrapper.querySelectorAll('.p1, .p2'), { opacity: 0, scale: 0.5, duration: 0.1 }, '<')
+            .to(wrapper.querySelector('.match-flash'), { scale: 2, opacity: 0, duration: 0.2 })
+            .to(wrapper.querySelectorAll('.slot-o1 .final-letter, .slot-o2 .final-letter'), { opacity: 1, duration: 0.2, stagger: 0.05 }, '-=0.1');
+          
+          // 3. TT Map
+          this.tl.to(wrapper.querySelector('.map-block-container'), { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.2)' })
+            .set(wrapper.querySelectorAll('.t1-static, .t2-static'), { y: 100, opacity: 1 })
+            .to(wrapper.querySelectorAll('.t1-static, .t2-static'), { y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.2')
+            .to(wrapper.querySelector('.map-block-container'), { y: -100, opacity: 0, duration: 0.4, ease: 'power2.out' }, '<');
+          
+          // 4. FA Bars & Network
+          this.tl.to([wrapper.querySelector('.graph-group'), wrapper.querySelector('.network-group')], { opacity: 1, duration: 0.2 })
+            .to(wrapper.querySelectorAll('.g-bar'), { height: (i) => [40, 50, 20, 35][i] + 'px', duration: 0.4, stagger: 0.05, ease: 'back.out(1.2)' })
+            .from(wrapper.querySelectorAll('.n-node'), { scale: 0, duration: 0.3, stagger: 0.03, ease: 'back.out(1.5)' }, '<')
+            .to([wrapper.querySelector('.graph-group'), wrapper.querySelector('.network-group')], { opacity: 0, duration: 0.2, delay: 0.1 })
+            .to(wrapper.querySelectorAll('.slot-f2 .final-letter, .slot-a .final-letter'), { opacity: 1, duration: 0.2, stagger: 0.05 });
+          
+          // 5. LL Pin & Forklift
+          // L1: Pin drops and transforms into L shape
+          this.tl.set(wrapper.querySelector('.l1-custom-shape'), { opacity: 1 })
+            .set(wrapper.querySelector('.l1-v-bar'), { opacity: 0 })
+            .set(wrapper.querySelector('.l1-h-bar'), { width: 0 })
+            .to(wrapper.querySelector('.pin-shape'), { opacity: 1, y: 0, startAt: { y: -60 }, duration: 0.3, ease: 'bounce.out' })
+            .to(wrapper.querySelector('.pin-shadow'), { opacity: 1, scale: 1, duration: 0.2 }, '-=0.2')
+            .to(wrapper.querySelector('.pin-shape'), { opacity: 0, duration: 0.2 }, '+=0.1')
+            .to(wrapper.querySelector('.pin-shadow'), { opacity: 0, duration: 0.2 }, '<')
+            .to(wrapper.querySelector('.l1-h-bar'), { width: '100%', duration: 0.2, ease: 'power2.out' })
+            .set(wrapper.querySelector('.l1-v-bar'), { opacity: 1 })
+            // L2: Forklift comes down, then forks retract leaving vertical stem
+            .fromTo(wrapper.querySelector('.l2-forklift-mechanism'), 
+              { y: -100, opacity: 0 }, 
+              { y: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }, '-=0.1')
+            .to(wrapper.querySelector('.l2-forks'), { width: 0, duration: 0.3, ease: 'power2.in' }, '+=0.1')
+            .to(wrapper.querySelector('.shop-block'), { opacity: 0, scale: 0.8, duration: 0.2 }, '<');
+        };
+        
+        startTimeline();
+      }
+    };
+
+    // --- Landing Page Tour & Stats Controllers ---
+    
+    // Stats Card Controller
+    const StatsCardController = {
+      currentAreaIndex: 0,
+      rotationInterval: null,
+      isTransitioning: false,
+      
+      elements: {
+        card: null,
+        areaName: null,
+        areaCity: null,
+        dates: null,
+        footfall: null,
+        categories: null
+      },
+      
+      init() {
+        this.elements.card = document.getElementById('stats-card');
+        this.elements.areaName = document.getElementById('stats-area-name');
+        this.elements.areaCity = document.getElementById('stats-area-city');
+        this.elements.dates = document.getElementById('stats-dates');
+        this.elements.footfall = document.getElementById('stats-footfall');
+        this.elements.categories = document.getElementById('stats-categories');
+      },
+      
+      getTradeAreasByRegion(region) {
+        return geoData.tradeAreas.features.filter(f => {
+          if (region === 'India') return f.properties.city === 'Pune' || f.properties.city === 'Mumbai';
+          if (region === 'UAE') return f.properties.city === 'Dubai';
+          return true;
+        });
+      },
+      
+      update(tradeArea) {
+  if (!this.elements.card || this.isTransitioning) return;
+  
+  this.isTransitioning = true;
+  this.elements.card.classList.add('transitioning');
+  
+  setTimeout(() => {
+    const props = tradeArea.properties;
+    const data = tradeData[props.id] || {};
+    
+    if (this.elements.areaName) this.elements.areaName.textContent = props.name;
+    if (this.elements.areaCity) this.elements.areaCity.textContent = `${props.city}, ${props.city === 'Dubai' ? 'UAE' : 'India'}`;
+    if (this.elements.dates) this.elements.dates.textContent = 'Dec 2024';
+    
+    // Update footfall based on trade area type
+    if (this.elements.footfall) {
+      const footfallData = {
+        'Premium': { value: '35,000+', percent: 90 },
+        'High Street': { value: '28,000+', percent: 75 },
+        'IT Hub': { value: '22,000+', percent: 60 },
+        'Residential': { value: '15,000+', percent: 40 },
+        'Business': { value: '30,000+', percent: 80 },
+        'Central': { value: '25,000+', percent: 65 },
+        'Industrial': { value: '12,000+', percent: 30 },
+        'Institutional': { value: '18,000+', percent: 45 }
+      };
+      const data = footfallData[props.type] || { value: '20,000+', percent: 50 };
+      this.elements.footfall.textContent = data.value;
+      
+      // Update bar width
+      const bar = document.getElementById('stats-footfall-bar');
+      if (bar) bar.style.width = data.percent + '%';
+    }
+    
+    // Update category pills
+    if (this.elements.categories) {
+      const types = ['Retail', 'F&B', 'Fashion'];
+      const activeType = props.type === 'Premium' ? 'Retail' : props.type === 'High Street' ? 'F&B' : 'Fashion';
+      this.elements.categories.innerHTML = types.map(t => 
+        `<span class="pill ${t === activeType ? 'active' : ''}">${t}</span>`
+      ).join('');
+    }
+    
+    this.elements.card.classList.remove('transitioning');
+    this.isTransitioning = false;
+  }, 300);
+},
+      
+      startRotation(region, intervalMs = 3000) {
+        this.stopRotation();
+        const areas = this.getTradeAreasByRegion(region);
+        if (areas.length === 0) return;
+        
+        // Show first area immediately
+        this.currentAreaIndex = Math.floor(Math.random() * areas.length);
+        this.update(areas[this.currentAreaIndex]);
+        
+        // Rotate
+        this.rotationInterval = setInterval(() => {
+          this.currentAreaIndex = (this.currentAreaIndex + 1) % areas.length;
+          this.update(areas[this.currentAreaIndex]);
+        }, intervalMs);
+      },
+      
+      stopRotation() {
+        if (this.rotationInterval) {
+          clearInterval(this.rotationInterval);
+          this.rotationInterval = null;
+        }
+      }
+    };
+    
+    // Map Tour Controller
+    const MapTourController = {
+      currentStopIndex: 0,
+      isRunning: false,
+      isPaused: false,
+      tourTimeout: null,
+      pauseIndicator: null,
+      
+      tourStops: [
+        { 
+          region: 'India',
+          // User wants map shifted right so Mumbai/Pune are visible on left side
+          // Moving center further WEST (lower longitude) shifts map right in view
+          center: [73.1, 18.87], 
+          zoom: 9.07, 
+          duration: 2500,
+          stayDuration: 6000
+        },
+        { 
+          region: 'UAE',
+          center: [55.27, 25.20],
+          zoom: 8.9,
+          duration: 2500,
+          stayDuration: 8000
+        }
+      ],
+      
+      pauseTimeout: null, // For temporary pause
+      
+      init() {
+        this.pauseIndicator = document.getElementById('tour-pause-indicator');
+        const landingMapPanel = document.getElementById('landing-map-panel'); // Note: this might be hidden/removed in new layout
+        const mapContainer = document.getElementById('map-container');
+        
+        // Pause on interactions
+        // Note: Global map listeners handle most of this now via hideHeroPanel
+      },
+      
+      start() {
+        if (this.isRunning) return;
+        this.isRunning = true;
+        this.isPaused = false;
+        
+        // Make sure stats card is visible for the tour
+        const card = document.getElementById('stats-card');
+        if (card) {
+             card.style.display = 'block'; // Ensure it's not display:none
+             card.classList.remove('hidden');
+             setTimeout(() => card.classList.add('visible'), 100);
+        }
+        
+        StatsCardController.init();
+        this.flyToStop(0);
+      },
+      
+      flyToStop(index) {
+        // Stop if not running, paused, or no longer in landing mode
+        if (!this.isRunning || this.isPaused || viewMode !== 'landing') {
+          this.stop();
+          return;
+        }
+        
+        const stop = this.tourStops[index];
+        this.currentStopIndex = index;
+        
+        // Fly to region
+        console.log(`Tour: Flying to ${stop.region}`);
+        
+        // Robust finding of country feature
+        const countryFeature = geoData.countries?.features?.find(f => 
+            f.properties.name === stop.region || 
+            f.properties.name.toLowerCase() === stop.region.toLowerCase()
+        );
+        
+        if (countryFeature) {
+            console.log(`Tour: Found feature for ${stop.region}, setting up Country View`);
+            currentLevel = 'Country';
+            updateBreadcrumbs(['Global', stop.region]);
+            
+            // Visibility: HIDE global country fill to prevent double-border/overlap
+            setLayerVisibility(['country-fill', 'india-fill'], 'none'); 
+            
+            // SHOW cities and city-specific borders
+            setLayerVisibility(['cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible');
+            setLayerVisibility(['cities-fill'], 'visible'); 
+            
+            // Hide specific trade area points
+            setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
+            
+            // Update Filters for Cities
+            map.setFilter('cities-fill', ['==', 'country', stop.region]);
+            map.setFilter('cities-border', ['==', 'country', stop.region]);
+            map.setFilter('cities-border-casing', ['==', 'country', stop.region]);
+            map.setFilter('cities-glow', ['==', 'country', stop.region]);
+            map.setFilter('cities-label', ['==', 'country', stop.region]);
+        } else {
+             console.warn(`Tour: Country feature for ${stop.region} NOT found!`);
+        }
+        
+        // 2. FORCE correct camera position for Landing Page Tour
+        if (map) {
+            map.flyTo({
+                center: stop.center,
+                zoom: stop.zoom,
+                duration: stop.duration,
+                essential: true
+            });
+        }
+        
+        // Start stats rotation after fly animation completes
+        setTimeout(() => {
+          if (!this.isPaused && viewMode === 'landing') {
+            StatsCardController.startRotation(stop.region, 3000);
+          }
+        }, stop.duration);
+        
+        // Schedule next region
+        this.tourTimeout = setTimeout(() => {
+          if (!this.isPaused && this.isRunning && viewMode === 'landing') {
+            StatsCardController.stopRotation();
+            const nextIndex = (index + 1) % this.tourStops.length;
+            this.flyToStop(nextIndex);
+          }
+        }, stop.stayDuration + stop.duration);
+      },
+      
+      pause() {
+        if (!this.isRunning || this.isPaused) return;
+        this.isPaused = true;
+        
+        if (this.tourTimeout) {
+          clearTimeout(this.tourTimeout);
+          this.tourTimeout = null;
+        }
+        StatsCardController.stopRotation();
+        
+        // SHOW Tip Box only when paused (clicked)
+        if (this.pauseIndicator) {
+          this.pauseIndicator.classList.add('visible');
+          // Update text: Remove emoji, simple text
+          const textEl = document.getElementById('tour-pause-text');
+          if (textEl) textEl.innerText = "Tour paused, tap off map to resume";
+        }
+      },
+      
+      // Temporary pause (4 seconds) then auto-resume
+      pauseTemporarily(durationMs = 4000) {
+        if (!this.isRunning) return;
+        
+        // Clear any existing pause timeout
+        if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
+        
+        // Pause
+        this.pause();
+        
+        // Auto-resume after duration
+        this.pauseTimeout = setTimeout(() => {
+          this.resume();
+        }, durationMs);
+      },
+      
+      resume() {
+        if (!this.isRunning || !this.isPaused) return;
+        this.isPaused = false;
+        
+        // HIDE Tip Box when running
+        if (this.pauseIndicator) {
+           this.pauseIndicator.classList.remove('visible'); 
+        }
+        
+        // Resume from current stop
+        this.flyToStop(this.currentStopIndex);
+      },
+      
+      stop() {
+        this.isRunning = false;
+        this.isPaused = false;
+        
+        if (this.tourTimeout) {
+          clearTimeout(this.tourTimeout);
+          this.tourTimeout = null;
+        }
+        StatsCardController.stopRotation();
+        
+        if (this.pauseIndicator) {
+          this.pauseIndicator.classList.remove('visible');
+        }
+      }
+    };
+    
+    // Return to Landing Page
+    // Return to Landing Page
+    const returnToLanding = () => {
+        console.log("Returning to Landing Page...");
+        viewMode = 'landing';
+        if (mapContainer) mapContainer.classList.add('landing-mode');
+        
+        // 1. Reset Landing Section & Hero
+        const landingSection = document.getElementById('landing-hero-section');
+        const landingPanels = document.querySelectorAll('.landing-left-panel, .landing-right, .hero-logo-animated');
+        
+        if (landingSection) {
+            landingSection.style.display = 'flex'; 
+            landingSection.classList.remove('hidden'); 
+            landingSection.classList.remove('prompt-mode'); 
+        }
+        
+        // Force reset children
+        landingPanels.forEach(panel => {
+           panel.classList.remove('hidden-overlay');
+           panel.style.opacity = '1';
+           panel.style.pointerEvents = 'auto';
+           panel.style.visibility = 'visible';
+        });
+
+        // 2. Reset Scroll Container
+        const mainScrollContainer = document.getElementById('main-scroll-container');
+        if (mainScrollContainer) {
+            mainScrollContainer.style.display = 'block'; 
+            mainScrollContainer.classList.add('landing-active');
+        }
+        
+        // 3. Reset Landing Overlays
+        const statsCard = document.getElementById('stats-card');
+        const scrollIndicator = document.getElementById('scroll-indicator');
+        
+        if (statsCard) {
+            statsCard.style.display = 'block';
+            statsCard.classList.remove('hidden');
+            setTimeout(() => statsCard.classList.add('visible'), 50);
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'flex';
+        
+        if (landingPrompt) landingPrompt.classList.remove('visible');
+
+        // 4. Hide Dashboard Elements
+        if (wizardOverlay) wizardOverlay.classList.add('hidden');
+        if (topBar) topBar.classList.remove('visible');
+        if (legend) legend.classList.remove('visible');
+        if (tipBox) {
+            tipBox.classList.remove('visible');
+            tipBox.style.display = 'none'; // Force hide
+            // Reset tip box style just in case
+            setTimeout(() => tipBox.style.removeProperty('display'), 500);
+        }
+        
+        // 5. Restart Tour
+        if (MapTourController) MapTourController.start();
+        if (LandingLogoAnimator) {
+             // Force stop/reset before start
+             LandingLogoAnimator.stop();
+             setTimeout(() => LandingLogoAnimator.start(), 100);
+        }
+        loadGlobalView(); // Reset map camera
+    };
+    
+    // Transition from landing to dashboard mode
+    const transitionToDashboard = (selectedCountry = null) => {
+      viewMode = 'dashboard';
+      MapTourController.stop();
+      LandingLogoAnimator.stop(); // Stop logo animation
+      
+      // Remove landing-mode from map (make it fixed)
+      if (mapContainer) mapContainer.classList.remove('landing-mode');
+      
+      // Remove landing-active to allow below-fold sections to be visible
+      const mainScrollContainer = document.getElementById('main-scroll-container');
+      if (mainScrollContainer) mainScrollContainer.classList.remove('landing-active');
+      
+      // Hide landing elements
+      const landingSection = document.getElementById('landing-hero-section');
+      const statsCard = document.getElementById('stats-card');
+      const scrollIndicator = document.getElementById('scroll-indicator');
+      
+      if (landingSection) landingSection.style.display = 'none';
+      if (statsCard) statsCard.style.display = 'none';
+      if (scrollIndicator) scrollIndicator.style.display = 'none';
+      
+      // Show wizard
+      if (wizardOverlay) {
+        wizardOverlay.classList.remove('hidden');
+        
+        // If country was selected, pre-select it and go to slide 2
+        if (selectedCountry && countrySelect) {
+          countrySelect.value = selectedCountry;
+          countrySelect.dispatchEvent(new Event('change'));
+          
+          // Go to slide 2
+          document.getElementById('slide-1')?.classList.remove('active');
+          document.getElementById('slide-2')?.classList.add('active');
+        }
+      }
+    };
+    
+    // Scroll indicator click handler
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    if (scrollIndicator) {
+      scrollIndicator.addEventListener('click', () => {
+        const belowFold = document.getElementById('below-fold-sections');
+        if (belowFold) {
+          belowFold.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+    
+    // Stats card button handler
+    const btnStatsExplore = document.getElementById('btn-stats-explore');
+    if (btnStatsExplore) {
+      btnStatsExplore.addEventListener('click', () => {
+        transitionToDashboard();
+      });
+    }
 
     // --- DOM Elements ---
     const wizardOverlay = document.getElementById('wizard-overlay');
@@ -425,7 +1094,13 @@ export const Intelligence = {
 
     // --- Map Initialization ---
     const initMap = () => {
-      map = new maplibregl.Map({
+     // Initialize Map with Landing Mode
+    if (mapContainer) mapContainer.classList.add('landing-mode');
+    
+    // Test if map container exists
+    if (!mapContainer) console.error("Map Container NOT found!");
+
+    map = new maplibregl.Map({
         container: 'map-container',
         style: 'https://tiles.openfreemap.org/styles/liberty', // Free vector style
         center: [78, 20],
@@ -435,6 +1110,41 @@ export const Intelligence = {
         antialias: true // Needed for 3D buildings
       });
 
+      // Temporary pause on map interaction - 4 seconds then resume
+      const pauseTourTemporarily = () => {
+         if (MapTourController && MapTourController.isRunning) {
+            MapTourController.pauseTemporarily(4000);
+         }
+      };
+      
+      // Hide hero panel AND stop tour permanently on intentional selection
+      const hideHeroPanelAndStop = () => {
+         const panel = document.getElementById('landing-left-panel');
+         if (panel) panel.classList.add('hidden-overlay');
+         
+         // Hide stats card too
+         const statsCard = document.getElementById('stats-card');
+         if (statsCard) {
+            statsCard.classList.remove('visible');
+            statsCard.classList.add('hidden');
+         }
+         
+         // Stop the tour permanently
+         if (MapTourController) {
+            MapTourController.stop(); 
+         }
+         LandingLogoAnimator.stop(); // Stop logo animation
+      };
+
+      // Temporary pause on drag/touch (not permanent stop)
+      map.on('mousedown', pauseTourTemporarily);
+      map.on('touchstart', pauseTourTemporarily);
+      
+      // Permanent stop on zoom actions (intentional interaction)
+      // UPDATED: Now merely pauses temporarily to allow interaction without losing landing context
+      map.on('wheel', pauseTourTemporarily);
+      map.on('dblclick', pauseTourTemporarily);
+
       // Initialize Popup for tooltips
       const popup = new maplibregl.Popup({
         closeButton: false,
@@ -443,10 +1153,23 @@ export const Intelligence = {
       });
 
       map.on('load', () => {
-        // Initial Fade In - Map is ready
-        setTimeout(() => {
-           triggerLandingAnimation();
-        }, 800);
+        // PRELOAD OPTIMIZATION: Wait for map to be idle (tiles loaded) before showing
+        // But set a max timeout so we don't wait forever
+        
+        let loaded = false;
+        const revealPage = () => {
+            if (loaded) return;
+            loaded = true;
+            console.log("Map tiles loaded - revealing page");
+            triggerLandingAnimation();
+            LandingLogoAnimator.init(); // Start landing logo animation
+        };
+
+        map.once('idle', revealPage);
+        
+        // Fallback max wait 2.5s
+        setTimeout(revealPage, 2500);
+
         
         // Hide loading screen handled in triggerLandingAnimation now for sequencing
 
@@ -798,11 +1521,24 @@ export const Intelligence = {
         map.on('click', 'cities-fill', (e) => {
           const feature = e.features[0];
           
-          // Animation removed to prevent overwriting hover expression
-          // map.setPaintProperty('cities-fill', 'fill-opacity', 0.4);
-          // setTimeout(() => {
-          //   map.setPaintProperty('cities-fill', 'fill-opacity', 0.2);
-          // }, 150);
+          // If in landing mode, transition to intelligence view
+          const landingSection = document.getElementById('landing-hero-section');
+          if (landingSection && !landingSection.classList.contains('hidden')) {
+             // TRANSITION PROPERLY to Dashboard Mode
+             // Use transitionToDashboard(null) to ensure all UI elements (topBar, legend) are revealed
+             // passing null so we don't open wizard, just go to explore mode which effectively is what loadCityView does visually
+             
+             // Manually do whatbtnLaunchSatellite does but keep context
+              if (landingPrompt) landingPrompt.classList.remove('visible');
+              landingSection.classList.add('hidden');
+              if (mainScrollContainer) mainScrollContainer.style.display = 'none';
+              
+              if (topBar) topBar.classList.add('visible');
+              if (legend) legend.classList.add('visible');
+              
+              // Stop tour
+              if (MapTourController) MapTourController.stop();
+          }
           
           loadCityView(feature);
         });
@@ -915,103 +1651,98 @@ export const Intelligence = {
     
     // Ensure tip box is hidden initially (landing page is active)
     if (tipBox) tipBox.classList.remove('visible');
+    
+    // Add landing-active class to hide below-fold sections
+    if (mainScrollContainer) mainScrollContainer.classList.add('landing-active');
 
     // Failsafe Timeout
     setTimeout(() => {
       triggerLandingAnimation();
     }, 4500);
 
-    // Country button click - zoom map and show prompt
+    // Country button click - Zoom to country and show Prompt
     console.log("Setting up button listeners. Found", countryButtons.length, "buttons");
     countryButtons.forEach((btn, index) => {
       console.log(`Button ${index}: ${btn.dataset.country}`);
       btn.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent event bubbling
         selectedCountryName = btn.dataset.country;
-        console.log("Country Button Clicked:", selectedCountryName, "Button Index:", index); // DEBUG
+        console.log("Country Button Clicked:", selectedCountryName);
+        
+        // 1. STOP THE TOUR
+        MapTourController.stop();
 
-        // Enter PROMPT MODE:
-        // 1. Hide Landing Text (logo etc)
-        const contentToHide = document.querySelector('.landing-content');
-        if (contentToHide) {
-             console.log("Hiding landing content for", selectedCountryName);
-             contentToHide.style.opacity = '0';
-             contentToHide.style.pointerEvents = 'none'; // Ensure no clicks
-        } else {
-             console.error("Could not find .landing-content to hide!");
-        }
+        // 2. Hide Landing Text (logo, etc.) but keep the glass panel visible for now
+        // actually we want to transition the whole view to "Prompt Mode"
+         const landingHeroSection = document.getElementById('landing-hero-section');
+         if (landingHeroSection) {
+             landingHeroSection.classList.add('prompt-mode');
+         }
 
-        // 2. Add prompt-mode class to overlay (allows overlays to show through guard)
-        if (landingOverlay) landingOverlay.classList.add('prompt-mode');
-
-        // Load Country View immediately (updates map state)
+        // 3. Load Country View immediately (updates map state)
+        // 3. Load Country View immediately (updates map state)
         console.log("Looking for country feature...");
         const countryFeature = geoData.countries.features.find(c => c.properties.name === selectedCountryName);
-        console.log("Country Feature Found:", countryFeature);
-
+        
         if (countryFeature) {
           console.log("Loading Country View...");
-          
-          try {
-              loadCountryView(countryFeature);
-          } catch (e) {
-              console.error("Error loading country view:", e);
-          }
-          
-          // FORCE SHOW UI Elements explicitly
-          if (legend) legend.classList.add('visible');
-          if (tipBox) {
-             tipBox.classList.add('visible');
-             // Update tip content
-             const countryCities = geoData.cities.features.filter(f => f.properties.country === selectedCountryName);
-             updateTipBox('Country', { countryName: selectedCountryName, cityCount: countryCities.length });
-          }
-        } else {
-             console.error("Country Feature NOT Found for:", selectedCountryName);
-             console.log("Available Countries:", geoData.countries.features.map(f => f.properties.name));
+          loadCountryView(countryFeature);
         }
 
-        // Update prompt text and show it
-        // Ensure this runs even if map fails
+        // 4. Show Prompt Overlay
+        // Update prompt text 
         const promptCountrySpan = document.getElementById('prompt-country-name');
         if (promptCountrySpan) promptCountrySpan.innerText = selectedCountryName;
         
         if (landingPrompt) {
-            console.log("Showing Prompt Overlay");
             landingPrompt.classList.add('visible');
-        } else {
-            console.error("Landing Prompt Element Not Found!");
         }
       });
     });
 
     // Close prompt - Go back to "Landing Mode"
+    // Close prompt - Go back to "Landing Mode"
     if (promptClose) {
       promptClose.addEventListener('click', () => {
         console.log("Closing prompt, reverting to landing mode");
-        
-        // Hide prompt
-        if (landingPrompt) landingPrompt.classList.remove('visible');
-        
-        // Revert PROMPT MODE:
-        if (landingOverlay) landingOverlay.classList.remove('prompt-mode');
-        
-        // Restore Landing Text - use fresh query
-        const contentToShow = document.querySelector('.landing-content');
-        if (contentToShow) {
-            contentToShow.style.opacity = '1';
-            contentToShow.style.pointerEvents = 'auto';
-        }
-        
-        // Hide all dashboard UI elements
-        if (topBar) topBar.classList.remove('visible');
-        if (legend) legend.classList.remove('visible');
-        if (tipBox) tipBox.classList.remove('visible');
-        
-        // Reload global view (resets map)
-        loadGlobalView();
+        returnToLanding();
       });
     }
+
+    // Launch Satellite View - Go to Dashboard in Explore Mode
+    if (btnLaunchSatellite) {
+      btnLaunchSatellite.addEventListener('click', () => {
+        // Transition to full dashboard
+        transitionToDashboard(null); // No wizard pre-select, just go
+        
+        // Manually handle the specific state for "Just Exploring"
+        // Hide wizard if transition showed it
+        if (wizardOverlay) wizardOverlay.classList.add('hidden');
+        
+        // Show UI bars
+        if (topBar) topBar.classList.add('visible');
+        if (legend) legend.classList.add('visible');
+        if (tipBox) {
+           tipBox.classList.add('visible');
+           const countryCities = geoData.cities.features.filter(f => f.properties.country === selectedCountryName);
+           updateTipBox('Country', { countryName: selectedCountryName, cityCount: countryCities.length });
+        }
+      });
+    }
+
+    // Customize Experience - Go to Dashboard Wizard
+    if (btnCustomizeExp) {
+      btnCustomizeExp.addEventListener('click', () => {
+         // Transition to dashboard AND show wizard at correct step
+         transitionToDashboard(selectedCountryName);
+      });
+    }
+
+    // Close prompt - Go back to "Landing Mode"
+    // Close prompt - Go back to "Landing Mode" (Duplicate listener removal/consolidation)
+    // The previous listener handles it, but let's just make sure we don't have duplicates or conflicting logic
+    // Removing the second separate block if it exists
+
 
     // Launch Satellite View - hide overlay, hide wizard, interact with map
     if (btnLaunchSatellite) {
@@ -1343,11 +2074,10 @@ export const Intelligence = {
       }
       
       // Show/Hide Back Button
-      if (path.length > 1) {
-        btnBack.style.display = 'block';
-      } else {
-        btnBack.style.display = 'none';
-      }
+      // ALWAYS Show if we are deeper than Global OR if we are ON Global but want to go back to landing
+      // Actually simpler: Always show it. If length is 1, it goes to landing.
+      btnBack.style.display = 'block';
+
     };
 
     const navigateTo = (levelIndex) => {
@@ -1371,6 +2101,9 @@ export const Intelligence = {
     btnBack.onclick = () => {
       if (breadcrumbs.length > 1) {
         navigateTo(breadcrumbs.length - 2);
+      } else {
+        // At Global level (length 1), return to Landing Page
+        returnToLanding();
       }
     };
 
@@ -1495,19 +2228,24 @@ export const Intelligence = {
     
     // Helper to trigger opening animation safely
     const triggerLandingAnimation = () => {
-        const landingContent = document.querySelector('.landing-content');
+        const landingContent = document.querySelector('.landing-hero-content');
         
         // SEQUENCE:
-        // 1. Start Zoom Animation (simulated fly-in)
+        // 1. Initialize MapTourController
+        MapTourController.init();
+        
+        // 2. Start the regional tour after a brief delay
         setTimeout(() => {
-             // Zoom to India/UAE focus
-             if (map) map.flyTo({ center: [78, 22], zoom: 3.8, duration: 2500, essential:true }); 
+             // Start the map tour (India/UAE loop)
+             if (viewMode === 'landing') {
+               MapTourController.start();
+             }
              
-             // 2. Fade In Landing Content after zoom starts
+             // Fade In Landing Content after tour starts
              setTimeout(() => {
                  if (landingContent) landingContent.style.opacity = '1';
-             }, 800);
-        }, 200);
+             }, 500);
+        }, 500);
     };
 
     const loadCityView = (cityFeature) => {
@@ -1563,6 +2301,10 @@ export const Intelligence = {
       const landingRef = document.getElementById('landing-hero-section');
       if (!landingRef || landingRef.classList.contains('hidden') || landingRef.classList.contains('prompt-mode')) {
            updateTipBox('City', { cityName: cityFeature.properties.name, tradeAreaCount: cityTradeAreas.length });
+           
+           // SHOW STATS CARD
+           const card = document.querySelector('.stats-card');
+           if (card) card.classList.add('visible');
       }
     };
 
@@ -1877,8 +2619,15 @@ export const Intelligence = {
 
     // Back Button Logic
     document.getElementById('btn-back-2').onclick = () => {
-      slide2.classList.remove('active');
-      slide1.classList.add('active');
+      // User requested back button on wizard to go back to Landing
+      // Check if we skipped slide 1 (usually true if country pre-selected)
+      if (countrySelect.value) { // We have a selected country
+          returnToLanding();
+      } else {
+          // Normal behavior? Or always return to Landing?
+          // "Take us back to landing" - usually implies exiting the wizard flow
+          returnToLanding();
+      }
     };
 
     document.getElementById('btn-back-3').onclick = () => {
@@ -1940,6 +2689,39 @@ export const Intelligence = {
           btnFinish.disabled = false;
       });
     };
+
+    // Auto-hide hero on button clicks
+    const countryBtns = document.querySelectorAll('.btn-country');
+    countryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+             // 1. Hide Hero Overlay
+             const panel = document.getElementById('landing-left-panel');
+             if (panel) panel.classList.add('hidden-overlay');
+             
+             // 2. Hide Stats Card (point 5 from feedback)
+             const statsCard = document.getElementById('stats-card');
+             if (statsCard) {
+                statsCard.classList.remove('visible');
+                statsCard.classList.add('hidden');
+             }
+             
+             // 3. Stop Tour permanently
+             if (MapTourController) MapTourController.stop();
+             
+             // 4. Load Country View
+             const countryName = btn.getAttribute('data-country');
+             const countryFeature = geoData.countries.features.find(f => f.properties.name === countryName);
+             
+             if (countryFeature) {
+                 // Mark landing as hidden so legend/tipbox become visible
+                 const landingSection = document.getElementById('landing-hero-section');
+                 if (landingSection) landingSection.classList.add('hidden');
+                 
+                 loadCountryView(countryFeature);
+             }
+        });
+    });
+
 
     document.getElementById('close-sidebar').onclick = () => sidebar.classList.remove('visible');
     

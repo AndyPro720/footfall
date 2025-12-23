@@ -193,10 +193,22 @@ export const geoData = {
   },
   cities: {
     ...cityBorders,
-    features: cityBorders.features.map(f => ({
-      ...f,
-      geometry: f.geometry || f.properties.geojson
-    }))
+    features: cityBorders.features.map(f => {
+      // Assign colors per city
+      const cityColors = {
+        'Pune': '#0891b2',    // Teal - visible on white
+        'Mumbai': '#00732F',  // Green
+        'Dubai': '#8B0000'    // Dark red
+      };
+      return {
+        ...f,
+        properties: {
+          ...f.properties,
+          color: cityColors[f.properties.name] || '#00732F'
+        },
+        geometry: f.geometry || f.properties.geojson
+      };
+    })
   },
    tradeAreas: {
     "type": "FeatureCollection",
@@ -234,7 +246,20 @@ export const geoData = {
       { "type": "Feature", "properties": { "id": "pune-ch", "name": "Chinchwad", "city": "Pune", "type": "Industrial", "color": "#CD7F32" }, "geometry": { "type": "Point", "coordinates": [73.7997, 18.6298] } },
       
       // Institutional: Orange (#E67E22)
-      { "type": "Feature", "properties": { "id": "pune-sb", "name": "SB / University", "city": "Pune", "type": "Institutional", "color": "#E67E22" }, "geometry": { "type": "Point", "coordinates": [73.8286, 18.5390] } }
+      { "type": "Feature", "properties": { "id": "pune-sb", "name": "SB / University", "city": "Pune", "type": "Institutional", "color": "#E67E22" }, "geometry": { "type": "Point", "coordinates": [73.8286, 18.5390] } },
+      
+      // --- Dubai Locations ---
+      // Premium: Gold (#D4AF37)
+      { "type": "Feature", "properties": { "id": "dubai-dm", "name": "Dubai Mall", "city": "Dubai", "type": "Premium", "color": "#D4AF37" }, "geometry": { "type": "Point", "coordinates": [55.2796, 25.1972] } },
+      { "type": "Feature", "properties": { "id": "dubai-jbr", "name": "JBR Walk", "city": "Dubai", "type": "Premium", "color": "#D4AF37" }, "geometry": { "type": "Point", "coordinates": [55.1325, 25.0765] } },
+      
+      // High Street: Coral Red (#FF6B6B)
+      { "type": "Feature", "properties": { "id": "dubai-dxb", "name": "Downtown Dubai", "city": "Dubai", "type": "High Street", "color": "#FF6B6B" }, "geometry": { "type": "Point", "coordinates": [55.2708, 25.2048] } },
+      { "type": "Feature", "properties": { "id": "dubai-moe", "name": "Mall of Emirates", "city": "Dubai", "type": "High Street", "color": "#FF6B6B" }, "geometry": { "type": "Point", "coordinates": [55.2006, 25.1181] } },
+      
+      // Business: Teal (#00D1B2)
+      { "type": "Feature", "properties": { "id": "dubai-difc", "name": "DIFC", "city": "Dubai", "type": "Business", "color": "#00D1B2" }, "geometry": { "type": "Point", "coordinates": [55.2872, 25.2130] } },
+      { "type": "Feature", "properties": { "id": "dubai-marina", "name": "Dubai Marina", "city": "Dubai", "type": "Business", "color": "#00D1B2" }, "geometry": { "type": "Point", "coordinates": [55.1415, 25.0809] } }
     ]
   }
 };

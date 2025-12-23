@@ -20,6 +20,22 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Deep shadow */
 }
 
+/* --- Menu Toggle Styling (Transparent & Blurred) --- */
+.navbar .menu-toggle {
+  background: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 8px; /* Optional: Soften corners */
+  transition: all 0.3s ease;
+}
+
+.navbar .menu-toggle:hover {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
 /* --- Navbar Override (V8) --- */
 .navbar {
   background: transparent !important;
@@ -42,6 +58,7 @@ body[data-page="home"] .navbar .logo {
 }
 
 /* --- Map Container --- */
+/* --- Map Container --- */
 #map-container {
   height: 100%;
   width: 100%;
@@ -49,6 +66,13 @@ body[data-page="home"] .navbar .logo {
   position: absolute;
   top: 0;
   left: 0;
+  transition: width 0.5s ease, left 0.5s ease;
+}
+
+/* Landing Mode: Restrict Map to Right Half */
+#map-container.landing-mode {
+  width: 50vw;
+  left: 50vw;
 }
 
 /* --- UI Elements --- */
@@ -56,6 +80,261 @@ body[data-page="home"] .navbar .logo {
   position: absolute;
   pointer-events: auto;
 }
+
+/* --- Stats Card (Landing Page) --- */
+/* --- Stats Card (Glassmorphic Floating Panel) --- */
+.stats-card {
+  position: absolute;
+  top: 18vh;
+  right: 60px;
+  width: 280px;
+  max-width: 280px;
+  
+  /* Glassmorphic with solid base */
+  background: rgba(255, 255, 255, 0.093);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
+  
+  overflow: hidden;
+  z-index: 999;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  color: #111;
+  pointer-events: auto;
+  
+  /* Initial State */
+  opacity: 0; 
+  transform: translateY(20px);
+}
+
+.stats-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stats-card:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(212, 175, 55, 0.4);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(212, 175, 55, 0.15);
+  transform: translateY(-3px);
+}
+
+.stats-card.transitioning {
+  opacity: 0.5;
+  transform: translateY(-5px);
+}
+
+.stats-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 0;
+}
+
+.stats-pin {
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.stats-location .area-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.stats-location .area-city {
+  font-size: 0.7rem;
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 2px;
+}
+
+.stats-body {
+  padding: 14px 16px;
+}
+
+.stats-period {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stats-period .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: 0.2px;
+}
+
+.stats-period .dates {
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.category-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.category-pills .pill {
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  color: #555;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.category-pills .pill.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+  color: #8b6914;
+  border-color: rgba(212, 175, 55, 0.35);
+  font-weight: 600;
+}
+
+.stats-footfall-chart {
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.01));
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.footfall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.footfall-label {
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.footfall-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #022c22;
+}
+
+.footfall-bar-container {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.footfall-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #022c22 0%, #15803d 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.footfall-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5rem;
+  color: rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+}
+
+.stats-footer {
+  padding: 12px 14px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.02));
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 0;
+}
+
+.btn-get-insights {
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-get-insights:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.6);
+  color: #8b6914;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+/* --- Tour Pause Indicator --- */
+.tour-pause-indicator {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.65); /* Semi-transparent dark base matching glass panels */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.tour-pause-indicator.visible {
+  opacity: 1;
+}
+
+.tour-pause-indicator .pause-icon {
+  font-size: 1rem;
+}
+
+.tour-pause-indicator .pause-text {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 500;
+}
+
 
 /* --- Top Bar (Breadcrumbs) --- */
 #top-bar {
@@ -239,6 +518,27 @@ body[data-page="home"] .navbar .logo {
 
 .wizard-btn.secondary:hover {
   background: rgba(212, 175, 55, 0.1);
+}
+
+/* --- Wizard Back Button --- */
+.wizard-back {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wizard-back:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #d4af37;
+  transform: translateX(-2px);
 }
 
 /* --- Legend (V8 Glass) --- */
@@ -642,23 +942,23 @@ body[data-page="home"] .navbar .logo {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Intelligence Page: Golden Menu Toggle */
-/* Intelligence Page: Golden Menu Toggle */
+/* Intelligence Page: Transparent Menu Toggle over Map */
 body[data-page="intelligence"] .navbar .menu-toggle {
-  background: rgba(224, 196, 105, 0.6) !important; /* Solid golden background */
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 body[data-page="intelligence"] .navbar .menu-toggle .bar {
-  background-color: #000 !important; /* Black bars on golden background */
+  background-color: #1a1a1a !important;
 }
 
 body[data-page="intelligence"] .navbar .menu-toggle:hover {
-  background: #e5c048 !important;
-  box-shadow: 0 0 35px rgba(212, 175, 55, 0.8);
+  background: rgba(212, 175, 55, 0.25) !important;
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
   transform: scale(1.05);
 }
 

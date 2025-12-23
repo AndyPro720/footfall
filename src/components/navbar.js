@@ -31,9 +31,7 @@ export const Navbar = {
         <div class="menu-content">
           <a href="#home" class="menu-item" data-scroll>Home</a>
           <a href="#about" class="menu-item" data-scroll>About</a>
-          <a href="#services" class="menu-item" data-scroll>Services</a>
-          <a href="#clients" class="menu-item" data-scroll>Clients</a>
-          <a href="/intelligence" class="menu-item" data-link>Intelligence</a>
+          <a href="#clients" class="menu-item" data-scroll>Testimonials</a>
           <a href="#contact" class="menu-item" data-scroll>Contact</a>
         </div>
       </div>
@@ -97,14 +95,15 @@ export const Navbar = {
         e.preventDefault();
         const targetId = link.getAttribute('href').substring(1);
         
-        // Check if we are on the home page
-        if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-          const targetSection = document.getElementById(targetId) || document.body;
-          targetSection.scrollIntoView({ behavior: 'smooth' });
-        } else {
-          // If not on home page, navigate to home page with hash
-          window.location.href = `/#${targetId}`;
-        }
+        // Dispatch event for Page Component to handle
+        // This is cleaner for SPA where "Home" or "About" might need state changes (returnToLanding)
+        window.dispatchEvent(new CustomEvent('nav-to-section', { 
+            detail: { targetId } 
+        }));
+        
+        // Close menu
+        toggle.classList.remove('active');
+        overlay.classList.remove('active');
       });
     });
 

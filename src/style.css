@@ -374,108 +374,259 @@ button:focus-visible {
   color: #fff;
 }
 
-/* 6. Landing Hero & Scroll Layout */
+/* 6. Landing Overlay Layout (Simplified) */
 #main-scroll-container {
   position: relative;
   z-index: 10;
   width: 100%;
+  pointer-events: none;  /* Let map receive clicks through empty space */
 }
 
-#landing-hero-section {
+#main-scroll-container > * {
+  pointer-events: auto;  /* Re-enable for actual content */
+}
+
+/* Landing Hero - Overlay on top of fullscreen map */
+#landing-hero-section.landing-split-view {
   height: 100vh;
   width: 100%;
   display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden; /* PREVENT scroll from revealing content below */
+  background: transparent;  /* REMOVED BLACK - Map shows through */
+  pointer-events: none;  /* Let map receive clicks */
+}
+
+/* LEFT PANEL: floating overlay -> Full Height Blended Overlay */
+.landing-left-panel {
+  width: 650px; /* Increased for more presence */
+  max-width: 55%; /* Wider overlay */
+  height: 100vh; /* Full Height */
+  display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  /* Blur the map behind */
-  /* Blur the map behind */
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
-  transition: backdrop-filter 0.5s ease, background 0.5s ease;
+  align-items: center; /* CENTER TEXT */
+  text-align: center; /* CENTER TEXT */
+  padding: 0 4rem;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  pointer-events: auto;
+  
+  /* Better Blended Gradient - Fade from left dark to transparent right */
+  background: linear-gradient(90deg, 
+    rgba(10, 10, 15, 0.85) 0%, 
+    rgba(15, 15, 20, 0.6) 50%, 
+    rgba(15, 15, 20, 0) 100%
+  );
+  
+  /* No border radius or box shadow for full height blend */
+  border-right: none;
+  border-radius: 0;
+  box-shadow: none;
+  
+  /* Transition for auto-hide */
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-#landing-hero-section.prompt-mode {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: transparent;
-  pointer-events: none; /* Let clicks pass to map/prompt */
-}
-
-/* When in prompt mode, let clicks pass through the scroll container too */
-#landing-hero-section.prompt-mode ~ *,
-.intelligence-page #main-scroll-container:has(#landing-hero-section.prompt-mode) {
+.landing-left-panel.hidden-overlay {
+  opacity: 0;
+  transform: translateX(-50px);
   pointer-events: none;
 }
 
-/* But ensure the prompt itself is still clickable */
-#landing-prompt.visible {
-  pointer-events: auto !important;
+.landing-hero-content {
+  max-width: 100%;
+  opacity: 0; /* JS handles fade in */
+  transition: opacity 0.8s ease;
 }
 
-.landing-content {
-  text-align: center;
-  z-index: 1;
-  transition: opacity 0.5s ease;
+/* Landing Page Loader Animation (scaled down) */
+.hero-logo-animated {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
 }
 
-/* Prompt is now glassmorphic */
-#landing-prompt {
-  position: fixed;
-  top: 50%;
+.landing-loader-wrapper {
+  transform: scale(0.9);
+  transform-origin: center center;
+  margin: 0; /* No compensation needed at this size */
+}
+
+/* Override colors for landing page (dark green theme matching main loader) */
+.landing-loader-wrapper .final-letter {
+  color: #022c22 !important;
+  text-shadow: none;
+}
+
+.landing-loader-wrapper .p-head,
+.landing-loader-wrapper .p-body,
+.landing-loader-wrapper .n-node,
+.landing-loader-wrapper .g-bar {
+  background: #022c22 !important;
+}
+
+.landing-loader-wrapper .scan-line {
+  background: #022c22 !important;
+  box-shadow: 0 0 10px rgba(2, 44, 34, 0.6) !important;
+}
+
+.landing-loader-wrapper .f-outline {
+  -webkit-text-stroke: 1.5px rgba(2, 44, 34, 0.4) !important;
+}
+
+.landing-loader-wrapper .l1-v-bar,
+.landing-loader-wrapper .l1-h-bar,
+.landing-loader-wrapper .l2-vertical-stem,
+.landing-loader-wrapper .l2-forks,
+.landing-loader-wrapper .pin-head {
+  background-color: #022c22 !important;
+}
+
+.landing-loader-wrapper .map-block-container {
+  border-color: #022c22 !important;
+}
+
+.landing-loader-wrapper .map-pin-small {
+  background: #022c22 !important;
+}
+
+/* Ensure L2 forklift mechanism is visible */
+.landing-loader-wrapper .l2-forklift-mechanism {
+  opacity: 1;
+}
+
+.landing-headline {
+  font-family: 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.6);
+}
+
+.headline-highlight {
+  background: linear-gradient(135deg, #d4af37 0%, #f0d060 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.landing-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 2rem;
+  letter-spacing: 0.3px;
+}
+
+/* Country Buttons in Overlay */
+.landing-left-panel .country-selector {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 0;
+  justify-content: center; /* Center buttons */
+}
+
+.landing-left-panel .btn-country {
+  padding: 0.5rem 1.5rem; /* Reduced padding */
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05); /* More transparent */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 30px; /* More rounded */
+}
+
+.landing-left-panel .btn-country:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+}
+
+/* Landing Features Hidden */
+.landing-features {
+  display: none;
+}
+
+/* RIGHT PANEL: No longer needed - map is fullscreen background */
+.landing-map-panel {
+  display: none;  /* Remove from layout */
+}
+
+/* Tour Pause Indicator */
+.tour-pause-indicator {
+  position: absolute;
+  top: 20px;
   left: 50%;
-  transform: translate(-50%, -50%); /* Centered */
-  z-index: 1000; /* Highest */
-  
-  /* Glassmorphic Style */
-  background: rgba(20, 20, 20, 0.25); /* Transparent */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  box-shadow: 0 15px 50px rgba(0,0,0,0.5);
-  
-  padding: 40px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 500px;
-  text-align: center;
-  
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s;
+  transition: all 0.3s ease;
+  z-index: 50;
 }
 
-/* Fix Menu Button Background */
-.menu-toggle {
-  background: transparent !important;
-}
-
-#landing-prompt.visible {
+.tour-pause-indicator.visible {
   opacity: 1;
   visibility: visible;
 }
 
-.scroll-hint {
+.pause-icon {
+  font-size: 0.9rem;
+}
+
+.pause-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+
+
+/* Scroll Indicator */
+.scroll-indicator {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  color: rgba(255,255,255,0.6);
-  font-size: 0.9rem;
+  cursor: pointer;
+  z-index: 30;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-indicator .scroll-text {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 1px;
-  animation: bounce 2s infinite;
+  margin-bottom: 8px;
 }
 
-.scroll-arrow {
-  font-size: 1.5rem;
-  margin-top: 5px;
+.scroll-indicator .scroll-arrow {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.4);
+  animation: scrollBounce 2s infinite;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(-10px); }
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+.scroll-indicator:hover .scroll-text,
+.scroll-indicator:hover .scroll-arrow {
+  color: rgba(212, 175, 55, 0.8);
 }
 
 /* 7. Below-Fold Sections Container */
@@ -486,7 +637,20 @@ button:focus-visible {
   z-index: 11;
 }
 
+/* Hide below-fold when landing is visible (not hidden class) */
+#main-scroll-container:has(#landing-hero-section:not(.hidden)) #below-fold-sections {
+  display: none;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Alternatively, use JS-based hiding via class */
+#main-scroll-container.landing-active #below-fold-sections {
+  display: none !important;
+}
+
 /* Ensure intelligence map container doesn't break layout */
+/* Default: Dashboard Mode (Fixed Fullscreen) */
 .intelligence-page #map-container {
   position: fixed;
   top: 0;
@@ -494,6 +658,16 @@ button:focus-visible {
   width: 100%;
   height: 100vh;
   z-index: 0;
+  pointer-events: auto;  /* ALWAYS INTERACTABLE */
+  transition: all 0.5s ease;
+}
+
+/* Landing Mode: Still fullscreen, just different zoom */
+.intelligence-page #map-container.landing-mode {
+  position: fixed;  /* Stay fixed for full background */
+  width: 100%;
+  left: 0;
+  pointer-events: auto;  /* ENSURE INTERACTABLE */
 }
 
 /* Intelligence page layout */
@@ -524,4 +698,37 @@ button:focus-visible {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* Responsive: Stack on smaller screens */
+@media (max-width: 1024px) {
+  #landing-hero-section.landing-split-view {
+    flex-direction: column;
+  }
+  
+  .landing-left-panel {
+    width: 100%;
+    height: auto;
+    padding: 3rem 2rem;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  
+  .landing-map-panel {
+    width: 100%;
+    height: 50vh;
+  }
+  
+  .stats-card {
+    width: calc(100% - 40px);
+    left: 20px;
+    right: 20px;
+    top: auto;
+    bottom: 80px;
+  }
+  
+  .landing-headline {
+    font-size: 2rem;
+  }
+}
+
 
