@@ -1,42 +1,49 @@
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { geoData } from '../data/geoData.js';
+
 export const Home = {
   render: () => {
     return `
       <div class="page home-page">
-        <!-- Hero Section -->
-        <section id="home" class="hero">
-          <video autoplay muted playsinline class="hero-video" poster="https://images.pexels.com/photos/3129671/pexels-photo-3129671.jpeg">
-            <source src="/videos/landingVideo.mp4" type="video/mp4">
-          </video>
-          <div class="hero-overlay"></div>
+        <!-- Loading Screen -->
+
+
+        <!-- Hero Section with Map Background -->
+        <section id="home" class="hero landing-hero">
+          <!-- Map Container - ONLY in hero -->
+          <div id="landing-map-container"></div>
+          <div class="map-overlay-gradient"></div>
+
+          <!-- Prompt Modal (Hidden by default) -->
+          <div id="landing-prompt">
+            <button class="prompt-close">&times;</button>
+            <h2 class="prompt-title">Select Experience</h2>
+            <p class="prompt-subtitle">How would you like to explore <span id="prompt-country-name">the market</span>?</p>
+            <div class="prompt-buttons">
+              <button class="btn-primary-gold" id="btn-launch-satellite">Launch Satellite View</button>
+              <button class="btn-secondary-glass" id="btn-customize-exp">Customize My Experience</button>
+            </div>
+          </div>
           
           <div class="hero-content fade-up">
             <div class="brand-container">
+              <!-- Centered Large Logo -->
               <div class="hero-logo-wrapper">
-                <img src="/logo.png" alt="FOOTTFALL" class="hero-logo">
-
+                <img src="/logo.png" alt="FOOTTFALL" class="hero-logo-large">
               </div>
 
+              <!-- Tagline -->
+              <h2 class="hero-tagline">Real Estate Intelligence Re-imagined.</h2>
               
-              <div class="hero-search-container">
-                <h2 class="hero-prompt">Where is your next <span id="scramble-text" class="scramble-highlight">brand?</span></h2>
-                <div class="search-box glass-card-sm">
-                  <span class="search-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                  </span>
-                  <input type="text" placeholder="Enter your brand name to begin">
-                  <button class="btn-search">ANALYZE</button>
-                </div>
+              <!-- Country Selectors -->
+              <div class="country-selector">
+                <button class="btn-country" data-country="India">India</button>
+                <button class="btn-country" data-country="UAE">UAE</button>
               </div>
-
-            <div class="cta-container">
-              <a href="/intelligence" class="btn-frosted" data-link>
-                Find me my location / Launch Foottfall Intelligence
-              </a>
             </div>
           </div>
         </section>
-
-
 
 
         <!-- About Section (Founder Profile) -->
@@ -47,7 +54,6 @@ export const Home = {
               <!-- Left Column: Image -->
               <div class="about-image-column">
                 <div class="founder-image-wrapper">
-                  <!-- Placeholder until generation succeeds -->
                   <img src="/founder-portrait.png" alt="Rahul Ahuja" class="founder-image">
                 </div>
               </div>
@@ -238,7 +244,6 @@ export const Home = {
                 <div class="contact-details">
                   <h3>Get in Touch</h3>
                   <div class="contact-item">
-                    <!-- Envelope SVG -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px; color: var(--color-accent);">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                       <polyline points="22,6 12,13 2,6"></polyline>
@@ -246,14 +251,12 @@ export const Home = {
                     info@foottfall.com
                   </div>
                   <div class="contact-item">
-                    <!-- Phone SVG -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px; color: var(--color-accent);">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
                     +1 (555) 123-4567
                   </div>
                   <div class="contact-item">
-                    <!-- Map Pin SVG -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px; color: var(--color-accent);">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                       <circle cx="12" cy="10" r="3"></circle>
@@ -262,7 +265,6 @@ export const Home = {
                   </div>
                   
                   <div class="social-icons">
-                    <!-- LinkedIn SVG -->
                     <a href="#" class="social-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
@@ -270,7 +272,6 @@ export const Home = {
                         <circle cx="4" cy="4" r="2"></circle>
                       </svg>
                     </a>
-                    <!-- Instagram SVG -->
                     <a href="#" class="social-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -278,7 +279,6 @@ export const Home = {
                         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                       </svg>
                     </a>
-                    <!-- Twitter/X SVG -->
                     <a href="#" class="social-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
@@ -333,80 +333,145 @@ export const Home = {
     `;
   },
   afterRender: () => {
-    const el = document.getElementById('scramble-text');
+    // --- MAP INITIALIZATION (scoped to hero only) ---
+    let map;
+    let selectedCountry = null;
+    let isMapLoaded = false;
     
-    // Scramble Text Logic
-    if (el) {
-      const phrases = ['location?', 'project?', 'identity?', 'brand?', 'masterpiece?'];
-      let currentIndex = 0;
-      const chars = '!<>-_\\/[]{}—=+*^?#________';
+    const coords = {
+      India: { center: [78.9629, 20.5937], zoom: 4.5 },
+      UAE: { center: [55.2708, 25.2048], zoom: 6.5 }
+    };
 
-      const scramble = (targetText) => {
-        let iteration = 0;
-        
-        const interval = setInterval(() => {
-          el.innerText = targetText
-            .split('')
-            .map((letter, index) => {
-              if (index < iteration) {
-                return targetText[index];
-              }
-              return chars[Math.floor(Math.random() * chars.length)];
-            })
-            .join('');
+    const initMap = () => {
+        try {
 
-          if (iteration >= targetText.length) {
-            clearInterval(interval);
-            
-            // Schedule next word
-            setTimeout(() => {
-              currentIndex = (currentIndex + 1) % phrases.length;
-              scramble(phrases[currentIndex]);
-            }, 3000);
-          }
 
-          iteration += 1 / 3; // Speed of reveal
-        }, 30);
-      };
+            const container = document.getElementById('landing-map-container');
+            if (!container) return;
 
-      // Start the loop
-      setTimeout(() => {
-        currentIndex = (currentIndex + 1) % phrases.length;
-        scramble(phrases[currentIndex]);
-      }, 2000);
-    }
+            map = new maplibregl.Map({
+                container: 'landing-map-container',
+                style: 'https://tiles.openfreemap.org/styles/liberty',
+                center: [60, 20],
+                zoom: 3,
+                pitch: 0,
+                bearing: 0,
+                interactive: false
+            });
 
-    // --- Landing Page Search Logic ---
-    const searchBtn = document.querySelector('.btn-search');
-    const searchInput = document.querySelector('.search-box input');
+            map.on('load', () => {
+                if (geoData && geoData.countryPolygons) {
+                    map.addSource('countryPolygons', {
+                        type: 'geojson',
+                        data: geoData.countryPolygons
+                    });
 
-    if (searchBtn && searchInput) {
-      searchBtn.addEventListener('click', () => {
-        const brandName = searchInput.value.trim();
-        if (brandName) {
-          sessionStorage.setItem('footfall_brand', brandName);
-          window.location.hash = '/intelligence'; // Use hash routing if that's what the Router uses, or pushState
-          // Since the Router likely listens to hashchange or we need to manually trigger it if it's history API
-          // Based on main.js, it seems to be a custom Router. Let's assume updating hash works or using history.pushState
-          // Checking router.js would be ideal, but standard anchor tags use href="/intelligence".
-          // Let's try simulating a click or just changing location.
-          window.history.pushState({}, '', '/intelligence');
-          // Manually trigger router if needed, but usually pushState needs a popstate event or manual dispatch.
-          // Safer bet:
-          const navEvent = new PopStateEvent('popstate');
-          window.dispatchEvent(navEvent);
-        } else {
-          searchInput.style.borderColor = '#ff4444';
-          setTimeout(() => searchInput.style.borderColor = 'rgba(212, 175, 55, 0.3)', 2000);
+                    map.addLayer({
+                        id: 'country-fill',
+                        type: 'fill',
+                        source: 'countryPolygons',
+                        paint: {
+                            'fill-color': ['get', 'color'],
+                            'fill-opacity': 0.6
+                        }
+                    });
+                }
+                
+                map.addSource('indiaOSM', {
+                    type: 'geojson',
+                    data: '/india-osm.geojson'
+                });
+
+                map.addLayer({
+                    id: 'india-fill',
+                    type: 'fill',
+                    source: 'indiaOSM',
+                    paint: {
+                        'fill-color': '#00732F',
+                        'fill-opacity': 0.6
+                    }
+                });
+
+                isMapLoaded = true;
+                
+
+            });
+        } catch (error) {
+            console.error("Map init error:", error);
+
         }
-      });
-      
-      // Allow Enter key
-      searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchBtn.click();
-      });
+    };
+
+    initMap();
+
+    // --- INTERACTION LOGIC ---
+    const countryBtns = document.querySelectorAll('.btn-country');
+    const promptModal = document.getElementById('landing-prompt');
+    const promptClose = document.querySelector('.prompt-close');
+    const mapContainer = document.getElementById('landing-map-container');
+    const btnLaunch = document.getElementById('btn-launch-satellite');
+    const btnCustomize = document.getElementById('btn-customize-exp');
+
+    countryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const country = btn.dataset.country;
+            selectedCountry = country;
+            
+            // Zoom Map
+            if (map && isMapLoaded && coords[country]) {
+                const target = coords[country];
+                map.flyTo({
+                    center: target.center,
+                    zoom: target.zoom,
+                    speed: 1.2,
+                    curve: 1.42
+                });
+                
+                // Clear Blur
+                if (mapContainer) mapContainer.classList.add('focused');
+            }
+
+            // Show Prompt
+            if (promptModal) {
+                 const nameSpan = document.getElementById('prompt-country-name');
+                 if(nameSpan) nameSpan.innerText = country;
+                 promptModal.classList.add('visible');
+            }
+        });
+    });
+
+    // Close Prompt
+    if (promptClose) {
+        promptClose.addEventListener('click', () => {
+            if (promptModal) promptModal.classList.remove('visible');
+            if (mapContainer) mapContainer.classList.remove('focused');
+            if (map) map.flyTo({ center: [60, 20], zoom: 3 });
+        });
     }
 
+    // Launch Satellite View - Navigate to intelligence WITHOUT wizard
+    if (btnLaunch) {
+        btnLaunch.addEventListener('click', () => {
+             if (promptModal) promptModal.classList.remove('visible');
+             
+             // Navigate to intelligence page with country param
+             const targetUrl = `/intelligence?country=${selectedCountry}`;
+             window.history.pushState({}, '', targetUrl);
+             window.dispatchEvent(new PopStateEvent('popstate'));
+        });
+    }
+
+    // Customize Experience - Navigate to intelligence WITH wizard
+    if (btnCustomize) {
+        btnCustomize.addEventListener('click', () => {
+             const targetUrl = `/intelligence?country=${selectedCountry}&mode=wizard`;
+             window.history.pushState({}, '', targetUrl);
+             window.dispatchEvent(new PopStateEvent('popstate'));
+        });
+    }
+
+    // --- EXISTING LANDING PAGE FUNCTIONALITY ---
     // Contact Page Logic (Flip & Modal)
     const card = document.querySelector('.contact-card');
     const modal = document.getElementById('contactModal');
@@ -414,39 +479,30 @@ export const Home = {
     const closeBtn = document.getElementById('closeFormBtn');
     const form = document.querySelector('.contact-form');
 
-    // Flip Logic
     if (card) {
-      card.addEventListener('click', () => {
-        card.classList.toggle('flipped');
-      });
+      card.addEventListener('click', () => card.classList.toggle('flipped'));
     }
 
-    // Modal Logic
     if (openBtn && modal) {
-      openBtn.addEventListener('click', () => {
-        modal.classList.add('active');
-      });
+      openBtn.addEventListener('click', () => modal.classList.add('active'));
     }
 
     if (closeBtn && modal) {
       closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent bubbling if needed
+        e.stopPropagation();
         modal.classList.remove('active');
       });
     }
 
     if (modal) {
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.remove('active');
-        }
+        if (e.target === modal) modal.classList.remove('active');
       });
     }
 
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        
         const submitBtn = form.querySelector('.btn-submit');
         const originalText = submitBtn.innerText;
         submitBtn.innerText = 'Sending...';
@@ -454,7 +510,6 @@ export const Home = {
 
         const formData = new FormData(form);
         
-        // Use FormSubmit AJAX endpoint
         fetch("https://formsubmit.co/ajax/info@foottfall.com", {
             method: "POST",
             body: formData
@@ -467,7 +522,7 @@ export const Home = {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Something went wrong. Please try again or email us manually at info@foottfall.com');
+            alert('Something went wrong. Please try again.');
         })
         .finally(() => {
             submitBtn.innerText = originalText;
@@ -476,7 +531,7 @@ export const Home = {
       });
     }
 
-    // About Section Auto-Color & Animation Logic
+    // About Section Animation
     const aboutSection = document.querySelector('.about-section');
     const aboutContent = document.querySelector('.about-content-wrapper');
     const founderImageWrapper = document.querySelector('.founder-image-wrapper');
@@ -485,40 +540,30 @@ export const Home = {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            // Trigger Scroll Animation
             aboutContent.classList.add('is-visible');
-
-            // Trigger Color Reveal (Wait 2 seconds)
             if (founderImageWrapper && !founderImageWrapper.classList.contains('revealed')) {
-               setTimeout(() => {
-                founderImageWrapper.classList.add('revealed');
-              }, 2000);
+               setTimeout(() => founderImageWrapper.classList.add('revealed'), 2000);
             }
-            
-            // Stop observing once triggered to prevent reset
             observer.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.2 }); // Lower threshold for earlier trigger
+      }, { threshold: 0.2 });
       
       observer.observe(aboutSection);
     }
 
-    // Services Split Layout Logic
+    // Services Split Layout
     const servicesContainer = document.querySelector('.services-split-container');
     const servicesSections = document.querySelectorAll('.split-section');
 
     if (servicesContainer && servicesSections.length > 0) {
       servicesSections.forEach(section => {
         section.addEventListener('click', () => {
-          // Toggle active state
           if (section.classList.contains('active')) {
             section.classList.remove('active');
             servicesContainer.classList.remove('has-active');
           } else {
-            // Remove active from all others
             servicesSections.forEach(s => s.classList.remove('active'));
-            
             section.classList.add('active');
             servicesContainer.classList.add('has-active');
           }

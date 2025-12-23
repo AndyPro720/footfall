@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footfall Redesign - Dark Concept</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #050505;
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--dark-bg);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SPLIT LAYOUT */
+        .container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* LEFT SIDEBAR */
+        .sidebar {
+            width: 35%;
+            min-width: 420px;
+            background: rgba(10, 10, 10, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            position: relative;
+            z-index: 20;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            color: #fff;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .tagline {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 4rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .description {
+            text-align: center;
+            color: #888;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            max-width: 340px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 1.2rem 2.5rem;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-radius: 4px;
+            /* Squared off for premium feel */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            width: 140px;
+            text-align: center;
+        }
+
+        .btn-nav:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* RIGHT MAP AREA */
+        .map-area {
+            flex: 1;
+            position: relative;
+            /* Using a gradient to simulate the map for mockup */
+            background: radial-gradient(circle at 60% 40%, #1a2a3a 0%, #050505 100%);
+            overflow: hidden;
+        }
+
+        .map-placeholder-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            /* If you had a real map screenshot, it goes here. Using pattern for now */
+            background-image:
+                linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* FLOATING INSIGHTS CARD */
+        .insights-card {
+            position: absolute;
+            top: 50%;
+            right: 10%;
+            /* Center-ish on the right panel */
+            transform: translateY(-50%);
+
+            width: 320px;
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 2px;
+            padding: 2rem;
+
+            color: #fff;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            /* Placer.ai style layout */
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .location-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: #fff;
+        }
+
+        .location-subtitle {
+            color: var(--gold);
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .stat-change {
+            color: #4caf50;
+            font-size: 0.8rem;
+        }
+
+        /* Green for growth */
+
+        .chart-placeholder {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.1), transparent);
+            margin-top: 1.5rem;
+            position: relative;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gold);
+            box-shadow: 0 0 10px var(--gold);
+            clip-path: polygon(0 80%, 20% 60%, 40% 70%, 60% 30%, 80% 40%, 100% 10%, 100% 100%, 0 100%);
+        }
+
+        /* ANIMATIONS */
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* LOADER MOCKUP (Tiny version) */
+        .mini-loader {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="mini-loader">F</div>
+            <h1 class="brand-logo fade-in">FOOTTFALL</h1>
+            <h2 class="tagline fade-in" style="animation-delay: 0.2s">Trade Area Intelligence</h2>
+
+            <p class="description fade-in" style="animation-delay: 0.4s">
+                Macro insights across industries locally and nationwide. The new standard for real estate decisions.
+            </p>
+
+            <div class="nav-buttons fade-in" style="animation-delay: 0.6s">
+                <button class="btn-nav">India</button>
+                <button class="btn-nav">UAE</button>
+            </div>
+        </div>
+
+        <div class="map-area">
+            <div class="map-placeholder-img"></div>
+
+            <!-- INSIGHTS CARD -->
+            <div class="insights-card fade-in" style="animation-delay: 0.8s">
+                <div class="card-header">
+                    <div>
+                        <div class="location-title">Bandra West</div>
+                        <div class="location-subtitle">Mumbai, Maharashtra</div>
+                    </div>
+                    <div style="font-size: 1.5rem;">📍</div>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-label">Footfall Traffic</span>
+                    <span class="stat-value">1.2M <span class="stat-change">▲ 12%</span></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Dwell Time</span>
+                    <span class="stat-value">45m <span class="stat-change">▲ 5%</span></span>
+                </div>
+
+                <div class="chart-placeholder">
+                    <div
+                        style="position:absolute; bottom:0; left:0; right:0; height: 30px; background: rgba(212,175,55,0.1);">
+                    </div>
+                    <!-- Just a visual line -->
+                    <svg width="100%" height="80" style="position: absolute; bottom: 0;">
+                        <path d="M0,70 Q50,60 80,40 T150,50 T250,20 T320,30" fill="none" stroke="#d4af37"
+                            stroke-width="2" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

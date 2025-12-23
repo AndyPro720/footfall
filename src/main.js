@@ -1,18 +1,36 @@
 import { registerSW } from 'virtual:pwa-register';
+// Self-hosted fonts via Fontsource
+import '@fontsource/outfit/400.css';
+import '@fontsource/outfit/500.css';
+import '@fontsource/outfit/600.css';
+import '@fontsource/outfit/700.css';
+import '@fontsource/outfit/800.css';
+import '@fontsource/outfit/900.css';
+import '@fontsource/cinzel/400.css';
+import '@fontsource/cinzel/700.css';
 import './styles/global.css';
 import './styles/components.css';
 import './styles/contact.css';
 import './styles/services.css';
 import './styles/intelligence.css';
+import './styles/loader.css'; // Loader styles
+import './style.css'; 
 import { Router } from './router.js';
 import { Navbar } from './components/navbar.js';
+import { Loader } from './components/loader.js'; // Import Loader
 import { Home } from './pages/home.js';
 
 import { Intelligence } from './pages/intelligence.js';
 import { Contact } from './pages/contact.js';
 
+// Global Loader Instance
+window.appLoader = new Loader();
+
+// Run immediate animation (if not already running via inline script, but we rely on this module now)
+window.appLoader.init();
+
 const routes = {
-  '/': Home,
+  '/': Intelligence, 
   '/intelligence': Intelligence,
   '/contact': Contact
 };
@@ -23,6 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render Navbar
   document.body.insertAdjacentHTML('afterbegin', Navbar.render());
   Navbar.afterRender();
+
+  // Hide loader after a minimum fallback time or when logic completes
+  // For a real app, you hide it after data fetch. Here we hide it after small delay to show off animation.
+  setTimeout(() => {
+     window.appLoader.hide();
+  }, 3500); // 3.5s to let at least one cycle of animation play somewhat
+
 
   // Add Scroll Progress Bar
   const progressBar = document.createElement('div');

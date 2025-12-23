@@ -46,6 +46,12 @@ html, body {
   -webkit-backdrop-filter: none;
   border-bottom: none;
   transition: padding 0.3s ease;
+  pointer-events: none; /* KEY FIX: Let clicks pass through empty space */
+}
+
+/* Re-enable clicks for navbar content */
+.navbar > * {
+  pointer-events: auto;
 }
 
 /* Navbar Scrolled State - Removed background as requested */

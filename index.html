@@ -2,19 +2,210 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
-  <title>FOOTTFALL | Trade Area Intelligence</title>
-  <meta name="description"
-    content="Foottfall helps brands and landlords find the right match with Trade Area Intelligence.">
-  <meta name="theme-color" content="#050505">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Fonts now self-hosted via @fontsource packages -->
+    <title>FOOTTFALL | Trade Area Intelligence</title>
+    <meta name="description"
+        content="Foottfall helps brands and landlords find the right match with Trade Area Intelligence.">
+    <meta name="theme-color" content="#050505">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        /* Critical path inline styles for loader to prevent FOUC */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .wrapper-ref {
+            opacity: 0;
+            transition: opacity 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transform: scale(1.2);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 90px;
+            position: relative;
+        }
+
+        .letter-slot {
+            width: 55px;
+            height: 90px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        /* Spacing adjustments to match loader.css */
+        .slot-o1 {
+            margin-right: 4px;
+        }
+
+        .slot-o2 {
+            margin-left: 4px;
+        }
+
+        .slot-t1 {
+            margin-right: -10px;
+            z-index: 21;
+        }
+
+        .slot-t2 {
+            margin-left: -5px;
+        }
+
+        .slot-l1 {
+            margin-right: -12px;
+            z-index: 21;
+        }
+
+        .slot-l2 {
+            margin-left: 0px;
+            z-index: 20;
+        }
+
+        @media (min-width: 768px) {
+            .wrapper-ref {
+                transform: scale(1.5);
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.js"></script>
+    <!-- Loader Overlay (Hardcoded for instant load) -->
+    <div id="loader-overlay">
+        <div class="wrapper-ref" style="opacity: 1;"> <!-- Set to 1 by JS or default visible if styles loaded -->
+            <div class="logo-container">
+
+                <!-- F -->
+                <div class="letter-slot slot-f">
+                    <div class="f-scanner-box">
+                        <div class="f-outline">F</div>
+                        <div class="scan-line"></div>
+                    </div>
+                    <div class="final-letter">F</div>
+                </div>
+
+                <!-- OO -->
+                <div class="letter-slot slot-o1">
+                    <div class="person-shape p1" style="left: 10px;">
+                        <div class="p-head"></div>
+                        <div class="p-body"></div>
+                    </div>
+                    <div class="final-letter">O</div>
+                </div>
+                <div class="letter-slot slot-o2">
+                    <div class="person-shape p2" style="right: 10px;">
+                        <div class="p-head"></div>
+                        <div class="p-body"></div>
+                    </div>
+                    <div class="match-flash"></div>
+                    <div class="final-letter">O</div>
+                </div>
+
+                <!-- TT -->
+                <div class="letter-slot slot-t1">
+                    <div class="letter-mask">
+                        <div class="final-letter t1-static" style="opacity: 0;">T</div>
+                    </div>
+                </div>
+                <div class="letter-slot slot-t2">
+                    <div class="map-block-container">
+                        <div class="map-road road-1"></div>
+                        <div class="map-road road-2"></div>
+                        <div class="map-road road-3"></div>
+                        <div class="map-road road-4"></div>
+                        <div class="map-pin-small" style="top: 20px; left: 30px;"></div>
+                        <div class="map-pin-small" style="bottom: 25px; right: 35px;"></div>
+                        <div class="map-pin-small" style="top: 15px; right: 20px;"></div>
+                    </div>
+                    <div class="letter-mask">
+                        <div class="final-letter t2-static" style="opacity: 0;">T</div>
+                    </div>
+                </div>
+
+                <div class="letter-slot slot-f2">
+                    <div class="graph-group">
+                        <div class="g-bar"></div>
+                        <div class="g-bar"></div>
+                        <div class="g-bar"></div>
+                        <div class="g-bar"></div>
+                    </div>
+                    <div class="final-letter">F</div>
+                </div>
+                <div class="letter-slot slot-a">
+                    <div class="network-group">
+                        <div class="n-node node1" style="bottom: 15px; left: 10px;"></div>
+                        <div class="n-node node2" style="bottom: 40px; left: 25px;"></div>
+                        <div class="n-node node3" style="bottom: 20px; left: 40px;"></div>
+                        <div class="n-line line1"
+                            style="bottom: 18px; left: 14px; width: 22px; transform: rotate(-55deg);"></div>
+                        <div class="n-line line2"
+                            style="bottom: 42px; left: 28px; width: 22px; transform: rotate(55deg);"></div>
+                    </div>
+                    <div class="final-letter">A</div>
+                </div>
+
+                <!-- LL Custom Merge -->
+                <div class="letter-slot slot-l1">
+                    <div class="pin-shape">
+                        <div class="pin-head">
+                            <div class="pin-dot"></div>
+                        </div>
+                    </div>
+                    <div class="pin-shadow"></div>
+                    <!-- Custom L1 Shape (Base + Ext) -->
+                    <div class="l1-custom-shape">
+                        <div class="l1-v-bar"></div>
+                        <div class="l1-h-bar"></div>
+                    </div>
+                </div>
+
+                <div class="letter-slot slot-l2">
+                    <div class="l2-forklift-mechanism">
+                        <div class="l2-vertical-stem"></div>
+                        <div class="l2-forks"></div>
+                        <div class="shop-block">
+                            <div class="shop-roof"></div>
+                            <div class="shop-door"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-text">
+                    <span id="status-text">System Idle</span>
+                    <span id="percent-text">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
 </body>
 
 </html>

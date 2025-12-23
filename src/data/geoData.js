@@ -191,7 +191,13 @@ export const geoData = {
       }
     ]
   },
-  cities: cityBorders,
+  cities: {
+    ...cityBorders,
+    features: cityBorders.features.map(f => ({
+      ...f,
+      geometry: f.geometry || f.properties.geojson
+    }))
+  },
    tradeAreas: {
     "type": "FeatureCollection",
     "features": [

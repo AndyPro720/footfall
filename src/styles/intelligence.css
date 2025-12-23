@@ -34,11 +34,11 @@
   pointer-events: auto !important;
 }
 
-/* Ensure Logo is visible */
-.navbar .logo {
-  opacity: 1 !important;
-  visibility: visible !important;
-  z-index: 3002;
+/* Hide Navbar Logo on Intelligence/Home Page but keep space (visibility: hidden) to prevent layout shift */
+body[data-page="intelligence"] .navbar .logo,
+body[data-page="home"] .navbar .logo {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* --- Map Container --- */
@@ -49,6 +49,12 @@
   position: absolute;
   top: 0;
   left: 0;
+}
+
+/* --- UI Elements --- */
+#legend, #tip-box {
+  position: absolute;
+  pointer-events: auto;
 }
 
 /* --- Top Bar (Breadcrumbs) --- */
@@ -248,12 +254,12 @@
   flex-direction: column;
   min-width: 200px;
   
-  /* Further increased transparency */
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  /* Further increased transparency - Unified Glass Style */
+  background: rgba(30, 30, 30, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   /* Added top/bottom padding to container so header isn't cut off */
   padding: 15px 0; 
   overflow: hidden; /* Hide overflow of main container */
@@ -370,12 +376,12 @@
   cursor: pointer;
   user-select: none;
   
-  /* Glassmorphic styling */
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  /* Glassmorphic styling - Unified */
+  background: rgba(30, 30, 30, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   
   /* Transition for expand/collapse */
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);

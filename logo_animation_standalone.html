@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foottfall Logic Animation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --accent: #1a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Container for the animation */
+        .wrapper-ref {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transform: scale(1.5);
+            /* Scaled up for standalone view */
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 90px;
+            position: relative;
+        }
+
+        .letter-slot {
+            width: 55px;
+            height: 90px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .letter-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .letter-mask .final-letter {
+            width: 100%;
+            text-align: center;
+            left: 0;
+        }
+
+        .final-letter {
+            font-weight: 900;
+            font-size: 72px;
+            line-height: 72px;
+            letter-spacing: -2px;
+            color: #022c22;
+            opacity: 0;
+            position: absolute;
+            bottom: 10px;
+            z-index: 20;
+        }
+
+        .slot-o1 {
+            margin-right: 4px;
+        }
+
+        .slot-o2 {
+            margin-left: 4px;
+        }
+
+        .slot-t1 {
+            margin-right: -10px;
+            z-index: 21;
+        }
+
+        .slot-t2 {
+            margin-left: -5px;
+        }
+
+        .slot-l1 {
+            margin-right: -12px;
+            z-index: 21;
+        }
+
+        .slot-l2 {
+            margin-left: 0px;
+            z-index: 20;
+        }
+
+        /* L1 Configuration */
+        .l1-custom-shape {
+            position: absolute;
+            bottom: 22px;
+            left: 14px;
+            width: 70px;
+            height: 52px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .l1-v-bar {
+            position: absolute;
+            left: 0;
+            bottom: 0px;
+            width: 13px;
+            height: 100%;
+            background-color: #022c22;
+        }
+
+        /* Helper to hide v-bar initially for morph */
+        .l1-v-bar.init-hidden {
+            opacity: 0;
+        }
+
+        .l1-h-bar {
+            position: absolute;
+            left: 0;
+            bottom: 0px;
+            width: 100%;
+            height: 11px;
+            background-color: #022c22;
+        }
+
+        /* L2 Forklift Mechanism */
+        .l2-forklift-mechanism {
+            position: absolute;
+            bottom: 44px;
+            left: 10px;
+            width: 50px;
+            height: 60px;
+            opacity: 0;
+            overflow: visible;
+        }
+
+        .l2-vertical-stem {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 13px;
+            height: 30px;
+            background-color: #022c22;
+        }
+
+        .l2-forks {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 6px;
+            background-color: #d97706;
+            border-radius: 0 0 2px 0;
+        }
+
+        .shop-block {
+            position: absolute;
+            bottom: 6px;
+            left: 18px;
+            width: 22px;
+            height: 22px;
+            background: #d97706;
+            border-radius: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .shop-roof {
+            position: absolute;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-left: 11px solid transparent;
+            border-right: 11px solid transparent;
+            border-bottom: 5px solid #d97706;
+        }
+
+        .shop-door {
+            width: 7px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            margin-top: 6px;
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* F Scanner */
+        .f-scanner-box {
+            position: absolute;
+            bottom: 10px;
+            width: 40px;
+            height: 72px;
+            opacity: 0;
+        }
+
+        .f-outline {
+            font-weight: 900;
+            font-size: 72px;
+            line-height: 72px;
+            letter-spacing: -2px;
+            -webkit-text-stroke: 1.5px rgba(21, 128, 61, 0.4);
+            color: transparent;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .scan-line {
+            width: 100%;
+            height: 3px;
+            background: #15803d;
+            box-shadow: 0 0 10px rgba(21, 128, 61, 0.6);
+            position: absolute;
+            top: 0;
+        }
+
+        /* OO People */
+        .person-shape {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .p-head {
+            width: 14px;
+            height: 14px;
+            background: #15803d;
+            border-radius: 50%;
+            margin-bottom: 2px;
+        }
+
+        .p-body {
+            width: 22px;
+            height: 26px;
+            background: #15803d;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .match-flash {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #15803d;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 5;
+        }
+
+        /* TT Map Block */
+        .map-block-container {
+            position: absolute;
+            left: -30px;
+            width: 85px;
+            height: 70px;
+            bottom: 10px;
+            opacity: 0;
+            z-index: 25;
+            background: #ffffff;
+            border: 2px solid #14532d;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        .map-road {
+            position: absolute;
+            background: #cbd5e1;
+        }
+
+        .road-1 {
+            width: 100%;
+            height: 6px;
+            top: 30%;
+            transform: rotate(5deg);
+        }
+
+        .road-2 {
+            width: 100%;
+            height: 5px;
+            bottom: 30%;
+            transform: rotate(-5deg);
+        }
+
+        .road-3 {
+            width: 6px;
+            height: 100%;
+            left: 40%;
+        }
+
+        .road-4 {
+            width: 5px;
+            height: 100%;
+            right: 25%;
+            transform: rotate(15deg);
+        }
+
+        .map-pin-small {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #14532d;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        /* FA Analytics */
+        .graph-group {
+            position: absolute;
+            bottom: 18px;
+            left: 5px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 50px;
+            opacity: 0;
+        }
+
+        .g-bar {
+            width: 7px;
+            background: #15803d;
+            border-radius: 2px 2px 0 0;
+            height: 0;
+        }
+
+        .network-group {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        .n-node {
+            width: 8px;
+            height: 8px;
+            background: #15803d;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .n-line {
+            position: absolute;
+            height: 2px;
+            background: #94a3b8;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        /* L Pin */
+        .pin-shape {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            width: 26px;
+            height: 38px;
+            opacity: 0;
+            transform-origin: bottom center;
+        }
+
+        .pin-head {
+            width: 26px;
+            height: 26px;
+            background: #022c22;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pin-dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+
+        .pin-shadow {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 12px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        /* Progress Bar */
+        .progress-wrap {
+            width: 300px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #15803d;
+            transition: width 0.1s linear;
+        }
+
+        /* Keyframes used in main animation flow (though mostly GSAP controlled, some might be residual or useful) */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper-ref">
+        <div class="logo-container">
+
+            <!-- F -->
+            <div class="letter-slot slot-f">
+                <div class="f-scanner-box">
+                    <div class="f-outline">F</div>
+                    <div class="scan-line"></div>
+                </div>
+                <div class="final-letter">F</div>
+            </div>
+
+            <!-- OO -->
+            <div class="letter-slot slot-o1">
+                <div class="person-shape p1" style="left: 10px;">
+                    <div class="p-head"></div>
+                    <div class="p-body"></div>
+                </div>
+                <div class="final-letter">O</div>
+            </div>
+            <div class="letter-slot slot-o2">
+                <div class="person-shape p2" style="right: 10px;">
+                    <div class="p-head"></div>
+                    <div class="p-body"></div>
+                </div>
+                <div class="match-flash"></div>
+                <div class="final-letter">O</div>
+            </div>
+
+            <!-- TT -->
+            <div class="letter-slot slot-t1">
+                <div class="letter-mask">
+                    <div class="final-letter t1-static" style="opacity: 0;">T</div>
+                </div>
+            </div>
+            <div class="letter-slot slot-t2">
+                <div class="map-block-container">
+                    <div class="map-road road-1"></div>
+                    <div class="map-road road-2"></div>
+                    <div class="map-road road-3"></div>
+                    <div class="map-road road-4"></div>
+                    <div class="map-pin-small" style="top: 20px; left: 30px;"></div>
+                    <div class="map-pin-small" style="bottom: 25px; right: 35px;"></div>
+                    <div class="map-pin-small" style="top: 15px; right: 20px;"></div>
+                </div>
+                <div class="letter-mask">
+                    <div class="final-letter t2-static" style="opacity: 0;">T</div>
+                </div>
+            </div>
+
+            <div class="letter-slot slot-f2">
+                <div class="graph-group">
+                    <div class="g-bar"></div>
+                    <div class="g-bar"></div>
+                    <div class="g-bar"></div>
+                    <div class="g-bar"></div>
+                </div>
+                <div class="final-letter">F</div>
+            </div>
+            <div class="letter-slot slot-a">
+                <div class="network-group">
+                    <div class="n-node node1" style="bottom: 15px; left: 10px;"></div>
+                    <div class="n-node node2" style="bottom: 40px; left: 25px;"></div>
+                    <div class="n-node node3" style="bottom: 20px; left: 40px;"></div>
+                    <div class="n-line line1" style="bottom: 18px; left: 14px; width: 22px; transform: rotate(-55deg);">
+                    </div>
+                    <div class="n-line line2" style="bottom: 42px; left: 28px; width: 22px; transform: rotate(55deg);">
+                    </div>
+                </div>
+                <div class="final-letter">A</div>
+            </div>
+
+            <!-- LL Custom Merge -->
+            <div class="letter-slot slot-l1">
+                <div class="pin-shape">
+                    <div class="pin-head">
+                        <div class="pin-dot"></div>
+                    </div>
+                </div>
+                <div class="pin-shadow"></div>
+
+                <!-- Custom L1 Shape (Base + Ext) -->
+                <div class="l1-custom-shape">
+                    <div class="l1-v-bar"></div>
+                    <div class="l1-h-bar"></div>
+                </div>
+            </div>
+
+            <div class="letter-slot slot-l2">
+                <div class="l2-forklift-mechanism">
+                    <div class="l2-vertical-stem"></div>
+                    <div class="l2-forks"></div>
+
+                    <!-- The Cargo: Shop Block sitting on forks -->
+                    <div class="shop-block">
+                        <div class="shop-roof"></div>
+                        <div class="shop-door"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-text">
+                <span id="status-text">System Idle</span>
+                <span id="percent-text">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status-text');
+        const percentEl = document.getElementById('percent-text');
+        const fillEl = document.querySelector('.progress-fill');
+
+        function setStatus(text, pct) {
+            gsap.fromTo(statusEl,
+                { color: "#15803d" },
+                { color: "#64748b", duration: 0.6 }
+            );
+
+            statusEl.innerText = text;
+
+            gsap.to(percentEl, {
+                innerText: pct,
+                duration: 0.8,
+                snap: { innerText: 1 },
+                onUpdate: function () {
+                    this.targets()[0].innerText = Math.ceil(this.targets()[0].innerText) + "%";
+                }
+            });
+
+            gsap.to(fillEl, {
+                width: pct + "%",
+                duration: 0.8,
+                ease: "power2.out"
+            });
+        }
+
+        // Create the main timeline with loop and delay
+        const tl = gsap.timeline({
+            delay: 0.5,
+            repeat: -1,
+            repeatDelay: 0.5,
+            defaults: { duration: 1 }
+        }).timeScale(0.6);
+
+        // Function to reset the UI at the start of each loop
+        function resetUI() {
+            gsap.set(fillEl, { width: "0%" });
+            percentEl.innerText = "0%";
+            statusEl.innerText = "System Idle";
+            statusEl.style.color = "#64748b";
+
+            // Explicitly reset elements to ensure clean loop start
+            gsap.set([
+                ".final-letter", ".l1-custom-shape", ".l2-forklift-mechanism",
+                ".f-scanner-box", ".map-block-container", ".graph-group", ".network-group",
+                ".pin-shape", ".pin-shadow", ".match-flash", ".p1", ".p2", ".t1-static", ".t2-static"
+            ], { clearProps: "all", opacity: 0 });
+
+            gsap.set(".l2-forks", { width: "40px" });
+            gsap.set(".shop-block", { opacity: 1, scale: 1 });
+        }
+
+        // 1. SCANNING (F)
+        tl.call(resetUI) // Reset at start
+            .add(() => setStatus("Scanning Urban Footprints", 15))
+            .to(".f-scanner-box", { opacity: 1, duration: 0.1 })
+            .fromTo(".scan-line", { top: "0%" }, { top: "100%", duration: 0.6, ease: "linear" })
+            .to(".f-outline", { opacity: 1, duration: 0.3 }, "<0.1")
+            .to(".f-scanner-box", { opacity: 0, duration: 0.2 })
+            .to(".slot-f .final-letter", { opacity: 1, duration: 0.2 }, "<");
+
+        // 2. CONNECTING PEOPLE (OO)
+        tl.add(() => setStatus("Scanning Trade Areas", 30))
+            .to([".p1", ".p2"], { opacity: 1, duration: 0.2 })
+            .to(".p1", { x: 15, duration: 0.4, ease: "back.in(1.5)" })
+            .to(".p2", { x: -15, duration: 0.4, ease: "back.in(1.5)" }, "<")
+            .to(".match-flash", { opacity: 1, scale: 1.2, duration: 0.1 })
+            .to([".p1", ".p2"], { opacity: 0, scale: 0.5, duration: 0.1 }, "<")
+            .to(".match-flash", { scale: 2, opacity: 0, duration: 0.2 })
+            .to([".slot-o1 .final-letter", ".slot-o2 .final-letter"], {
+                opacity: 1, scale: 1, duration: 0.3, stagger: 0.05, ease: "back.out(1.5)"
+            }, "-=0.1");
+
+        // 3. MAPPING TRADE AREAS (TT)
+        tl.add(() => setStatus("Mapping Brandscape", 45))
+            .to(".map-block-container", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.2)" })
+            .set([".t1-static", ".t2-static"], { y: 100, opacity: 1 })
+            // Faster exit
+            .to([".t1-static", ".t2-static"], { y: 0, duration: 0.5, ease: "power2.out" }, "+=0.3")
+            .to(".map-block-container", { y: -100, opacity: 0, duration: 0.5, ease: "power2.out" }, "<");
+
+        // 4. FETCHING ANALYTICS (FA)
+        tl.add(() => setStatus("Decoding Trade Area Intelligence", 60))
+            .to(".slot-f2 .final-letter", { opacity: 0, duration: 0.1 })
+            .to([".graph-group", ".network-group"], { opacity: 1, duration: 0.3 }, "<")
+            // Faster, punchier entry - but longer hold overall
+            .to(".g-bar", { height: (i) => [55, 60, 25, 45][i] + "px", duration: 0.6, stagger: 0.05, ease: "back.out(1.2)" }, "-=0.2")
+            // Nodes expand quickly, mimicking A shape points
+            .from(".n-node", { scale: 0, duration: 0.5, stagger: 0.05, ease: "back.out(1.5)" }, "<")
+            .from(".n-line", { scaleX: 0, duration: 0.5, stagger: 0.05 }, "<")
+
+            // Smooth Crossfade Transition (Transitioning "into" the letters)
+            // No Y movement, just a direct morph-like fade
+            .to([".graph-group", ".network-group"], { opacity: 0, scale: 1.1, duration: 0.3, ease: "power2.inOut", delay: 0.2 })
+            .to([".slot-f2 .final-letter", ".slot-a .final-letter"], { opacity: 1, scale: 1, startAt: { scale: 0.9 }, duration: 0.3, ease: "power2.out" }, "<");
+
+        // 5. GATHERING LOCATION (L1) & CURATING DATA (L2) - INTEGRATED REVEAL
+        tl.add(() => setStatus("Matching Profiles", 75))
+            // Prepare L1 states
+            .set(".l1-custom-shape", { opacity: 1 })
+            .set(".l1-v-bar", { opacity: 0 })
+            .set(".l1-h-bar", { width: 0 })
+
+            // Pin Drop
+            .to(".pin-shape", { opacity: 1, y: 0, startAt: { y: -80 }, duration: 0.4, ease: "bounce.out" })
+            .to(".pin-shadow", { opacity: 1, scale: 1, duration: 0.3 }, "-=0.3")
+
+            // MORPH: Pin becomes Vertical Bar
+            .to(".pin-dot", { opacity: 0, duration: 0.2 }, "+=0.1")
+            .to(".pin-shadow", { opacity: 0, duration: 0.2 }, "<")
+            // Move container to exact L1 position
+            .to(".pin-shape", {
+                left: "14px",
+                bottom: "22px",
+                width: "13px",
+                height: "52px",
+                duration: 0.4,
+                ease: "power2.inOut"
+            }, "<")
+            // Morph the head shape to valid bar
+            .to(".pin-head", {
+                rotation: 0,
+                borderRadius: "0%",
+                width: "13px",
+                height: "52px",
+                boxShadow: "none",
+                duration: 0.4,
+                ease: "power2.inOut"
+            }, "<")
+
+            // Expand Horizontal Bar from the morphed pin
+            .to(".l1-h-bar", { width: "100%", duration: 0.3, ease: "power2.out" })
+
+            // Swap morphed pin with real static bar (seamless)
+            .set(".l1-v-bar", { opacity: 1 })
+            .set(".pin-shape", { opacity: 0 })
+
+        // 6. SCORING LOCATION OPPORTUNITY
+        tl.add(() => setStatus("Scoring Location Opportunity", 90))
+            // L2 MECHANISM ACTION - Faster
+            // The "L2 Forklift Mechanism" (Stem + Forks + Shop) Enters from Top
+            .fromTo(".l2-forklift-mechanism",
+                { y: -150, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }, "-=0.2")
+
+            .to(".l2-forks", { width: 0, duration: 0.4, ease: "power2.in" }, "+=0.2")
+            .to(".shop-block", { opacity: 0, scale: 0.8, duration: 0.3 }, "<")
+
+            // Final Clean Up available if needed
+            .call(() => setStatus("Intelligence Engine Ready", 100));
+
+        // Final Pulse (Faster)
+        tl.to([".final-letter", ".l1-custom-shape", ".l2-vertical-stem"], {
+            scale: 1.05,
+            duration: 0.8, // Reduced from 1.5
+            yoyo: true,
+            repeat: 1,
+            ease: "sine.inOut",
+            stagger: 0.05
+        }, "+=0.2"); // Reduced delay before pulse
+    </script>
+</body>
+
+</html>

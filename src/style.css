@@ -24,22 +24,22 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block; /* Removed flex/place-items center */
   min-width: 320px;
   min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  overflow-x: hidden;
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: 100%; /* Removed 1280px limit */
+  margin: 0;
+  padding: 0; /* Removed padding */
+  text-align: left; /* Reset text align */
+  width: 100%;
+  height: 100vh; /* App dictates height */
+  overflow-y: auto; /* Scroll happens here */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 .logo {
@@ -160,3 +160,368 @@ button:focus-visible {
     transform: rotate(-45deg) translateY(-8px);
   }
 }
+
+/* --- Landing Page Redesign V9 --- */
+
+/* 1. Loading Screen (Removed) */
+
+/* 2. Map Background - Scoped to landing hero ONLY */
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-hero #landing-map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  filter: blur(2px); 
+  transition: filter 1s ease;
+}
+
+.landing-hero #landing-map-container.focused {
+  filter: blur(0);
+}
+
+/* Map Overlay Gradient - Scoped to landing hero ONLY */
+.landing-hero .map-overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 3. Hero Content Updates */
+/* More specific selector to override components.css */
+.home-page .hero {
+  background: transparent; /* Let map show through */
+}
+
+.home-page .hero-content {
+  /* Ensure it sits above map */
+  z-index: 10 !important;
+  position: relative;
+  text-align: center;
+  /* Centering */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.hero-logo-large {
+  width: 220px; /* Larger logo */
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 25px rgba(0,0,0,0.6));
+}
+
+
+.hero-tagline {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 4rem;
+  text-shadow: 0 3px 15px rgba(0,0,0,0.9);
+  letter-spacing: 3px;
+}
+
+/* 4. Country Selection Buttons */
+.country-selector {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.btn-country {
+  padding: 1.2rem 4rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-country:hover {
+  background: rgba(212, 175, 55, 0.2); /* Gold tint */
+  border-color: rgba(212, 175, 55, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.btn-country::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: 0.5s;
+}
+
+.btn-country:hover::before {
+  left: 100%;
+}
+
+/* 5. Prompt Modal */
+#landing-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: rgba(20, 20, 20, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 3rem;
+  border-radius: 20px;
+  z-index: 100;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  min-width: 400px;
+}
+
+#landing-prompt.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.prompt-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  color: #000;
+  margin-bottom: 0.5rem;
+}
+
+.prompt-subtitle {
+  color: #444;
+  margin-bottom: 2.5rem;
+}
+
+.prompt-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-primary-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+  color: #000;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary-glass {
+  background: transparent;
+  color: #222;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-secondary-glass:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Close button for prompt */
+.prompt-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.prompt-close:hover {
+  color: #fff;
+}
+
+/* 6. Landing Hero & Scroll Layout */
+#main-scroll-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+#landing-hero-section {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* Blur the map behind */
+  /* Blur the map behind */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+  transition: backdrop-filter 0.5s ease, background 0.5s ease;
+}
+
+#landing-hero-section.prompt-mode {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: transparent;
+  pointer-events: none; /* Let clicks pass to map/prompt */
+}
+
+/* When in prompt mode, let clicks pass through the scroll container too */
+#landing-hero-section.prompt-mode ~ *,
+.intelligence-page #main-scroll-container:has(#landing-hero-section.prompt-mode) {
+  pointer-events: none;
+}
+
+/* But ensure the prompt itself is still clickable */
+#landing-prompt.visible {
+  pointer-events: auto !important;
+}
+
+.landing-content {
+  text-align: center;
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* Prompt is now glassmorphic */
+#landing-prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centered */
+  z-index: 1000; /* Highest */
+  
+  /* Glassmorphic Style */
+  background: rgba(20, 20, 20, 0.25); /* Transparent */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+  
+  padding: 40px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+
+/* Fix Menu Button Background */
+.menu-toggle {
+  background: transparent !important;
+}
+
+#landing-prompt.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  animation: bounce 2s infinite;
+}
+
+.scroll-arrow {
+  font-size: 1.5rem;
+  margin-top: 5px;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+/* 7. Below-Fold Sections Container */
+#below-fold-sections {
+  position: relative;
+  /* No margin-top needed anymore as it follows hero-section naturally */
+  background: #000;
+  z-index: 11;
+}
+
+/* Ensure intelligence map container doesn't break layout */
+.intelligence-page #map-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 0;
+}
+
+/* Intelligence page layout */
+.intelligence-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Hide UI elements initially */
+.intelligence-page #top-bar,
+.intelligence-page #legend,
+.intelligence-page #tip-box {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.intelligence-page #top-bar.visible,
+.intelligence-page #legend.visible,
+.intelligence-page #tip-box.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Generic hidden class */
+.hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
