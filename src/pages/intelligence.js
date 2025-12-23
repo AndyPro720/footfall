@@ -2361,96 +2361,49 @@ export const Intelligence = {
       openSidebar(data);
     };
 
-    let csvData = [];
-
-    const loadCSVData = async () => {
-      try {
-        const response = await fetch('/intelligence_data.csv');
-        const rawText = await response.text();
-        
-        // Fix: Header is on line 3, find where it starts
-        const headerIndex = rawText.indexOf('Locality,');
-        const csvText = headerIndex !== -1 ? rawText.substring(headerIndex) : rawText;
-
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-             // Clean and process data
-             csvData = results.data.map(row => {
-                // Parse Rent: "₹24,000" or "₹22,000–₹35,000"
-                const parseRange = (str) => {
-                   if (!str) return 0;
-                   // Normalize: Remove currency, commas, and handle both hyphen and en-dash
-                   const clean = str.replace(/[₹,]/g, '').trim();
-                   // Split by hyphen or en-dash
-                   if (clean.match(/[–-]/)) {
-                      const parts = clean.split(/[–-]/).map(p => parseFloat(p.trim()));
-                      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                          return (parts[0] + parts[1]) / 2;
-                      }
-                   }
-                   return parseFloat(clean) || 0;
-                };
-
-                return {
-                   locality: row['Locality'] ? row['Locality'].trim() : '',
-                   rent: parseRange(row['Avg Residential Rent / Month (₹)']),
-                   spend: parseRange(row['Est. Spend per Visit (₹)']),
-                   rawRent: row['Avg Residential Rent / Month (₹)'],
-                   rawSpend: row['Est. Spend per Visit (₹)']
-                };
-             }).filter(x => x.locality);
-             console.log("CSV Data Loaded:", csvData.length, "rows");
-          }
-        });
-      } catch (e) {
-        console.error("Error loading CSV:", e);
-      }
-    };
-
-    loadCSVData(); // Trigger load
-
     // --- Sidebar Logic ---
     let chartInstance = null;
+
+    const parseRangeValue = (str) => {
+        if (!str) return 0;
+        // Handle currency symbols and commas (AED, ₹, etc)
+        const clean = str.replace(/[^\d\.\-\–]/g, '');
+        
+        if (clean.includes('-') || clean.includes('–')) {
+            const parts = clean.split(/[-\–]/).map(p => parseFloat(p));
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                return (parts[0] + parts[1]) / 2;
+            }
+        }
+        return parseFloat(clean) || 0;
+    };
 
     const openSidebar = (data) => {
       sidebarTitle.innerText = data.name;
       
-      // Helper: Normalize string for comparison (remove special chars, lowercase, standardize dashes)
-      const normalize = (str) => {
-          if (!str) return '';
-          return str.toLowerCase()
-             .replace(/[–—]/g, '-') // Replace en/em dash with hyphen
-             .replace(/[^a-z0-9]/g, '') // Keep only alphanumeric
-             .trim();
-      };
-
-      const searchName = normalize(data.name);
+      // Use pre-enriched data from build script
+      const rentText = data.stats.rent || 'N/A';
+      const spendText = data.stats.spend || 'N/A';
       
-      // Find matching CSV data
-      // 1. Exact match (normalized)
-      // 2. Partial match (if one contains the other)
-      const marketData = csvData.find(d => {
-          const csvName = normalize(d.locality);
-          return csvName === searchName || 
-                 csvName.includes(searchName) || 
-                 searchName.includes(csvName);
-      });
+      const rentValue = parseRangeValue(rentText);
+      const spendValue = parseRangeValue(spendText);
 
-      console.log(`Open Sidebar: ${data.name} (norm: ${searchName}) -> Match:`, marketData);
+      // Collect all trade areas for scatter plot context
+      // We want to compare against ALL trade areas in the same city or globally?
+      // Let's do same city for relevance.
+      const currentCity = data.city;
+      const cityAreas = Object.values(tradeData).filter(d => d.city === currentCity);
 
-      const rentValue = marketData ? marketData.rent : 0;
-      const spendValue = marketData ? marketData.spend : 0;
-      
+      console.log(`Open Sidebar: ${data.name}. Stats: Rent=${rentValue}, Spend=${spendValue}`);
+
       sidebarContent.innerHTML = `
         <div class="metric-card">
           <span class="metric-title">Financials</span>
           
           <!-- Rent Section -->
           <div style="margin-bottom: 25px;">
-             <span class="metric-sub" style="display:block; margin-bottom:5px;">Avg. Residential Rent</span>
-             <div class="metric-value-large" style="font-size: 1.5rem;">${marketData ? marketData.rawRent : 'N/A'}</div>
+             <span class="metric-sub" style="display:block; margin-bottom:5px;">Avg. Rent (${currentCity === 'Dubai' ? 'AED/sqft' : '₹/Mo'})</span>
+             <div class="metric-value-large" style="font-size: 1.5rem;">${rentText}</div>
              <div class="chart-container" style="height: 150px;">
                 <canvas id="rent-chart"></canvas>
              </div>
@@ -2458,126 +2411,136 @@ export const Intelligence = {
 
           <!-- Spend / Market Position Section -->
           <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 20px;">
-             <span class="metric-sub" style="display:block; margin-bottom:5px;">Market Positioning (Spend vs Rent)</span>
-             <div class="metric-value-large" style="font-size: 1.5rem;">${marketData ? marketData.rawSpend : 'N/A'}</div>
+             <span class="metric-sub" style="display:block; margin-bottom:5px;">Est. Spend per Visit</span>
+             <div class="metric-value-large" style="font-size: 1.5rem;">${spendText}</div>
              <div class="chart-container" style="height: 200px;">
                 <canvas id="spend-chart"></canvas>
              </div>
           </div>
+          
+          <!-- Demographics Mini-Section -->
+           <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 20px; display: flex; justify-content: space-between;">
+              <div>
+                  <span class="metric-sub" style="display:block;">Footfall</span>
+                  <div class="metric-value" style="font-size: 1.2rem;">${data.stats.footfall || '-'}</div>
+              </div>
+              <div>
+                  <span class="metric-sub" style="display:block;">Profile</span>
+                  <div class="metric-value" style="font-size: 1.2rem;">${data.demographics.segment || '-'}</div>
+              </div>
+           </div>
 
         </div>
       `;
 
       sidebar.classList.add('visible');
 
-      // Render Charts
-      if (marketData) {
-         if (chartInstance) chartInstance.destroy();
-         
-         // 1. Rent Bar Chart (Simple)
-         const ctxRent = document.getElementById('rent-chart').getContext('2d');
-         new Chart(ctxRent, {
-            type: 'bar',
-            data: {
-               labels: ['Avg Rent'],
-               datasets: [{
-                  label: 'Rent',
-                  data: [rentValue],
-                  backgroundColor: '#4bc0c090',
-                  borderColor: '#4bc0c0',
-                  borderWidth: 1,
-                  borderRadius: 6,
-                  barThickness: 30
-               }]
-            },
-            options: {
-               indexAxis: 'y',
-               responsive: true,
-               maintainAspectRatio: false,
-               plugins: { legend: { display: false } },
-               scales: {
-                  x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
-                  y: { display: false }
-               }
-            }
-         });
+      // 1. Rent Bar Chart
+      if (rentValue > 0) {
+          const ctxRent = document.getElementById('rent-chart').getContext('2d');
+          
+          // Compare with City Average
+          const cityAvgRent = cityAreas.reduce((acc, curr) => acc + parseRangeValue(curr.stats.rent), 0) / (cityAreas.length || 1);
+          
+          new Chart(ctxRent, {
+             type: 'bar',
+             data: {
+                labels: ['This Area', 'City Avg'],
+                datasets: [{
+                   label: 'Rent',
+                   data: [rentValue, cityAvgRent],
+                   backgroundColor: ['#d4af37', '#00000050'],
+                   borderColor: ['#d4af37', '#000000'],
+                   borderWidth: 1,
+                   borderRadius: 6,
+                   barThickness: 30
+                }]
+             },
+             options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                   x: { 
+                       beginAtZero: true, 
+                       grid: { color: 'rgba(255,255,255,0.1)' },
+                       ticks: { color: '#888', font: {size: 10} }
+                   },
+                   y: { 
+                       ticks: { color: '#ddd', font: {size: 11} }
+                   }
+                }
+             }
+          });
+      }
 
-         // 2. Market Position Scatter Chart (Fancy)
-         const ctxSpend = document.getElementById('spend-chart').getContext('2d');
-         
-         // Prepare Dataset: All Points + Current Point
-         const allPoints = csvData.map(d => ({
-            x: d.rent,
-            y: d.spend,
-            name: d.locality
-         }));
+      // 2. Scatter Plot
+      const ctxSpend = document.getElementById('spend-chart').getContext('2d');
+      
+      const allPoints = cityAreas.map(d => ({
+         x: parseRangeValue(d.stats.rent),
+         y: parseRangeValue(d.stats.spend),
+         name: d.name
+      })).filter(p => p.x > 0 && p.y > 0);
 
-         const currentPoint = {
-            x: rentValue,
-            y: spendValue,
-            name: data.name
-         };
+      const currentPoint = {
+         x: rentValue,
+         y: spendValue,
+         name: data.name
+      };
 
-         new Chart(ctxSpend, {
-            type: 'scatter',
-            data: {
-               datasets: [
-                  {
-                     label: 'Market',
-                     data: allPoints,
-                     backgroundColor: 'rgba(0, 0, 0, 0.3)', // Visible dark ghost points
-                     borderColor: 'transparent',
-                     pointRadius: 4,
-                     pointHoverRadius: 6
-                  },
-                  {
-                     label: 'Current',
-                     data: [currentPoint],
-                     backgroundColor: '#d4af37', // Gold
-                     borderColor: '#fff',
-                     borderWidth: 2,
-                     pointRadius: 8,
-                     pointHoverRadius: 10,
-                     pointShadowColor: '#d4af37'
-                  }
-               ]
-            },
-            options: {
-               responsive: true,
-               maintainAspectRatio: false,
-               plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                     backgroundColor: 'rgba(0,0,0,0.9)',
-                     padding: 10,
-                     callbacks: {
-                        label: (c) => {
-                           const point = c.raw;
-                           return `${point.name || 'Area'}: ₹${point.y} Spend / ₹${point.x} Rent`;
-                        }
-                     }
-                  }
-               },
-               scales: {
-                  x: {
-                     type: 'linear',
-                     position: 'bottom',
-                     title: { display: true, text: 'Avg Rent', color: '#666', font: {size: 9} },
-                     grid: { color: 'rgba(255,255,255,0.05)' },
-                     ticks: { color: '#888', font: {size: 9}, callback: (v) => '₹' + v/1000 + 'k' }
-                  },
-                  y: {
-                     title: { display: true, text: 'Abs. Spend', color: '#666', font: {size: 9} },
-                     grid: { color: 'rgba(255,255,255,0.05)' },
-                     ticks: { color: '#888', font: {size: 9}, callback: (v) => '₹' + v/1000 + 'k' }
-                  }
-               },
-               animation: {
-                   duration: 1500,
-                   easing: 'easeOutElastic'
-               }
-            }
-         });
+      if (allPoints.length > 0) {
+          new Chart(ctxSpend, {
+             type: 'scatter',
+             data: {
+                datasets: [
+                   {
+                      label: 'Other Areas',
+                      data: allPoints,
+                      backgroundColor: 'rgba(0, 0, 0, 0.4)', // Visible dark ghost points
+                      borderColor: 'transparent',
+                      pointRadius: 5,
+                      pointHoverRadius: 7
+                   },
+                   {
+                      label: 'Current',
+                      data: [currentPoint],
+                      backgroundColor: '#d4af37',
+                      borderColor: '#fff',
+                      borderWidth: 2,
+                      pointRadius: 8,
+                      pointHoverRadius: 10,
+                      pointShadowColor: '#d4af37'
+                   }
+                ]
+             },
+             options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                   legend: { display: false },
+                   tooltip: {
+                      backgroundColor: 'rgba(0,0,0,0.9)',
+                      callbacks: {
+                         label: (c) => `${c.raw.name}: ${c.raw.y} Spend / ${c.raw.x} Rent`
+                      }
+                   }
+                },
+                scales: {
+                   x: {
+                      title: { display: true, text: 'Rent', color: '#666', font: {size: 10} },
+                      grid: { color: 'rgba(255,255,255,0.05)' },
+                      ticks: { color: '#888' }
+                   },
+                   y: {
+                      title: { display: true, text: 'Spend', color: '#666', font: {size: 10} },
+                      grid: { color: 'rgba(255,255,255,0.05)' },
+                      ticks: { color: '#888' }
+                   }
+                }
+             }
+          });
       }
     };
 

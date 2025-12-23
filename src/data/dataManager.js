@@ -27,57 +27,14 @@ const ID_MAPPING = {
 export const DataManager = {
   csvData: null,
 
+  // DEPRECATED: Data is now pre-generated at build time via scripts/generate-geo-data.js
   async loadData() {
-    try {
-      const response = await fetch('/intelligence_data.csv');
-      const text = await response.text();
-      this.csvData = this.parseCSV(text);
-      this.enrichTradeData();
-      return true;
-    } catch (e) {
-      console.error("Failed to load CSV data:", e);
-      return false;
-    }
-  },
-
-  parseCSV(text) {
-    const lines = text.split('\n');
-    // Data starts from line 4 (index 3) based on file inspection
-    // Header: Locality, Avg Residential Rent / Month (₹), Est. Spend per Visit (₹)
-    const data = {};
-    
-    for (let i = 3; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      // Simple CSV regex to handle quoted values
-      const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      if (!matches || matches.length < 3) continue;
-
-      const locality = matches[0].replace(/"/g, '').trim();
-      const rent = matches[1].replace(/"/g, '').trim();
-      const spend = matches[2].replace(/"/g, '').trim();
-
-      data[locality] = { rent, spend };
-    }
-    return data;
+    console.log('✅ specific trade data loaded from build.');
+    return true;
   },
 
   enrichTradeData() {
-    if (!this.csvData) return;
-
-    // Iterate over our hardcoded tradeData and enrich it if we find a match
-    Object.keys(tradeData).forEach(id => {
-      // Find which CSV locality maps to this ID
-      const csvName = Object.keys(ID_MAPPING).find(key => ID_MAPPING[key] === id);
-      
-      if (csvName && this.csvData[csvName]) {
-        const enriched = this.csvData[csvName];
-        tradeData[id].stats.rent = enriched.rent; // Overwrite mock rent
-        tradeData[id].stats.spend = enriched.spend; // Add spend data
-        tradeData[id].csvMatch = true;
-      }
-    });
+    // No-op: Data is already enriched in geoData.js
   },
 
   getRecommendations(criteria) {
