@@ -65,23 +65,75 @@ async function generate() {
           return;
         }
 
-        // Determine Pin Color based on Tier/Corridor if not explicitly set
-        // (Simple logic: existing mapping or fallback)
-        let pinColor = "#4A90E2"; // Default Blue
-        if (row.tat_tier && row.tat_tier.includes("TAT-1")) pinColor = "#D4AF37"; // Gold for CBD
-        else if (row.corridor_type && row.corridor_type.toLowerCase().includes("nightlife")) pinColor = "#9B59B6"; // Purple
-        else if (row.tat_tier && row.tat_tier.includes("TAT-2")) pinColor = "#FF6B6B"; // Coral for PBD
+        // Determine Pin Color based on Tier/Corridor - UPDATED TAT COLOR SCHEME
+        // 🔴 TAT-1 (CBD) = Red #E53935
+        // 🟠 TAT-2 (PBD) = Orange #FF9800
+        // 🔵 TAT-3 (TBD/Growth) = Blue #2196F3
+        // 🟣 Nightlife = Purple #9C27B0
+        // ⚫ Mall = Dark #424242
+        let pinColor = "#FF9800"; // Default: Orange (TAT-2)
+        let subCategory = "family"; // Default subCategory
         
-        // Build GeoJSON Feature
+        const corridor = (row.corridor_type || '').toLowerCase();
+        const tier = row.tat_tier || '';
+        
+        // Priority: Nightlife/Mall subcategory first, then tier
+        if (corridor.includes('nightlife') || corridor.includes('high-energy')) {
+          pinColor = "#9C27B0"; // Purple for Nightlife
+          subCategory = "nightlife";
+        } else if (corridor.includes('mall') || corridor.includes('premium') && corridor.includes('mall')) {
+          pinColor = "#424242"; // Dark for Mall
+          subCategory = "mall";
+        } else if (tier.includes("TAT-1")) {
+          pinColor = "#E53935"; // Red for CBD
+          subCategory = "highstreet";
+        } else if (tier.includes("TAT-3") || tier.includes("Growth")) {
+          pinColor = "#2196F3"; // Blue for TBD/Strategic
+          subCategory = "strategic";
+        } else if (tier.includes("TAT-2")) {
+          pinColor = "#FF9800"; // Orange for PBD
+          subCategory = "family";
+        }
+        
+        // Determine suitability based on corridor
+        const suitableFor = ["fb"]; // F&B is always suitable
+        if (corridor.includes('fashion') || corridor.includes('high street') || subCategory === 'highstreet') {
+          suitableFor.push("fashion");
+        }
+        if (corridor.includes('lifestyle') || subCategory === 'nightlife') {
+          suitableFor.push("lifestyle");
+        }
+        if (corridor.includes('family') || corridor.includes('retail')) {
+          suitableFor.push("electronics");
+        }
+        if (corridor.includes('premium') || corridor.includes('luxury')) {
+          suitableFor.push("wellness");
+        }
+        
+        // Property sizes based on tier
+        const propertySizes = tier.includes("TAT-1") ? ["500-2000", "2000-5000"] : 
+                             tier.includes("TAT-3") ? ["<500", "500-2000"] : 
+                             ["500-2000", "2000-5000"];
+        
+        // Ticket range based on rent band
+        const rentBand = (row.rent_band || '').toLowerCase();
+        const ticketRange = rentBand.includes('premium') || rentBand.includes('high') ? "500-1000" :
+                           rentBand.includes('low') ? "<200" : "200-500";
+        
+        // Build GeoJSON Feature with new fields
         tradeAreasFeatures.push({
           "type": "Feature",
           "properties": {
             "id": row.id,
             "name": row.name,
             "city": row.city,
-            "type": row.tat_tier || row.type, // Map Tier to Type properties
+            "type": row.tat_tier || row.type,
             "color": pinColor,
-            "corridor": row.corridor_type
+            "corridor": row.corridor_type,
+            "subCategory": subCategory,
+            "suitableFor": suitableFor,
+            "propertySizes": propertySizes,
+            "ticketRange": ticketRange
           },
           "geometry": {
             "type": "Point",

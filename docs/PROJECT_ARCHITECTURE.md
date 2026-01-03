@@ -91,17 +91,62 @@ The **Intelligence Dashboard** is the core product. It allows users to explore t
 
 ### Data Layer
 
-**1. geoData.js**:
-Defines the hierarchy of regions:
-- `countryPolygons`: GeoJSON for country fills (UAE).
-- `countries`: Center points for camera transitions.
-- `cities`: City boundaries and metadata.
-- `tradeAreas`: Point data for specific trade areas.
+The data pipeline uses a **build-time generation** approach. This ensures zero performance cost at runtime—the browser doesn't need to calculate colors, it just renders what was pre-calculated.
 
-**2. DataManager.js**:
-- Fetches `public/intelligence_data.csv`.
-- Parses and enriches `tradeAreas` with statistical data (footfall, demographics).
-- **ID Mapping**: Maps CSV names to internal IDs (e.g., "Koregaon Park" -> `pune-kp`).
+#### Data Flow Explanation
+
+**1. Raw Data Input (`.csv`)**
+*   **Source:** We maintain CSV files in `data-sources/countries/` (e.g., `uae.csv`, `india.csv`).
+*   **Content:** Key columns include `tat_tier` (e.g., "TAT-1 (CBD)") and `corridor_type` (e.g., "High Street").
+
+**2. Build Process (`generate-geo-data.js`)**
+*   **Trigger:** Runs on `npm run generate-data` (or `npm run build`).
+*   **Logic:** Reads CSVs, applies color logic (Nightlife=Purple, Mall=Dark, CBD=Red, etc.), and generates filtering fields.
+*   **Output:** Generates `src/data/geoData.js` containing the final JSON object with determined colors.
+
+**3. Runtime Ingestion (`intelligence.js`)**
+*   **Import:** App imports the pre-generated `geoData` object.
+*   **Rendering:** Visualizes data using the pre-calculated `color` property directly in MapLibre's paint system.
+
+#### Data Flow Diagram
+
+```
+📁 data-sources/countries/*.csv    (Trade area raw data)
+         ↓
+   scripts/generate-geo-data.js    (Generates colors, filters, TAT logic)
+         ↓
+   src/data/geoData.js             (Auto-generated - DO NOT EDIT)
+
+
+📁 src/data/*.geojson              (City boundary polygons)
+         ↓
+   scripts/prepare_data.cjs        (Combines into single module)
+         ↓
+   src/data/cityBorders.js         (Auto-generated - DO NOT EDIT)
+```
+
+#### Files
+
+| File | Purpose | Editable? |
+|------|---------|-----------|
+| `data-sources/countries/*.csv` | Raw trade area data: coords, TAT tiers, corridors, rent, footfall, brands | ✅ Edit this |
+| `scripts/generate-geo-data.js` | Build script: reads CSV, applies TAT color logic, generates filtering fields | ✅ Edit color rules here |
+| `scripts/prepare_data.cjs` | Build script: combines city GeoJSON files into `cityBorders.js` | ✅ Edit city config here |
+| `src/data/geoData.js` | **Auto-generated** - Trade areas with colors, consumed by app | ❌ Don't edit manually |
+| `src/data/cityBorders.js` | **Auto-generated** - City polygons, consumed by app | ❌ Don't edit manually |
+| `src/data/dataManager.js` | **DEPRECATED** - Legacy file, only has recommendation scoring | 🚫 Ignore |
+
+#### TAT Color Scheme
+
+The `generate-geo-data.js` script applies colors based on tier and corridor:
+
+| Type | Color | Hex | Condition |
+|------|-------|-----|-----------|
+| 🔴 TAT-1 (CBD) | Red | `#E53935` | Tier includes "TAT-1" |
+| 🟠 TAT-2 (PBD) | Orange | `#FF9800` | Tier includes "TAT-2" |
+| 🔵 TAT-3 (TBD) | Blue | `#2196F3` | Tier includes "TAT-3" or "Growth" |
+| 🟣 Nightlife | Purple | `#9C27B0` | Corridor includes "nightlife" or "high-energy" |
+| ⚫ Mall | Dark | `#424242` | Corridor includes "mall" |
 
 ### Map System
 
@@ -117,9 +162,11 @@ Powered by **MapLibre GL** using **OpenFreeMap** tiles and **OSM** data.
 1.  **Global View**: Select a country (India/UAE).
 2.  **Country View**: Select a city (e.g., Pune, Dubai).
 3.  **City View**: Explore trade areas (Pins/Blobs).
-4.  **Trade Area View**: Sidebar opens with detailed statistics charts.
+4.  **Trade Area View**: Sidebar opens with DCB tabs (Demographics, Commercial, Brandscape).
 
 **Wizard**: An onboarding overlay (`#wizard-overlay`) guides new users to select their preferences, though exploring freely is also possible.
+
+**Customisation Panel**: Users can filter trade areas by category, property size, and ticket size. Matched results appear in a separate panel.
 
 **Intro Optimization**:
 - **First Visit**: Full "FOOTFALL" scanner animation plays.
@@ -145,11 +192,26 @@ Implemented in `src/pages/home.js`.
 
 ## Build & Development
 
-**Scripts**:
-- `npm run dev`: Start Vite development server.
-- `npm run build`: Build for production (output to `dist/`).
-- `npm run preview`: Preview production build locally.
-- `npm run generate-data`: Run `scripts/generate-geo-data.js` to process GeoJSONs.
+### npm Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite development server (fast, no data regen) |
+| `npm run build` | **Production build**: runs `prepare-all` then builds |
+| `npm run preview` | Preview production build locally |
+| `npm run prepare-all` | Regenerates both city borders AND trade areas |
+| `npm run prepare-cities` | Regenerates city borders only (`cityBorders.js`) |
+| `npm run generate-data` | Regenerates trade areas only (`geoData.js`) |
+
+### When to Run Data Scripts
+
+| Scenario | Command |
+|----------|---------|
+| Added/edited trade area in CSV | `npm run generate-data` |
+| Changed color logic in build script | `npm run generate-data` |
+| Added new city GeoJSON | `npm run prepare-cities` |
+| Before deploying to production | `npm run build` (auto-runs both) |
+| Just editing CSS/JS (no data changes) | Nothing - hot reload works |
 
 ## Deployment & Build
 

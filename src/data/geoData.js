@@ -460,8 +460,18 @@ export const geoData = {
       "name": "Koregaon Park",
       "city": "Pune",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Nightlife"
+      "color": "#9C27B0",
+      "corridor": "Nightlife",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -478,8 +488,18 @@ export const geoData = {
       "name": "Kalyani Nagar",
       "city": "Pune",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Nightlife"
+      "color": "#9C27B0",
+      "corridor": "Nightlife",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -496,8 +516,18 @@ export const geoData = {
       "name": "Camp",
       "city": "Pune",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "High Street"
+      "color": "#E53935",
+      "corridor": "High Street",
+      "subCategory": "highstreet",
+      "suitableFor": [
+        "fb",
+        "fashion"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -514,8 +544,19 @@ export const geoData = {
       "name": "Viman Nagar",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#9B59B6",
-      "corridor": "Nightlife / Family"
+      "color": "#9C27B0",
+      "corridor": "Nightlife / Family",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -532,8 +573,18 @@ export const geoData = {
       "name": "Aundh",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Family Dining"
+      "color": "#FF9800",
+      "corridor": "Family Dining",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -550,8 +601,18 @@ export const geoData = {
       "name": "Kothrud",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Family Dining"
+      "color": "#FF9800",
+      "corridor": "Family Dining",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -568,8 +629,18 @@ export const geoData = {
       "name": "Baner",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#9B59B6",
-      "corridor": "Nightlife / High-Energy"
+      "color": "#9C27B0",
+      "corridor": "Nightlife / High-Energy",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -586,8 +657,18 @@ export const geoData = {
       "name": "Wakad",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Family / Community"
+      "color": "#FF9800",
+      "corridor": "Family / Community",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -604,8 +685,17 @@ export const geoData = {
       "name": "Kharadi",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "QSR / Volume"
+      "color": "#FF9800",
+      "corridor": "QSR / Volume",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -622,8 +712,17 @@ export const geoData = {
       "name": "Hadapsar",
       "city": "Pune",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "QSR / Volume"
+      "color": "#FF9800",
+      "corridor": "QSR / Volume",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -640,8 +739,17 @@ export const geoData = {
       "name": "Manjari",
       "city": "Pune",
       "type": "TAT-3 (TBD)",
-      "color": "#4A90E2",
-      "corridor": "Future Growth"
+      "color": "#2196F3",
+      "corridor": "Future Growth",
+      "subCategory": "strategic",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "<500",
+        "500-2000"
+      ],
+      "ticketRange": "<200"
     },
     "geometry": {
       "type": "Point",
@@ -658,8 +766,17 @@ export const geoData = {
       "name": "Moshi",
       "city": "Pune",
       "type": "TAT-3 (TBD)",
-      "color": "#4A90E2",
-      "corridor": "QSR / Volume"
+      "color": "#2196F3",
+      "corridor": "QSR / Volume",
+      "subCategory": "strategic",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "<500",
+        "500-2000"
+      ],
+      "ticketRange": "<200"
     },
     "geometry": {
       "type": "Point",
@@ -676,8 +793,19 @@ export const geoData = {
       "name": "BKC",
       "city": "Mumbai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Business / Premium"
+      "color": "#E53935",
+      "corridor": "Business / Premium",
+      "subCategory": "highstreet",
+      "suitableFor": [
+        "fb",
+        "fashion",
+        "wellness"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -694,8 +822,19 @@ export const geoData = {
       "name": "Bandra West",
       "city": "Mumbai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "High Street / Nightlife"
+      "color": "#9C27B0",
+      "corridor": "High Street / Nightlife",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "fashion",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -712,8 +851,18 @@ export const geoData = {
       "name": "Colaba",
       "city": "Mumbai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Tourism / Heritage"
+      "color": "#E53935",
+      "corridor": "Tourism / Heritage",
+      "subCategory": "highstreet",
+      "suitableFor": [
+        "fb",
+        "fashion"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -730,8 +879,18 @@ export const geoData = {
       "name": "Lower Parel",
       "city": "Mumbai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Premium / Mall"
+      "color": "#424242",
+      "corridor": "Premium / Mall",
+      "subCategory": "mall",
+      "suitableFor": [
+        "fb",
+        "wellness"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -748,8 +907,19 @@ export const geoData = {
       "name": "Juhu",
       "city": "Mumbai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Luxury / Residential"
+      "color": "#E53935",
+      "corridor": "Luxury / Residential",
+      "subCategory": "highstreet",
+      "suitableFor": [
+        "fb",
+        "fashion",
+        "wellness"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -766,8 +936,18 @@ export const geoData = {
       "name": "Andheri West",
       "city": "Mumbai",
       "type": "TAT-2 (PBD)",
-      "color": "#9B59B6",
-      "corridor": "Nightlife / Media"
+      "color": "#9C27B0",
+      "corridor": "Nightlife / Media",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -784,8 +964,17 @@ export const geoData = {
       "name": "Powai",
       "city": "Mumbai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Community / Expat"
+      "color": "#FF9800",
+      "corridor": "Community / Expat",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -802,8 +991,18 @@ export const geoData = {
       "name": "Malad West",
       "city": "Mumbai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "QSR / Family"
+      "color": "#FF9800",
+      "corridor": "QSR / Family",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -820,8 +1019,18 @@ export const geoData = {
       "name": "Vashi",
       "city": "Mumbai",
       "type": "TAT-3 (TBD)",
-      "color": "#4A90E2",
-      "corridor": "Growth / Retail"
+      "color": "#2196F3",
+      "corridor": "Growth / Retail",
+      "subCategory": "strategic",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "<500",
+        "500-2000"
+      ],
+      "ticketRange": "<200"
     },
     "geometry": {
       "type": "Point",
@@ -838,8 +1047,18 @@ export const geoData = {
       "name": "Thane West",
       "city": "Mumbai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Family / Volume"
+      "color": "#FF9800",
+      "corridor": "Family / Volume",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -856,8 +1075,18 @@ export const geoData = {
       "name": "Downtown Dubai",
       "city": "Dubai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Nightlife / Tourism"
+      "color": "#9C27B0",
+      "corridor": "Nightlife / Tourism",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -874,8 +1103,18 @@ export const geoData = {
       "name": "Dubai Marina",
       "city": "Dubai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Nightlife / High-Energy"
+      "color": "#9C27B0",
+      "corridor": "Nightlife / High-Energy",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -892,8 +1131,19 @@ export const geoData = {
       "name": "Palm Jumeirah",
       "city": "Dubai",
       "type": "TAT-1 (CBD)",
-      "color": "#D4AF37",
-      "corridor": "Luxury / Resort"
+      "color": "#E53935",
+      "corridor": "Luxury / Resort",
+      "subCategory": "highstreet",
+      "suitableFor": [
+        "fb",
+        "fashion",
+        "wellness"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -910,8 +1160,18 @@ export const geoData = {
       "name": "Business Bay",
       "city": "Dubai",
       "type": "TAT-2 (PBD)",
-      "color": "#9B59B6",
-      "corridor": "Business / Nightlife"
+      "color": "#9C27B0",
+      "corridor": "Business / Nightlife",
+      "subCategory": "nightlife",
+      "suitableFor": [
+        "fb",
+        "lifestyle"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -928,8 +1188,17 @@ export const geoData = {
       "name": "JLT",
       "city": "Dubai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Community / F&B"
+      "color": "#FF9800",
+      "corridor": "Community / F&B",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "200-500"
     },
     "geometry": {
       "type": "Point",
@@ -946,8 +1215,18 @@ export const geoData = {
       "name": "Al Barsha",
       "city": "Dubai",
       "type": "TAT-2 (PBD)",
-      "color": "#FF6B6B",
-      "corridor": "Family / Retail"
+      "color": "#FF9800",
+      "corridor": "Family / Retail",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb",
+        "electronics"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -963,9 +1242,18 @@ export const geoData = {
       "id": "dubai-dei",
       "name": "Deira",
       "city": "Dubai",
-      "type": "TAT-2 (Traditional)",
-      "color": "#FF6B6B",
-      "corridor": "Volume / Wholesale"
+      "type": "TAT-2 (PBD)",
+      "color": "#FF9800",
+      "corridor": "Volume / Wholesale",
+      "subCategory": "family",
+      "suitableFor": [
+        "fb"
+      ],
+      "propertySizes": [
+        "500-2000",
+        "2000-5000"
+      ],
+      "ticketRange": "<200"
     },
     "geometry": {
       "type": "Point",
@@ -982,8 +1270,19 @@ export const geoData = {
       "name": "Dubai Hills",
       "city": "Dubai",
       "type": "TAT-3 (Growth)",
-      "color": "#4A90E2",
-      "corridor": "Family / Premium"
+      "color": "#2196F3",
+      "corridor": "Family / Premium",
+      "subCategory": "strategic",
+      "suitableFor": [
+        "fb",
+        "electronics",
+        "wellness"
+      ],
+      "propertySizes": [
+        "<500",
+        "500-2000"
+      ],
+      "ticketRange": "500-1000"
     },
     "geometry": {
       "type": "Point",
@@ -1825,9 +2124,9 @@ export const tradeData = {
   "dubai-dei": {
     "name": "Deira",
     "city": "Dubai",
-    "tier": "TAT-2 (Traditional)",
+    "tier": "TAT-2 (PBD)",
     "corridor": "Volume / Wholesale",
-    "type": "TAT-2 (Traditional)",
+    "type": "TAT-2 (PBD)",
     "stats": {
       "rent": "AED 60-120/sqft",
       "spend": "AED 50-150",

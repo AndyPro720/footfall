@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run prepare-all && vite build",
     "preview": "vite preview",
+    "prepare-all": "npm run prepare-cities && npm run generate-data",
+    "prepare-cities": "node scripts/prepare_data.cjs",
     "generate-data": "node scripts/generate-geo-data.js"
   },
   "devDependencies": {
