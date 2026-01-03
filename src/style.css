@@ -535,12 +535,15 @@ button:focus-visible {
 }
 
 .landing-left-panel .btn-country {
-  padding: 0.5rem 1.5rem; /* Reduced padding */
-  font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.25); /* More visible on white */
+  padding: 0.5rem 1.2rem; /* Decreased padding further */
+  font-size: 0.9rem; /* Decreased font size */
+  font-weight: 700; /* Bolder text */
+  background: rgba(255, 255, 255, 0.25); 
   color: #1a1a1a;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 30px; /* More rounded */
+  border: 2px solid rgba(0, 0, 0, 0.1); /* Slightly thicker border */
+  border-radius: 40px; 
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .landing-left-panel .btn-country:hover {

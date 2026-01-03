@@ -668,7 +668,7 @@ body[data-page="home"] .navbar .logo {
   top: 30px;
   left: 30px;
   z-index: 1000;
-  padding: 14px 22px;
+  padding: 10px 16px;
   border-radius: 16px;
   display: none;
   flex-direction: column;
@@ -685,8 +685,10 @@ body[data-page="home"] .navbar .logo {
   
   /* Transition for expand/collapse */
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  max-width: 320px;
+  max-width: 260px;
 }
+
+/* Landing Mode Position: Reverted to default (Top Left) as requested */
 
 #tip-box.visible {
   display: flex;
@@ -701,7 +703,7 @@ body[data-page="home"] .navbar .logo {
 }
 
 #tip-box.expanded {
-  max-width: 380px;
+  max-width: 320px;
   animation: none;
   border-color: rgba(212, 175, 55, 0.4);
 }
@@ -730,10 +732,11 @@ body[data-page="home"] .navbar .logo {
 }
 
 .tip-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #222;
+  font-size: 0.85rem; /* Smaller as requested */
+  font-weight: 700;
+  color: #022c22; /* Dark Green/Black */
   flex: 1;
+  letter-spacing: 0.3px;
 }
 
 .tip-toggle {

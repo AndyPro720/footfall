@@ -132,7 +132,7 @@ export const Intelligence = {
                   </div>
                 </div>
                 <h1 class="landing-headline">
-                  Explore Trade Area Trends
+                  Explore Trade Areas
                 </h1>
                 
                 <div class="country-selector">
@@ -199,11 +199,7 @@ export const Intelligence = {
                <!-- Empty now -->
             </div>
             
-            <!-- Scroll Indicator (bottom center) -->
-            <div class="scroll-indicator" id="scroll-indicator">
-              <span class="scroll-text">Explore more about us</span>
-              <div class="scroll-arrow">↓</div>
-            </div>
+            <!-- Scroll Indicator REMOVED -->
           </div>
 
           <!-- Below Fold Sections -->
@@ -554,7 +550,7 @@ export const Intelligence = {
           // User wants map shifted right so Mumbai/Pune are visible on left side
           // Moving center further WEST (lower longitude) shifts map right in view
           center: [73.1, 18.87], 
-          zoom: 9.07, 
+          zoom: 8.4, 
           duration: 2500,
           stayDuration: 6000
         },
@@ -562,6 +558,8 @@ export const Intelligence = {
           region: 'UAE',
           center: [55.27, 25.20],
           zoom: 8.9,
+          pitch: 60,
+          bearing: 15,
           duration: 2500,
           stayDuration: 8000
         }
@@ -571,11 +569,8 @@ export const Intelligence = {
       
       init() {
         this.pauseIndicator = document.getElementById('tour-pause-indicator');
-        const landingMapPanel = document.getElementById('landing-map-panel'); // Note: this might be hidden/removed in new layout
+        const landingMapPanel = document.getElementById('landing-map-panel');
         const mapContainer = document.getElementById('map-container');
-        
-        // Pause on interactions
-        // Note: Global map listeners handle most of this now via hideHeroPanel
       },
       
       start() {
@@ -583,20 +578,103 @@ export const Intelligence = {
         this.isRunning = true;
         this.isPaused = false;
         
-        // Make sure stats card is visible for the tour
+        // Stats card visibility
         const card = document.getElementById('stats-card');
         if (card) {
-             card.style.display = 'block'; // Ensure it's not display:none
+             card.style.display = 'block'; 
              card.classList.remove('hidden');
              setTimeout(() => card.classList.add('visible'), 100);
+        }
+
+        // Tip Box visibility (Persistent now)
+        const tipBox = document.getElementById('tip-box');
+        if (tipBox) {
+            tipBox.style.display = 'flex';
+            // Wait slightly for transition
+            setTimeout(() => {
+                tipBox.classList.add('visible');
+                // Ensure it's not expanded by default unless clicked
+                tipBox.classList.remove('expanded'); 
+            }, 100);
         }
         
         StatsCardController.init();
         this.flyToStop(0);
       },
+
+      updateLandingUI(region) {
+          // 1. Update Country/City Buttons
+          const wrapper = document.querySelector('.country-selector');
+          if (wrapper) {
+            // Get cities for this region
+            const cities = geoData.cities.features
+                .filter(f => f.properties.country === region)
+                .map(f => f.properties.name);
+            
+            // If no cities found (e.g. UAE might be just Dubai in data?), fallback or manual list
+            let displayCities = cities;
+            if (region === 'UAE' && (!cities || cities.length === 0)) displayCities = ['Dubai', 'Abu Dhabi']; // Fallback
+            if (region === 'India' && (!cities || cities.length === 0)) displayCities = ['Mumbai', 'Pune', 'Bengaluru', 'Delhi'];
+            
+            // Remove duplicates and limit
+            displayCities = [...new Set(displayCities)].slice(0, 4); 
+            
+            wrapper.innerHTML = displayCities.map(city => 
+                `<button class="btn-country" data-city="${city}" data-country="${region}">${city}</button>`
+            ).join('');
+
+            // Add listeners
+            wrapper.querySelectorAll('.btn-country').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const city = e.target.dataset.city;
+                    
+                    const cityFeature = geoData.cities.features.find(f => f.properties.name === city);
+                    if (cityFeature && map) {
+                         // MIMIC MAP CLICK LOGIC: Transition to Dashboard
+                         
+                         const landingSection = document.getElementById('landing-hero-section');
+                         const mainScrollContainer = document.getElementById('main-scroll-container');
+                         const landingPrompt = document.getElementById('landing-prompt');
+                         
+                         if (landingPrompt) landingPrompt.classList.remove('visible');
+                         if (landingSection) landingSection.classList.add('hidden');
+                         if (mainScrollContainer) mainScrollContainer.style.display = 'none';
+                         
+                         if (topBar) topBar.classList.add('visible');
+                         if (legend) legend.classList.add('visible');
+                         
+                         // Stop tour
+                         this.stop();
+                         
+                         // Load City View
+                         loadCityView(cityFeature);
+                    }
+                });
+            });
+          }
+
+          // 2. Update Tip Box Content - Simplified
+          const tipTitle = document.querySelector('.tip-title');
+          const tipDetails = document.querySelector('.tip-details');
+          
+          if (tipTitle) {
+              // Minimal content for contracted state
+              tipTitle.innerHTML = `<span style="opacity: 0.6; font-weight: 500;">Scouting:</span> ${region}`;
+          }
+          
+          if (tipDetails) {
+              // Details only visible when expanded
+              tipDetails.innerHTML = `
+                <ul>
+                    <li>Tap map to pause tour</li>
+                    <li>Analyzing footfall trends for ${region}</li>
+                    <li>Select a city button to fly directly</li>
+                </ul>
+              `;
+          }
+      },
       
       flyToStop(index) {
-        // Stop if not running, paused, or no longer in landing mode
         if (!this.isRunning || this.isPaused || viewMode !== 'landing') {
           this.stop();
           return;
@@ -605,58 +683,49 @@ export const Intelligence = {
         const stop = this.tourStops[index];
         this.currentStopIndex = index;
         
-        // Fly to region
         console.log(`Tour: Flying to ${stop.region}`);
+
+        // Update UI for this region
+        this.updateLandingUI(stop.region);
         
-        // Robust finding of country feature
         const countryFeature = geoData.countries?.features?.find(f => 
             f.properties.name === stop.region || 
             f.properties.name.toLowerCase() === stop.region.toLowerCase()
         );
         
         if (countryFeature) {
-            console.log(`Tour: Found feature for ${stop.region}, setting up Country View`);
             currentLevel = 'Country';
             updateBreadcrumbs(['Global', stop.region]);
             
-            // Visibility: HIDE global country fill to prevent double-border/overlap
             setLayerVisibility(['country-fill', 'india-fill'], 'none'); 
-            
-            // SHOW cities and city-specific borders
             setLayerVisibility(['cities-border', 'cities-border-casing', 'cities-glow', 'cities-label'], 'visible');
             setLayerVisibility(['cities-fill'], 'visible'); 
-            
-            // Hide specific trade area points
             setLayerVisibility(['trade-blobs', 'trade-points'], 'none');
             
-            // Update Filters for Cities
             map.setFilter('cities-fill', ['==', 'country', stop.region]);
             map.setFilter('cities-border', ['==', 'country', stop.region]);
             map.setFilter('cities-border-casing', ['==', 'country', stop.region]);
             map.setFilter('cities-glow', ['==', 'country', stop.region]);
             map.setFilter('cities-label', ['==', 'country', stop.region]);
-        } else {
-             console.warn(`Tour: Country feature for ${stop.region} NOT found!`);
         }
         
-        // 2. FORCE correct camera position for Landing Page Tour
         if (map) {
             map.flyTo({
                 center: stop.center,
                 zoom: stop.zoom,
+                pitch: stop.pitch || 0,
+                bearing: stop.bearing || 0,
                 duration: stop.duration,
                 essential: true
             });
         }
         
-        // Start stats rotation after fly animation completes
         setTimeout(() => {
           if (!this.isPaused && viewMode === 'landing') {
             StatsCardController.startRotation(stop.region, 3000);
           }
         }, stop.duration);
         
-        // Schedule next region
         this.tourTimeout = setTimeout(() => {
           if (!this.isPaused && this.isRunning && viewMode === 'landing') {
             StatsCardController.stopRotation();
@@ -676,26 +745,20 @@ export const Intelligence = {
         }
         StatsCardController.stopRotation();
         
-        // SHOW Tip Box only when paused (clicked)
-        if (this.pauseIndicator) {
-          this.pauseIndicator.classList.add('visible');
-          // Update text: Remove emoji, simple text
-          const textEl = document.getElementById('tour-pause-text');
-          if (textEl) textEl.innerText = "Tour paused, tap off map to resume";
+        // Show pause state in Tip Box
+        const tipTitle = document.querySelector('.tip-title');
+        if (tipTitle) {
+            tipTitle.textContent = "Tour Paused. Select a city or tap map to resume.";
         }
+        
+        const pauseIndicator = document.getElementById('tour-pause-indicator');
+        if (pauseIndicator) pauseIndicator.classList.add('visible'); // Keep this as visual feedback too
       },
       
-      // Temporary pause (4 seconds) then auto-resume
       pauseTemporarily(durationMs = 4000) {
         if (!this.isRunning) return;
-        
-        // Clear any existing pause timeout
         if (this.pauseTimeout) clearTimeout(this.pauseTimeout);
-        
-        // Pause
         this.pause();
-        
-        // Auto-resume after duration
         this.pauseTimeout = setTimeout(() => {
           this.resume();
         }, durationMs);
@@ -705,12 +768,9 @@ export const Intelligence = {
         if (!this.isRunning || !this.isPaused) return;
         this.isPaused = false;
         
-        // HIDE Tip Box when running
-        if (this.pauseIndicator) {
-           this.pauseIndicator.classList.remove('visible'); 
-        }
+        const pauseIndicator = document.getElementById('tour-pause-indicator');
+        if (pauseIndicator) pauseIndicator.classList.remove('visible');
         
-        // Resume from current stop
         this.flyToStop(this.currentStopIndex);
       },
       
@@ -735,6 +795,7 @@ export const Intelligence = {
     const returnToLanding = () => {
         console.log("Returning to Landing Page...");
         viewMode = 'landing';
+        document.body.classList.add('landing-mode');
         if (mapContainer) mapContainer.classList.add('landing-mode');
         
         // 1. Reset Landing Section & Hero
@@ -780,10 +841,10 @@ export const Intelligence = {
         if (topBar) topBar.classList.remove('visible');
         if (legend) legend.classList.remove('visible');
         if (tipBox) {
-            tipBox.classList.remove('visible');
-            tipBox.style.display = 'none'; // Force hide
-            // Reset tip box style just in case
-            setTimeout(() => tipBox.style.removeProperty('display'), 500);
+             // Reset tip box but keep visible if tour is restarting
+             // But actually, updateLandingUI will handle content.
+             // Just ensure it's not hidden by display:none
+             // tipBox.classList.remove('visible'); // Let start() handle this
         }
         
         // 5. Restart Tour
@@ -803,6 +864,7 @@ export const Intelligence = {
       LandingLogoAnimator.stop(); // Stop logo animation
       
       // Remove landing-mode from map (make it fixed)
+      document.body.classList.remove('landing-mode');
       if (mapContainer) mapContainer.classList.remove('landing-mode');
       
       // Remove landing-active to allow below-fold sections to be visible
@@ -2105,7 +2167,7 @@ export const Intelligence = {
       // If landing is visible AND NOT in prompt mode -> Hide Legend/Tip/Watermark
       if (landingRef && !landingRef.classList.contains('hidden') && !landingRef.classList.contains('prompt-mode')) {
            if (legend) legend.classList.remove('visible');
-           if (tipBox) tipBox.classList.remove('visible');
+           // if (tipBox) tipBox.classList.remove('visible'); // Keep tip box visible in landing mode
            if (watermark) watermark.classList.add('hidden'); // Hide watermark on landing
       } else {
            updateTipBox('Global');
