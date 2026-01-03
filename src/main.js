@@ -32,7 +32,8 @@ window.appLoader.init();
 const routes = {
   '/': Intelligence, 
   '/intelligence': Intelligence,
-  '/contact': Contact
+  '/contact': Contact,
+  '/info': Home
 };
 
 document.addEventListener('DOMContentLoaded', () => {

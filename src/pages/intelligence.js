@@ -1161,8 +1161,28 @@ export const Intelligence = {
             if (loaded) return;
             loaded = true;
             console.log("Map tiles loaded - revealing page");
-            triggerLandingAnimation();
-            LandingLogoAnimator.init(); // Start landing logo animation
+            
+            // Check if intro has played this session
+            const hasPlayed = sessionStorage.getItem('introPlayed');
+            
+            if (hasPlayed) {
+                // FAST TRACK: Skip logo animation
+                console.log("Skipping intro animation (already played)");
+                const landingContent = document.querySelector('.landing-hero-content');
+                if (landingContent) landingContent.style.opacity = '1';
+                
+                // Start Tour immediately
+                MapTourController.init();
+                MapTourController.start();
+                
+                // START SMALL LOGO ANIMATION (Keep it running)
+                LandingLogoAnimator.init();
+            } else {
+                // FULL INTRO
+                triggerLandingAnimation();
+                LandingLogoAnimator.init(); 
+                sessionStorage.setItem('introPlayed', 'true');
+            }
         };
 
         map.once('idle', revealPage);
@@ -2690,7 +2710,8 @@ export const Intelligence = {
     
     // Watermark Home Link
     document.getElementById('watermark-home').onclick = () => {
-      window.location.href = '/';
+      window.history.pushState(null, null, '/info');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     };
   }
 };

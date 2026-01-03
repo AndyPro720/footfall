@@ -29,10 +29,10 @@ export const Navbar = {
 
       <div class="menu-overlay" id="menuOverlay">
         <div class="menu-content">
-          <a href="#home" class="menu-item" data-scroll>Home</a>
-          <a href="#about" class="menu-item" data-scroll>About</a>
-          <a href="#clients" class="menu-item" data-scroll>Testimonials</a>
-          <a href="#contact" class="menu-item" data-scroll>Contact</a>
+          <a href="/" class="menu-item" data-link>Home</a>
+          <a href="/info#about" class="menu-item" data-scroll>About</a>
+          <a href="/info#clients" class="menu-item" data-scroll>Testimonials</a>
+          <a href="/info#contact" class="menu-item" data-scroll>Contact</a>
         </div>
       </div>
     `;
@@ -89,17 +89,30 @@ export const Navbar = {
       });
     });
 
-    // Smooth Scroll Logic
+    // Enhanced Navigation Logic for /info Page Sections
     scrollLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
+        const href = link.getAttribute('href');
+        const [path, hash] = href.split('#');
+        const targetId = hash;
         
-        // Dispatch event for Page Component to handle
-        // This is cleaner for SPA where "Home" or "About" might need state changes (returnToLanding)
-        window.dispatchEvent(new CustomEvent('nav-to-section', { 
-            detail: { targetId } 
-        }));
+        const currentPath = window.location.pathname;
+
+        if (currentPath === path) {
+             // We are on the right page, just scroll
+             const targetEl = document.getElementById(targetId);
+             if (targetEl) {
+                 targetEl.scrollIntoView({ behavior: 'smooth' });
+             }
+        } else {
+            // Check if we need to navigate
+            window.history.pushState(null, null, href);
+            // Manually trigger popstate for router to pick up if it listens to it, 
+            // or just rely on router's ability to handle pushState if wrapped?
+            // Since router.js attaches popstate listener, dispatching it helps.
+            window.dispatchEvent(new PopStateEvent('popstate'));
+        }
         
         // Close menu
         toggle.classList.remove('active');

@@ -9,41 +9,7 @@ export const Home = {
         <!-- Loading Screen -->
 
 
-        <!-- Hero Section with Map Background -->
-        <section id="home" class="hero landing-hero">
-          <!-- Map Container - ONLY in hero -->
-          <div id="landing-map-container"></div>
-          <div class="map-overlay-gradient"></div>
 
-          <!-- Prompt Modal (Hidden by default) -->
-          <div id="landing-prompt">
-            <button class="prompt-close">&times;</button>
-            <h2 class="prompt-title">Select Experience</h2>
-            <p class="prompt-subtitle">How would you like to explore <span id="prompt-country-name">the market</span>?</p>
-            <div class="prompt-buttons">
-              <button class="btn-primary-gold" id="btn-launch-satellite">Launch Satellite View</button>
-              <button class="btn-secondary-glass" id="btn-customize-exp">Customize My Experience</button>
-            </div>
-          </div>
-          
-          <div class="hero-content fade-up">
-            <div class="brand-container">
-              <!-- Centered Large Logo -->
-              <div class="hero-logo-wrapper">
-                <img src="/logo.png" alt="FOOTTFALL" class="hero-logo-large">
-              </div>
-
-              <!-- Tagline -->
-              <h2 class="hero-tagline">Real Estate Intelligence Re-imagined.</h2>
-              
-              <!-- Country Selectors -->
-              <div class="country-selector">
-                <button class="btn-country" data-country="India">India</button>
-                <button class="btn-country" data-country="UAE">UAE</button>
-              </div>
-            </div>
-          </div>
-        </section>
 
 
         <!-- About Section (Founder Profile) -->
@@ -77,31 +43,7 @@ export const Home = {
           </div>
         </section>
 
-        <!-- Services Section -->
-        <section id="services" class="services-section">
-          <h2 class="section-title services-header animate-on-scroll">Offerings</h2>
-          <div class="services-split-container">
-            <!-- Brands Section -->
-            <div class="split-section brands" id="section-brands">
-              <div class="overlay-gradient"></div>
-              <div class="section-content">
-                <span class="section-number">01 — Strategy</span>
-                <h2 class="service-type-title">Brands</h2>
-                <p class="section-desc">Use AI to find your next flagship location. Analyze footfall, demographics, and competition to minimize risk.</p>
-              </div>
-            </div>
 
-            <!-- Landlords Section -->
-            <div class="split-section landlords" id="section-landlords">
-              <div class="overlay-gradient"></div>
-              <div class="section-content">
-                <span class="section-number">02 — Assets</span>
-                <h2 class="service-type-title">Landlords</h2>
-                <p class="section-desc">Optimize tenant mix for maximum yield. Identify the right brand mix for your property using real-world data.</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
 
 
@@ -333,143 +275,8 @@ export const Home = {
     `;
   },
   afterRender: () => {
-    // --- MAP INITIALIZATION (scoped to hero only) ---
-    let map;
-    let selectedCountry = null;
-    let isMapLoaded = false;
-    
-    const coords = {
-      India: { center: [78.9629, 20.5937], zoom: 4.5 },
-      UAE: { center: [55.2708, 25.2048], zoom: 6.5 }
-    };
-
-    const initMap = () => {
-        try {
-
-
-            const container = document.getElementById('landing-map-container');
-            if (!container) return;
-
-            map = new maplibregl.Map({
-                container: 'landing-map-container',
-                style: 'https://tiles.openfreemap.org/styles/liberty',
-                center: [60, 20],
-                zoom: 3,
-                pitch: 0,
-                bearing: 0,
-                interactive: false
-            });
-
-            map.on('load', () => {
-                if (geoData && geoData.countryPolygons) {
-                    map.addSource('countryPolygons', {
-                        type: 'geojson',
-                        data: geoData.countryPolygons
-                    });
-
-                    map.addLayer({
-                        id: 'country-fill',
-                        type: 'fill',
-                        source: 'countryPolygons',
-                        paint: {
-                            'fill-color': ['get', 'color'],
-                            'fill-opacity': 0.6
-                        }
-                    });
-                }
-                
-                map.addSource('indiaOSM', {
-                    type: 'geojson',
-                    data: '/india-osm.geojson'
-                });
-
-                map.addLayer({
-                    id: 'india-fill',
-                    type: 'fill',
-                    source: 'indiaOSM',
-                    paint: {
-                        'fill-color': '#00732F',
-                        'fill-opacity': 0.6
-                    }
-                });
-
-                isMapLoaded = true;
-                
-
-            });
-        } catch (error) {
-            console.error("Map init error:", error);
-
-        }
-    };
-
-    initMap();
-
-    // --- INTERACTION LOGIC ---
-    const countryBtns = document.querySelectorAll('.btn-country');
-    const promptModal = document.getElementById('landing-prompt');
-    const promptClose = document.querySelector('.prompt-close');
-    const mapContainer = document.getElementById('landing-map-container');
-    const btnLaunch = document.getElementById('btn-launch-satellite');
-    const btnCustomize = document.getElementById('btn-customize-exp');
-
-    countryBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const country = btn.dataset.country;
-            selectedCountry = country;
-            
-            // Zoom Map
-            if (map && isMapLoaded && coords[country]) {
-                const target = coords[country];
-                map.flyTo({
-                    center: target.center,
-                    zoom: target.zoom,
-                    speed: 1.2,
-                    curve: 1.42
-                });
-                
-                // Clear Blur
-                if (mapContainer) mapContainer.classList.add('focused');
-            }
-
-            // Show Prompt
-            if (promptModal) {
-                 const nameSpan = document.getElementById('prompt-country-name');
-                 if(nameSpan) nameSpan.innerText = country;
-                 promptModal.classList.add('visible');
-            }
-        });
-    });
-
-    // Close Prompt
-    if (promptClose) {
-        promptClose.addEventListener('click', () => {
-            if (promptModal) promptModal.classList.remove('visible');
-            if (mapContainer) mapContainer.classList.remove('focused');
-            if (map) map.flyTo({ center: [60, 20], zoom: 3 });
-        });
-    }
-
-    // Launch Satellite View - Navigate to intelligence WITHOUT wizard
-    if (btnLaunch) {
-        btnLaunch.addEventListener('click', () => {
-             if (promptModal) promptModal.classList.remove('visible');
-             
-             // Navigate to intelligence page with country param
-             const targetUrl = `/intelligence?country=${selectedCountry}`;
-             window.history.pushState({}, '', targetUrl);
-             window.dispatchEvent(new PopStateEvent('popstate'));
-        });
-    }
-
-    // Customize Experience - Navigate to intelligence WITH wizard
-    if (btnCustomize) {
-        btnCustomize.addEventListener('click', () => {
-             const targetUrl = `/intelligence?country=${selectedCountry}&mode=wizard`;
-             window.history.pushState({}, '', targetUrl);
-             window.dispatchEvent(new PopStateEvent('popstate'));
-        });
-    }
+    // --- EXISTING LANDING PAGE FUNCTIONALITY ---
+    // Contact Page Logic (Flip & Modal)
 
     // --- EXISTING LANDING PAGE FUNCTIONALITY ---
     // Contact Page Logic (Flip & Modal)
@@ -552,23 +359,17 @@ export const Home = {
       observer.observe(aboutSection);
     }
 
-    // Services Split Layout
-    const servicesContainer = document.querySelector('.services-split-container');
-    const servicesSections = document.querySelectorAll('.split-section');
 
-    if (servicesContainer && servicesSections.length > 0) {
-      servicesSections.forEach(section => {
-        section.addEventListener('click', () => {
-          if (section.classList.contains('active')) {
-            section.classList.remove('active');
-            servicesContainer.classList.remove('has-active');
-          } else {
-            servicesSections.forEach(s => s.classList.remove('active'));
-            section.classList.add('active');
-            servicesContainer.classList.add('has-active');
-          }
-        });
-      });
+
+    // Hash Scroll Handling
+    if (window.location.hash) {
+      setTimeout(() => {
+        const targetId = window.location.hash.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500); // Slight delay for rendering
     }
   }
 };
