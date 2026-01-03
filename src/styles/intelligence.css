@@ -352,7 +352,7 @@ body[data-page="home"] .navbar .logo {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 }
 
@@ -1003,7 +1003,7 @@ body[data-page="intelligence"] .navbar .lang-dropdown {
 
 .watermark-logo img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
 }
 
@@ -1129,4 +1129,24 @@ body[data-page="intelligence"] .navbar .lang-dropdown {
   height: 250px;
   width: 100%;
   margin-top: 20px;
+}
+
+/* --- Static Hero Logo --- */
+.hero-static-logo {
+  height: 90px; /* Match previous animation height */
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); /* Slight shadow for depth */
+}
+
+
+
+/* Align wrapper to center content */
+.landing-loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 90px;
+  width: 100%;
 }

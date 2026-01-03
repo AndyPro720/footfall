@@ -128,108 +128,12 @@ export const Intelligence = {
                 <!-- Full Loader Animation (scaled down) -->
                 <div class="hero-logo-animated" id="hero-logo-animated">
                   <div class="landing-loader-wrapper">
-                    <div class="logo-container">
-                      <!-- F -->
-                      <div class="letter-slot slot-f">
-                        <div class="f-scanner-box">
-                          <div class="f-outline">F</div>
-                          <div class="scan-line"></div>
-                        </div>
-                        <div class="final-letter">F</div>
-                      </div>
-
-                      <!-- OO -->
-                      <div class="letter-slot slot-o1">
-                        <div class="person-shape p1" style="left: 10px;">
-                          <div class="p-head"></div>
-                          <div class="p-body"></div>
-                        </div>
-                        <div class="final-letter">O</div>
-                      </div>
-                      <div class="letter-slot slot-o2">
-                        <div class="person-shape p2" style="right: 10px;">
-                          <div class="p-head"></div>
-                          <div class="p-body"></div>
-                        </div>
-                        <div class="match-flash"></div>
-                        <div class="final-letter">O</div>
-                      </div>
-
-                      <!-- TT -->
-                      <div class="letter-slot slot-t1">
-                        <div class="letter-mask">
-                          <div class="final-letter t1-static" style="opacity: 0;">T</div>
-                        </div>
-                      </div>
-                      <div class="letter-slot slot-t2">
-                        <div class="map-block-container">
-                          <div class="map-road road-1"></div>
-                          <div class="map-road road-2"></div>
-                          <div class="map-road road-3"></div>
-                          <div class="map-road road-4"></div>
-                          <div class="map-pin-small" style="top: 20px; left: 30px;"></div>
-                          <div class="map-pin-small" style="bottom: 25px; right: 35px;"></div>
-                          <div class="map-pin-small" style="top: 15px; right: 20px;"></div>
-                        </div>
-                        <div class="letter-mask">
-                          <div class="final-letter t2-static" style="opacity: 0;">T</div>
-                        </div>
-                      </div>
-
-                      <div class="letter-slot slot-f2">
-                        <div class="graph-group">
-                          <div class="g-bar"></div>
-                          <div class="g-bar"></div>
-                          <div class="g-bar"></div>
-                          <div class="g-bar"></div>
-                        </div>
-                        <div class="final-letter">F</div>
-                      </div>
-                      <div class="letter-slot slot-a">
-                        <div class="network-group">
-                          <div class="n-node node1" style="bottom: 15px; left: 10px;"></div>
-                          <div class="n-node node2" style="bottom: 40px; left: 25px;"></div>
-                          <div class="n-node node3" style="bottom: 20px; left: 40px;"></div>
-                          <div class="n-line line1" style="bottom: 18px; left: 14px; width: 22px; transform: rotate(-55deg);"></div>
-                          <div class="n-line line2" style="bottom: 42px; left: 28px; width: 22px; transform: rotate(55deg);"></div>
-                        </div>
-                        <div class="final-letter">A</div>
-                      </div>
-
-                      <!-- LL Custom Merge -->
-                      <div class="letter-slot slot-l1">
-                        <div class="pin-shape">
-                          <div class="pin-head">
-                            <div class="pin-dot"></div>
-                          </div>
-                        </div>
-                        <div class="pin-shadow"></div>
-                        <div class="l1-custom-shape">
-                          <div class="l1-v-bar"></div>
-                          <div class="l1-h-bar"></div>
-                        </div>
-                      </div>
-
-                      <div class="letter-slot slot-l2">
-                        <div class="l2-forklift-mechanism">
-                          <div class="l2-vertical-stem"></div>
-                          <div class="l2-forks"></div>
-                          <div class="shop-block">
-                            <div class="shop-roof"></div>
-                            <div class="shop-door"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      <img src="/logo.png" alt="Foottfall" class="hero-static-logo">
                   </div>
                 </div>
                 <h1 class="landing-headline">
-                  Trade Area Intelligence<br>
-                  <span class="headline-highlight">Reimagined.</span>
+                  Explore Trade Area Trends
                 </h1>
-                <p class="landing-subtitle">
-                  Curating spaces that people want to be in — with the brands that belong in them.
-                </p>
                 
                 <div class="country-selector">
                   <button class="btn-country" data-country="India">India</button>
@@ -436,7 +340,8 @@ export const Intelligence = {
       init() {
         this.container = document.querySelector('.landing-loader-wrapper');
         if (!this.container || !window.gsap) return;
-        this.start();
+        // DISABLED for static logo:
+        // this.start();
       },
       
       start() {
