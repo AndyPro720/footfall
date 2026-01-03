@@ -157,3 +157,53 @@ Implemented in `src/pages/home.js`.
 - **Entry**: `index.html` -> `src/main.js`
 - **Assets**: `public/` (GeoJSONs, CSVs, Images)
 - **Styles**: CSS Variables defined in `src/style.css`.
+
+---
+
+## Loader & Resource Loading Flow
+
+This system ensures no "Flash of Unstyled Data" by synchronizing map rendering with the UI loader.
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Loader
+    participant main.js
+    participant Intelligence.js
+    participant MapLibre
+
+    Browser->>main.js: DOMContentLoaded
+    main.js->>Loader: init() - starts animation
+    main.js->>main.js: Check route
+    alt Non-landing route (/info, etc.)
+        main.js->>main.js: isLandingPage = false
+        main.js->>Loader: hide() immediately
+    else Landing route (/, /intelligence)
+        Note over Intelligence.js: Loader continues playing...
+        Intelligence.js->>Intelligence.js: await DataManager.loadData()
+        Intelligence.js->>MapLibre: new Map()
+        
+        alt Map Cached
+             Intelligence.js->>MapLibre: Map Reused (Singleton/Logic)
+             Intelligence.js-->Loader: hide() immediate
+        else Map Fresh
+             MapLibre->>MapLibre: Load tiles
+             Intelligence.js->>MapLibre: addSource(polygons)
+             Intelligence.js->>MapLibre: addLayers()
+             MapLibre-->>Intelligence.js: 'load' event
+             MapLibre->>MapLibre: Render all layers
+             MapLibre-->>Intelligence.js: 'idle' event
+             Note over MapLibre: All tiles + polygons drawn
+             Intelligence.js->>Loader: hide()
+        end
+    end
+```
+
+### What "Idle" Guarantees
+
+MapLibre's `idle` event fires when:
+1. All **tiles** for the current viewport are downloaded and decoded.
+2. All **GeoJSON sources** are parsed and their geometries uploaded to GPU.
+3. All **layers** (fills, lines, symbols) are rendered to the frame buffer.
+
+This ensures the user never sees a blank or partially-rendered map when the loader vanishes.

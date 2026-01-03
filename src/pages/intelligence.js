@@ -1100,6 +1100,18 @@ export const Intelligence = {
     // Test if map container exists
     if (!mapContainer) console.error("Map Container NOT found!");
 
+    // CLEANUP: Destroy existing map if it exists (prevents WebGL context loss)
+    if (window._footfallMap) {
+        console.log("Destroying previous map instance to prevent WebGL context loss");
+        try {
+            window._footfallMap.remove();
+        } catch (e) {
+            console.log("Previous map already invalid");
+        }
+        window._footfallMap = null;
+    }
+
+    // Create new map instance
     map = new maplibregl.Map({
         container: 'map-container',
         style: 'https://tiles.openfreemap.org/styles/liberty', // Free vector style
@@ -1107,8 +1119,16 @@ export const Intelligence = {
         zoom: 2.2, // Start slightly farther out for zoom effect
         pitch: 0,
         bearing: 0,
-        antialias: true // Needed for 3D buildings
+        bearing: 0,
+        bearing: 0,
+        antialias: true, // Needed for 3D buildings
+        attributionControl: {
+            compact: true
+        }
       });
+    
+    // Store globally so we can clean it up on next navigation
+    window._footfallMap = map;
 
       // Temporary pause on map interaction - 4 seconds then resume
       const pauseTourTemporarily = () => {
@@ -1156,11 +1176,26 @@ export const Intelligence = {
         // PRELOAD OPTIMIZATION: Wait for map to be idle (tiles loaded) before showing
         // But set a max timeout so we don't wait forever
         
+        // FORCE COMPACT ATTRIBUTION TO START COLLAPSED
+        // MapLibre often expands it by default on desktop. We want just the icon.
+        const attribDetails = document.querySelector('.maplibregl-ctrl-attrib.maplibregl-compact');
+        if (attribDetails) {
+            attribDetails.removeAttribute('open');
+            attribDetails.classList.remove('maplibregl-compact-show');
+        }
+
         let loaded = false;
         const revealPage = () => {
             if (loaded) return;
             loaded = true;
             console.log("Map tiles loaded - revealing page");
+            
+            // --- CRITICAL: Hide the loader NOW ---
+            // At this point: Data is loaded, Map tiles rendered, GeoJSON sources added & drawn.
+            // The map.idle event guarantees all layers are stable and visible.
+            if (window.appLoader) {
+                window.appLoader.hide();
+            }
             
             // Check if intro has played this session
             const hasPlayed = sessionStorage.getItem('introPlayed');

@@ -8,9 +8,11 @@ export class Router {
   init() {
     window.addEventListener('popstate', () => this.handleRoute());
     document.body.addEventListener('click', e => {
-      if (e.target.matches('[data-link]')) {
+      // Use closest() to handle clicks on child elements (e.g., img inside anchor)
+      const link = e.target.closest('[data-link]');
+      if (link) {
         e.preventDefault();
-        this.navigateTo(e.target.href);
+        this.navigateTo(link.href);
       }
     });
     this.handleRoute();

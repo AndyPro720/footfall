@@ -6,7 +6,11 @@ export const Home = {
   render: () => {
     return `
       <div class="page home-page">
-        <!-- Loading Screen -->
+        <!-- Floating Background Blobs -->
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-blob blob-3"></div>
+        <div class="bg-blob blob-4"></div>
 
 
 
@@ -35,7 +39,7 @@ export const Home = {
                   </svg>
                 </h2>
                 <div class="founder-bio">
-                  <p><strong style="color: #fff;">Rahul Ahuja</strong> believes that real estate is the physical language of economics. With over 15 years in high-volume acquisitions, he steers the firm's macro-strategy, identifying undervalued corridors before they hit the institutional radar.</p>
+                  <p><strong>Rahul Ahuja</strong> believes that real estate is the physical language of economics. With over 15 years in high-volume acquisitions, he steers the firm's macro-strategy, identifying undervalued corridors before they hit the institutional radar.</p>
                 </div>
               </div>
 
@@ -167,9 +171,6 @@ export const Home = {
 
                 <div class="contact-logo">
                   <div class="logo-text">FOOTTFALL</div>
-                  <div class="fingerprint-icon">
-                    <img src="/fingerprint.png" alt="Fingerprint" class="fingerprint-img">
-                  </div>
                 </div>
                 
                 <div class="quote">
@@ -243,10 +244,8 @@ export const Home = {
           <div id="contactModal" class="form-modal">
             <div class="form-content">
               <button id="closeFormBtn" class="close-modal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <span class="bar"></span>
+                <span class="bar"></span>
               </button>
               <h2 style="color: var(--color-accent); margin-bottom: 30px; font-family: var(--font-heading); text-align: center;">Contact Us</h2>
               <form class="contact-form">

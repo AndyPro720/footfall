@@ -11,6 +11,10 @@ export class Loader {
     init() {
         if (!this.overlay) return;
         
+        // REVEAL the loader overlay (hidden by default in index.html)
+        this.overlay.style.opacity = '1';
+        this.overlay.style.pointerEvents = 'all';
+        
         // Wait for fonts to load before showing the animation to prevent FOUT
         document.fonts.ready.then(() => {
             this.runAnimation();

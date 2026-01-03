@@ -4,8 +4,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(0, 0, 0, 0.87); /* Inverted for light theme */
+  background-color: #ffffff; /* Global White Background */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -40,6 +40,7 @@ body {
   overflow-y: auto; /* Scroll happens here */
   overflow-x: hidden;
   scroll-behavior: smooth;
+  background: transparent; /* Allow background animations to show */
 }
 
 .logo {

@@ -26,8 +26,7 @@ import { Contact } from './pages/contact.js';
 // Global Loader Instance
 window.appLoader = new Loader();
 
-// Run immediate animation (if not already running via inline script, but we rely on this module now)
-window.appLoader.init();
+// DO NOT call init() here - moved inside DOMContentLoaded for route-aware control
 
 const routes = {
   '/': Intelligence, 
@@ -43,11 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.insertAdjacentHTML('afterbegin', Navbar.render());
   Navbar.afterRender();
 
-  // Hide loader after a minimum fallback time or when logic completes
-  // For a real app, you hide it after data fetch. Here we hide it after small delay to show off animation.
-  setTimeout(() => {
-     window.appLoader.hide();
-  }, 3500); // 3.5s to let at least one cycle of animation play somewhat
+  // --- LOADER LOGIC: Route-Aware ---
+  // For Landing Pages (/  or /intelligence): Run and show the loader animation.
+  // The loader is hidden by Intelligence.js after all resources are ready via map.idle event.
+  // For other pages (e.g., /info): Hide immediately without even starting the animation.
+  const currentPath = window.location.pathname;
+  const isLandingPage = currentPath === '/' || currentPath === '/intelligence';
+
+  if (isLandingPage) {
+    // Landing page: Start the loader animation
+    window.appLoader.init();
+  } else {
+    // Non-landing page: Hide loader immediately (never show animation)
+    window.appLoader.hide();
+  }
+  // For landing page, loader hiding is managed by Intelligence.js after map.once('idle')
 
 
   // Add Scroll Progress Bar
