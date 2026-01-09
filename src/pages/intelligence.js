@@ -660,26 +660,52 @@ export const Intelligence = {
       updateLandingUI(region) {
           // 1. Update Country/City Buttons
           const wrapper = document.querySelector('.country-selector');
-          if (wrapper) {
-            // Get cities for this region
-            const cities = geoData.cities.features
-                .filter(f => f.properties.country === region)
-                .map(f => f.properties.name);
-            
-            // If no cities found (e.g. UAE might be just Dubai in data?), fallback or manual list
-            let displayCities = cities;
-            if (region === 'UAE' && (!cities || cities.length === 0)) displayCities = ['Dubai', 'Abu Dhabi']; // Fallback
-            if (region === 'India' && (!cities || cities.length === 0)) displayCities = ['Mumbai', 'Pune', 'Bengaluru', 'Delhi'];
-            
-            // Remove duplicates and limit
-            displayCities = [...new Set(displayCities)].slice(0, 4); 
-            
-            wrapper.innerHTML = displayCities.map(city => 
-                `<button class="btn-country" data-city="${city}" data-country="${region}">${city}</button>`
-            ).join('');
+          
+          // Only render the city buttons once to keep them static
+          if (wrapper && wrapper.getAttribute('data-static-rendered') !== 'true') {
+             
+             // Define all serviceable cities
+             // User requested only these specific cities
+             const priorityCities = ['Mumbai', 'Pune', 'Dubai'];
+             let allCities = [];
+             
+             // Add priority cities first
+             allCities.push(...priorityCities);
+             
+             // Add any other cities from data that might be missing? 
+             // Temporarily disabled to strictly follow "only cities are..." unless data explicitly has them
+             if (geoData.cities && geoData.cities.features) {
+                 geoData.cities.features.forEach(f => {
+                     // Only add if it's really a different city in the data, but primarily stick to the list if possible
+                     // or just let the list define the buttons if we want strict control.
+                     // The user said "only cities are...", so let's rely on the list unless the data has a real active city we missed.
+                     // But for now, to be safe, I will trust the user's "only" statement.
+                     if (!allCities.includes(f.properties.name) && ['Mumbai', 'Pune', 'Dubai'].includes(f.properties.name)) {
+                         // redundant check given the list above, but ensures we don't accidentally add others
+                     }
+                 });
+             }
+             
+             // Filter undefined strings just in case
+             const displayCities = allCities.filter(c => c);
 
-            // Add listeners
-            wrapper.querySelectorAll('.btn-country').forEach(btn => {
+             wrapper.innerHTML = displayCities.map(city => {
+                // Determine country for data attribute
+                let country = 'India';
+                if (['Dubai', 'Abu Dhabi', 'Sharjah'].includes(city)) country = 'UAE';
+                
+                // Try from features
+                const f = geoData.cities.features && geoData.cities.features.find(feat => feat.properties.name === city);
+                if (f && f.properties.country) country = f.properties.country;
+
+                return `<button class="btn-country" data-city="${city}" data-country="${country}">${city}</button>`;
+             }).join('');
+
+             // Mark as rendered so we don't re-render on next tour tick
+             wrapper.setAttribute('data-static-rendered', 'true');
+
+             // Add listeners
+             wrapper.querySelectorAll('.btn-country').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const city = e.target.dataset.city;
                     
@@ -703,12 +729,14 @@ export const Intelligence = {
                          
                          // Load City View
                          loadCityView(cityFeature);
+                    } else {
+                         console.warn(`City feature not found for ${city}`);
                     }
                 });
             });
           }
 
-          // 2. Update Tip Box Content - Simplified
+          // 2. Update Tip Box Content - Simplified (Dynamic based on region)
           const tipTitle = document.querySelector('.tip-title');
           const tipDetails = document.querySelector('.tip-details');
           
