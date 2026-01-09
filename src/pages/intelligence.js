@@ -372,7 +372,7 @@ export const Intelligence = {
     await DataManager.loadData();
 
     let map;
-    let breadcrumbs = ['Global'];
+    let breadcrumbs = ['India']; // DEFAULT TO INDIA (Hidden Global)
     let userCriteria = {};
     let currentLevel = 'Global'; // Global, Country, City, TradeArea
     let markers = []; // Store active markers
@@ -1234,13 +1234,6 @@ export const Intelligence = {
             loaded = true;
             console.log("Map tiles loaded - revealing page");
             
-            // --- CRITICAL: Hide the loader NOW ---
-            // At this point: Data is loaded, Map tiles rendered, GeoJSON sources added & drawn.
-            // The map.idle event guarantees all layers are stable and visible.
-            if (window.appLoader) {
-                window.appLoader.hide();
-            }
-            
             // Check if intro has played this session
             const hasPlayed = sessionStorage.getItem('introPlayed');
             
@@ -1250,7 +1243,7 @@ export const Intelligence = {
                 const landingContent = document.querySelector('.landing-hero-content');
                 if (landingContent) landingContent.style.opacity = '1';
                 
-                // Start Tour immediately
+                // Start Tour immediately (BEFORE loader hides)
                 MapTourController.init();
                 MapTourController.start();
                 
@@ -1258,9 +1251,19 @@ export const Intelligence = {
                 LandingLogoAnimator.init();
             } else {
                 // FULL INTRO
+                // Trigger animation BEFORE loader hides so it's moving when revealed
                 triggerLandingAnimation();
                 LandingLogoAnimator.init(); 
                 sessionStorage.setItem('introPlayed', 'true');
+            }
+
+            // --- CRITICAL: Hide the loader NOW ---
+            // At this point: Data is loaded, Map tiles rendered, GeoJSON sources added & drawn.
+            // The map.idle event guarantees all layers are stable and visible.
+            if (window.appLoader) {
+                // Small buffer to ensure rendering frame catches up
+                // setTimeout(() => window.appLoader.hide(), 100); 
+                window.appLoader.hide(); 
             }
         };
 
@@ -1701,7 +1704,10 @@ export const Intelligence = {
           if (countryFeature) {
              loadCountryView(countryFeature);
           } else {
-             loadGlobalView();
+             // FALLBACK: Default to India if clicked not found (instead of Global)
+             const india = geoData.countries.features.find(c => c.properties.name === 'India');
+             if (india) loadCountryView(india);
+             else loadGlobalView(); 
           }
 
           if (wizardOverlay) {
@@ -1724,7 +1730,10 @@ export const Intelligence = {
              }
           }
         } else {
-          loadGlobalView();
+          // DEFAULT BEHAVIOR: Load India instead of Global
+           const india = geoData.countries.features.find(c => c.properties.name === 'India');
+           if (india) loadCountryView(india);
+           else loadGlobalView();
         }
       });
     };
@@ -2271,25 +2280,7 @@ export const Intelligence = {
     const updateBreadcrumbs = (path) => {
       breadcrumbs = path;
       // Clear items but keep back button
-      const items = topBar.querySelectorAll('.breadcrumb-item, .breadcrumb-separator');
-      items.forEach(el => el.remove());
-      
-      path.forEach((item, index) => {
-        const el = document.createElement('div');
-        el.className = 'breadcrumb-item';
-        el.innerText = item;
-        
-        if (index < path.length - 1) {
-          el.onclick = () => navigateTo(index);
-          const sep = document.createElement('span');
-          sep.className = 'breadcrumb-separator';
-          sep.innerText = '>';
-          topBar.appendChild(el);
-          topBar.appendChild(sep);
-        } else {
-          topBar.appendChild(el);
-        }
-      });
+
 
       // VISIBILITY GUARD
       const landingRef = document.getElementById('landing-hero-section');
@@ -2302,6 +2293,38 @@ export const Intelligence = {
       // Actually simpler: Always show it. If length is 1, it goes to landing.
       btnBack.style.display = 'block';
 
+      // HIDDEN GLOBAL VIEW LOGIC:
+      // If the first breadcrumb is 'Global', remove it from UI
+      const visualPath = path.filter(p => p !== 'Global');
+      
+      // Clear items but keep back button
+      const items = topBar.querySelectorAll('.breadcrumb-item, .breadcrumb-separator');
+      items.forEach(el => el.remove());
+      
+      visualPath.forEach((item, index) => {
+        const el = document.createElement('div');
+        el.className = 'breadcrumb-item';
+        el.innerText = item;
+        
+        // Logic for clicking prev breadcrumbs
+        // We need to map visual index back to actual path index
+        // If 'Global' is hidden, visual index 0 is actually path index 1 (Country)
+        // If 'Global' is NOT hidden, visual index 0 is path index 0
+        
+        const isGlobalHidden = path[0] === 'Global';
+        const actualIndex = isGlobalHidden ? index + 1 : index;
+
+        if (index < visualPath.length - 1) {
+          el.onclick = () => navigateTo(actualIndex);
+          const sep = document.createElement('span');
+          sep.className = 'breadcrumb-separator';
+          sep.innerText = '>';
+          topBar.appendChild(el);
+          topBar.appendChild(sep);
+        } else {
+          topBar.appendChild(el);
+        }
+      });
     };
 
     const navigateTo = (levelIndex) => {
@@ -2322,11 +2345,19 @@ export const Intelligence = {
     };
 
     // Back Button Logic
+    // Back Button Logic
     btnBack.onclick = () => {
       if (breadcrumbs.length > 1) {
-        navigateTo(breadcrumbs.length - 2);
+        // HIDDEN GLOBAL CHECK:
+        // If we are at [Global, Country] (length 2), going back would take us to Global.
+        // We want to skip Global and go to Landing.
+        if (breadcrumbs.length === 2 && breadcrumbs[0] === 'Global') {
+           returnToLanding();
+        } else {
+           navigateTo(breadcrumbs.length - 2);
+        }
       } else {
-        // At Global level (length 1), return to Landing Page
+        // At root level (Global or Country if started there), return to Landing Page
         returnToLanding();
       }
     };
@@ -2387,7 +2418,72 @@ export const Intelligence = {
             essential: true
           });
       }
+
+      // HIDE TRIGGER (Strictly)
+      const trigger = document.getElementById('hidden-global-trigger');
+      if (trigger) {
+          trigger.style.opacity = '0';
+          trigger.style.pointerEvents = 'none';
+          trigger.classList.remove('active-context');
+      }
     };
+
+    // --- HIDDEN GLOBAL TRIGGER ---
+    const addHiddenTrigger = () => {
+        const container = document.querySelector('.maplibregl-ctrl-bottom-left') || document.body;
+        const trigger = document.createElement('div');
+        trigger.className = 'hidden-global-trigger';
+        trigger.innerHTML = '🌍';
+        trigger.title = 'Global View';
+        trigger.style.cssText = `
+            position: fixed; /* Fixed to ensure it sticks */
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(0,0,0,0.2);
+            color: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            font-size: 16px;
+            opacity: 0; 
+            pointer-events: none; /* Initially disabled */
+            transition: opacity 0.3s;
+        `;
+        trigger.id = 'hidden-global-trigger'; // Add ID for referencing
+        
+        trigger.onmouseover = () => trigger.style.opacity = '1';
+        trigger.onmouseout = () => {
+             // Only hide if we are in Country view (it stays 0 otherwise via logic)
+             // Actually, just let CSS hover handle it, but we need base state
+             if (trigger.classList.contains('active-context')) {
+                 trigger.style.opacity = '0.3'; // Dim but visible in active context
+             } else {
+                 trigger.style.opacity = '0';
+             }
+        };
+        trigger.onmouseenter = () => trigger.style.opacity = '1';
+        trigger.onmouseleave = () => {
+             if (trigger.classList.contains('active-context')) {
+                 trigger.style.opacity = '0.3'; 
+             } else {
+                trigger.style.opacity = '0';
+             }
+        };
+        trigger.onclick = () => {
+            console.log("Secret Global View Triggered");
+            loadGlobalView();
+        };
+        
+        document.body.appendChild(trigger);
+    };
+
+    // Call it
+    addHiddenTrigger();
 
     const loadCountryView = (countryFeature) => {
       currentLevel = 'Country';
@@ -2448,6 +2544,25 @@ export const Intelligence = {
       } else {
           console.warn("No cities found for country, skipping zoom");
       }
+
+
+      // SHOW TRIGGER (Country View Only)
+      // VISIBILITY GUARD: Do not show on landing page
+      // Reuse existing landingRef from top of function
+      const isLandingVisible = landingRef && !landingRef.classList.contains('hidden') && !landingRef.classList.contains('prompt-mode');
+
+      const trigger = document.getElementById('hidden-global-trigger');
+      if (trigger) {
+          if (isLandingVisible) {
+             trigger.style.opacity = '0';
+             trigger.style.pointerEvents = 'none';
+             trigger.classList.remove('active-context');
+          } else {
+             trigger.style.opacity = '0.3'; // Visible but dim
+             trigger.style.pointerEvents = 'auto'; // Clickable
+             trigger.classList.add('active-context');
+          }
+      }
     };
     
     // Helper to trigger opening animation safely
@@ -2458,18 +2573,16 @@ export const Intelligence = {
         // 1. Initialize MapTourController
         MapTourController.init();
         
-        // 2. Start the regional tour after a brief delay
-        setTimeout(() => {
-             // Start the map tour (India/UAE loop)
-             if (viewMode === 'landing') {
-               MapTourController.start();
-             }
-             
-             // Fade In Landing Content after tour starts
-             setTimeout(() => {
-                 if (landingContent) landingContent.style.opacity = '1';
-             }, 500);
-        }, 500);
+        // 2. Start the regional tour IMMEDIATELY (no delay)
+        // This ensures map is moving as loader fades out
+         if (viewMode === 'landing') {
+           MapTourController.start();
+         }
+         
+         // Fade In Landing Content slightly after
+         setTimeout(() => {
+             if (landingContent) landingContent.style.opacity = '1';
+         }, 800);
     };
 
     const loadCityView = (cityFeature) => {
@@ -2480,6 +2593,14 @@ export const Intelligence = {
       updateBreadcrumbs(['Global', cityFeature.properties.country, cityFeature.properties.name]);
       updateLegend('City');
       clearMarkers();
+
+      // HIDE TRIGGER
+      const trigger = document.getElementById('hidden-global-trigger');
+      if (trigger) {
+          trigger.style.opacity = '0';
+          trigger.style.pointerEvents = 'none';
+          trigger.classList.remove('active-context');
+      }
 
       // Visibility
       setLayerVisibility(['country-fill', 'india-fill'], 'none'); // Hide country layers
@@ -2535,6 +2656,14 @@ export const Intelligence = {
     const loadTradeAreaView = (tradeFeature) => {
       currentLevel = 'TradeArea';
       currentTradeArea = tradeFeature;
+      
+      // HIDE TRIGGER
+      const trigger = document.getElementById('hidden-global-trigger');
+      if (trigger) {
+          trigger.style.opacity = '0';
+          trigger.style.pointerEvents = 'none';
+          trigger.classList.remove('active-context');
+      }
       
       const cityName = tradeFeature.properties.city;
       const cityFeature = geoData.cities.features.find(c => c.properties.name === cityName);
