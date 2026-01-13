@@ -72,35 +72,24 @@
   justify-content: center;
   align-items: center;
   padding: 30px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
   overflow: hidden;
-  background: #000;
+  /* Dark text for white card */
+  color: #1a1a1a;
   
-  /* Golden Border Cycle Animation */
-  border: 1px solid transparent;
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-  background-image: linear-gradient(#000, #000), linear-gradient(135deg, #D4AF37, #333, #D4AF37);
-  background-size: 200% 200%;
-  animation: borderCycle 4s ease infinite;
-}
-
-@keyframes borderCycle {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  /* Subtle border instead of golden cycle */
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Very subtle border */
 }
 
 /* Gold Foil Shine Effect */
 .shine-effect {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top right, transparent, rgba(255, 255, 255, 0.1), transparent);
+  /* Gold/Warm shine for white card */
+  background: linear-gradient(to top right, transparent, rgba(212, 175, 55, 0.15), transparent);
   transform: translateX(-200%);
   transition: transform 1s;
   pointer-events: none;
-  /* Removed z-index to stay behind content (since it's first child) */
-  /* Removed border-radius as parent clips it */
 }
 
 .contact-card:hover .shine-effect {
@@ -110,53 +99,26 @@
 
 /* Front Face Styling */
 .card-front {
-  color: #fff;
+  background: #ffffff;
+  color: #1a1a1a;
 }
 
 .contact-logo {
   width: 100%;
+  flex: 1; /* Take up all available space */
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: auto;
-  position: relative; /* Ensure it sits above shine */
+  margin: 0;
+  position: relative;
   z-index: 5;
 }
 
-.logo-text {
-  font-family: var(--font-heading);
-  font-size: 2.2rem;
-  letter-spacing: 4px;
-  text-align: center;
-  /* Always golden with dark shimmer */
-  color: #D4AF37;
-  background: linear-gradient(to right, #D4AF37, #8B6914, #D4AF37);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmerLogo 3s linear infinite;
+/* Quote style removed but keeping class just in case */
+.quote {
+  display: none;
 }
 
-@media (max-width: 600px) {
-  .logo-text {
-    font-size: 1.5rem;
-  }
-  
-  .quote {
-    font-size: 1.2rem;
-  }
-  
-  .card-face {
-    padding: 20px;
-  }
-}
-
-@keyframes shimmerLogo {
-  to {
-    background-position: 200% center;
-  }
-}
 
 
 .contact-card:hover .fingerprint-img {
@@ -169,37 +131,42 @@
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   font-size: 1.5rem;
-  color: #e0e0e0;
+  color: #4a4a4a;
   text-align: center;
-  margin: auto 0;
+  margin: 0;
+  margin-bottom: auto; /* Push divider down */
   line-height: 1.4;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  position: relative; /* Ensure it sits above shine */
+  text-shadow: none;
+  position: relative; 
   z-index: 5;
 }
+
 
 .card-footer {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: auto;
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  color: var(--color-accent);
+  margin-bottom: 25px; /* Space from bottom */
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  color: #4a4a4a; /* Dark gray match mockup */
   text-transform: uppercase;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
+  border-top: none; 
+  padding-top: 0;
   transition: color 0.3s;
-  position: relative; /* Ensure it sits above shine */
+  position: relative; 
   z-index: 5;
 }
 
 .contact-card:hover .card-footer {
-  color: #fff;
+  color: #000;
 }
 
 /* Back Face Styling */
 .card-back {
+  background: #ffffff;
+  color: #1a1a1a;
   transform: rotateY(180deg);
 }
 
@@ -210,7 +177,7 @@
 
 .contact-details h3 {
   font-family: var(--font-heading);
-  color: var(--color-accent);
+  color: #022c22; /* Dark green heading */
   margin-bottom: 15px;
   font-size: 1.5rem;
   letter-spacing: 2px;
@@ -219,7 +186,7 @@
 .contact-item {
   margin: 8px 0;
   font-size: 1.1rem;
-  color: #ccc;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -434,7 +401,7 @@
 
 /* Theme Override for Contact Card (Home Page) */
 .home-page .contact-card .card-face {
-  background: #045441; /* Dark Forest Green to match theme, lighter than black */
-  background-image: linear-gradient(#033b2e, #065b47), linear-gradient(135deg, #D4AF37, #0f3f33, #D4AF37);
+  background: #ffffff; 
+  background-image: none;
   box-shadow: 0 15px 40px rgba(2, 44, 34, 0.4); /* Softer shadow */
 }

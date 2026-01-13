@@ -136,17 +136,28 @@ The data pipeline uses a **build-time generation** approach. This ensures zero p
 | `src/data/cityBorders.js` | **Auto-generated** - City polygons, consumed by app | ❌ Don't edit manually |
 | `src/data/dataManager.js` | **DEPRECATED** - Legacy file, only has recommendation scoring | 🚫 Ignore |
 
-#### TAT Color Scheme
+### TAT Classification System
 
-The `generate-geo-data.js` script applies colors based on tier and corridor:
+The application uses a **Dual-Layer Classification** system:
 
-| Type | Color | Hex | Condition |
-|------|-------|-----|-----------|
-| 🔴 TAT-1 (CBD) | Red | `#E53935` | Tier includes "TAT-1" |
-| 🟠 TAT-2 (PBD) | Orange | `#FF9800` | Tier includes "TAT-2" |
-| 🔵 TAT-3 (TBD) | Blue | `#2196F3` | Tier includes "TAT-3" or "Growth" |
-| 🟣 Nightlife | Purple | `#9C27B0` | Corridor includes "nightlife" or "high-energy" |
-| ⚫ Mall | Dark | `#424242` | Corridor includes "mall" |
+**1. Primary Tiers (Business Potential)**
+Determines the primary economic classification of the trade area.
+
+| Tier | Label | Color | Hex | Condition |
+|------|-------|-------|-----|-----------|
+| **TAT-1** | Central Business District | Red | `#E53935` | High density, premium catchment |
+| **TAT-2** | Peripheral Business District | Orange | `#FF9800` | Emerging business districts |
+| **TAT-3** | Tertiary Business District | Blue | `#2196F3` | Developing or residential-heavy zones |
+
+**2. Sub-Trade Areas (Characteristics)**
+Additional attributes that describe specific vibes or catchments.
+
+| Type | Label | Color | Hex | Condition |
+|------|-------|-------|-----|-----------|
+| **Nightlife** | High Energy | Purple | `#9C27B0` | High concentration of bars/pubs |
+| **Mall** | Mall Catchment | Dark | `#424242` | Anchored by major shopping malls |
+
+> **Note:** In the UI (City View & Trade Area View), trade areas are categorized by their **Primary Tier**, with Nightlife/Mall displayed as a supplementary attribute.
 
 ### Map System
 

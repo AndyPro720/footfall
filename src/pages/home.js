@@ -170,11 +170,7 @@ export const Home = {
                 <div class="shine-effect"></div>
 
                 <div class="contact-logo">
-                  <div class="logo-text">FOOTTFALL</div>
-                </div>
-                
-                <div class="quote">
-                  "Excellence in every square foot."
+                  <img src="/logo.png" alt="FOOTTFALL" class="logo-img" style="max-width: 50%; height: auto;" />
                 </div>
 
                 <div class="card-footer">

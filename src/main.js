@@ -21,7 +21,6 @@ import { Loader } from './components/loader.js'; // Import Loader
 import { Home } from './pages/home.js';
 
 import { Intelligence } from './pages/intelligence.js';
-import { Contact } from './pages/contact.js';
 
 // Global Loader Instance
 window.appLoader = new Loader();
@@ -31,7 +30,6 @@ window.appLoader = new Loader();
 const routes = {
   '/': Intelligence, 
   '/intelligence': Intelligence,
-  '/contact': Contact,
   '/info': Home
 };
 
