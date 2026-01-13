@@ -399,31 +399,28 @@ button:focus-visible {
   pointer-events: none;  /* Let map receive clicks */
 }
 
-/* LEFT PANEL: floating overlay -> Full Height Blended Overlay */
+/* LEFT PANEL: Clean overlay - No blur, map fully visible */
 .landing-left-panel {
-  width: 650px; /* Increased for more presence */
-  max-width: 55%; /* Wider overlay */
-  height: 100vh; /* Full Height */
+  width: 650px;
+  max-width: 55%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center; /* CENTER TEXT */
-  text-align: center; /* CENTER TEXT */
-  padding: 0 4rem;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem;
   position: absolute;
   left: 0;
   top: 0;
   z-index: 20;
   pointer-events: auto;
   
-  /* Better Blended Gradient - Fade from left dark to transparent right */
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.5) 0%, 
-    rgba(255, 255, 255, 0.25) 50%, 
-    rgba(255, 255, 255, 0) 100%
-  );
+  /* No background, no blur - pure transparency */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   
-  /* No border radius or box shadow for full height blend */
   border-right: none;
   border-radius: 0;
   box-shadow: none;
@@ -440,10 +437,109 @@ button:focus-visible {
   pointer-events: none;
 }
 
+/* Top-Left Small Logo - HIDDEN (Center logo restored) */
+.landing-logo-small {
+  display: none;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  z-index: 30;
+}
+
+.landing-logo-small .landing-logo-img {
+  height: 50px;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.landing-logo-small .landing-logo-img:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.4));
+}
+
+/* Center Logo */
+.hero-center-logo {
+  height: 60px;
+  width: auto;
+  filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+  transition: all 0.3s ease;
+}
+
+.hero-center-logo:hover {
+  transform: scale(1.02);
+  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
+}
+
+/* Tagline - Golden Accent */
+.landing-tagline {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.15rem; /* Slightly reduced */
+  font-weight: 400;
+  font-style: italic;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0; /* Much tighter spacing */
+  letter-spacing: 0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+.landing-tagline::before {
+  content: '—';
+  margin-right: 8px;
+  color: #d4af37;
+}
+
+.landing-tagline::after {
+  content: '—';
+  margin-left: 8px;
+  color: #d4af37;
+}
+
+/* Bio Text - Compact and Clean */
+.landing-bio {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem; /* Slightly reduced */
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.75);
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0 auto 0.8rem auto; /* Much tighter spacing */
+  text-align: center;
+}
+
+/* Golden Divider Line */
+.landing-divider {
+  height: 1px;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  margin: 0.8rem auto 10px auto; /* Restored to reasonable spacing */
+  opacity: 0.8;
+}
+
+/* Subtle Radial Gradient - More transparent, less blob-like */
 .landing-hero-content {
   max-width: 100%;
   opacity: 0; /* JS handles fade in */
   transition: opacity 0.8s ease;
+  
+  /* Very subtle radial gradient - barely visible */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Comfortable padding */
+  padding: 2.5rem 3rem;
+  border-radius: 24px;
+  
+  /* No border, minimal shadow */
+  border: none;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Landing Page Loader Animation (scaled down) */
@@ -454,9 +550,9 @@ button:focus-visible {
 }
 
 .landing-loader-wrapper {
-  transform: scale(0.9);
+  transform: scale(1.15);
   transform-origin: center center;
-  margin: 0; /* No compensation needed at this size */
+  margin: 0;
 }
 
 /* Override colors for landing page (dark green theme matching main loader) */
@@ -503,13 +599,29 @@ button:focus-visible {
 }
 
 .landing-headline {
-  font-family: 'Cinzel', serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 15px rgba(0,0,0,0.6);
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: #022c22; /* Dark green brand color */
+  line-height: 1.15;
+  margin-bottom: 0.3rem;
+  text-shadow: none;
+  letter-spacing: -0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+/* Decorative golden underline */
+.landing-headline::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.8), transparent);
+  border-radius: 2px;
 }
 
 .headline-highlight {
@@ -520,41 +632,87 @@ button:focus-visible {
 }
 
 .landing-subtitle {
-  font-size: 1rem;
-  color: rgba(0, 0, 0, 0.75);
-  margin-bottom: 2rem;
-  letter-spacing: 0.3px;
+  font-size: 0.95rem; /* Slightly smaller for elegance */
+  color: rgba(0, 0, 0, 0.6);
+  letter-spacing: 1.5px;
+  font-weight: 500;
 }
 
 /* Country Buttons in Overlay */
 .landing-left-panel .country-selector {
   display: flex;
   gap: 0.8rem;
+  padding-top: 1.2rem;
+  margin-top: 0; /* Absolute zero margin for tightest fit */
   margin-bottom: 0;
   justify-content: center; /* Center buttons */
+  flex-wrap: wrap;
+}
+
+.landing-left-panel .country-selector .btn-country {
+  /* Ensure no external margins on buttons themselves */
+  margin: 0;
+} 
+
+/* ... existing code ... */
+
+.landing-subtitle {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 0; /* Zero gap to buttons */
+  margin-top: 0;
+  letter-spacing: 0.5px; /* Reduced letter spacing since it's not caps anymore */
+  font-weight: 500;
+  text-transform: none; /* Changed from uppercase */
+  line-height: 1.2; /* Tighter line height to reduce vertical occupancy */
 }
 
 .landing-left-panel .btn-country {
-  padding: 0.5rem 1.2rem; /* Decreased padding further */
-  font-size: 0.9rem; /* Decreased font size */
-  font-weight: 700; /* Bolder text */
-  background: rgba(255, 255, 255, 0.25); 
+  padding: 0.45rem 1.1rem; /* Sleeker profile */
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.3); 
   color: #1a1a1a;
-  border: 2px solid rgba(0, 0, 0, 0.1); /* Slightly thicker border */
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 40px; 
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .landing-left-panel .btn-country:hover {
-  background: rgba(212, 175, 55, 0.15);
-  border-color: rgba(212, 175, 55, 0.5);
-  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+  transform: scale(1.05);
 }
 
 /* Landing Features Hidden */
 .landing-features {
   display: none;
+}
+
+/* Shimmer animation for active buttons */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Active Tour Highlight for Cities */
+.landing-left-panel .btn-country.active-tour {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.1) 0%,
+    rgba(212, 175, 55, 0.35) 50%,
+    rgba(212, 175, 55, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 4s ease-in-out infinite;
+  border-color: rgba(212, 175, 55, 0.7);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  transform: translateY(-1px);
+  color: #000;
 }
 
 /* RIGHT PANEL: No longer needed - map is fullscreen background */

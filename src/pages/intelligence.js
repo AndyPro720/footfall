@@ -179,20 +179,30 @@ export const Intelligence = {
             
             <!-- LEFT PANEL: Hero Content -->
             <div class="landing-left-panel" id="landing-left-panel">
+              <!-- Top-Left Small Logo -->
+              <div class="landing-logo-small">
+                <img src="/logo.png" alt="Foottfall" class="landing-logo-img">
+              </div>
+              
               <div class="landing-hero-content">
-                <!-- Full Loader Animation (scaled down) -->
-                <div class="hero-logo-animated" id="hero-logo-animated">
-                  <div class="landing-loader-wrapper">
-                      <img src="/logo.png" alt="Foottfall" class="hero-static-logo">
-                  </div>
+                <!-- Main Logo -->
+                <div class="landing-main-logo">
+                   <img src="/logo.png" alt="FOOTTFALL" class="hero-center-logo">
                 </div>
-                <h1 class="landing-headline">
-                  Explore Trade Areas
-                </h1>
+                <p class="landing-tagline">Growth Architects | Leasing</p>
+                
+                <p class="landing-bio">
+                  Strategic site selection for retail and F&B brands. We analyze footfall, demographics, and commercial potential to match you with locations where customers already gather — spaces where your brand belongs
+                </p>
+                
+                <div class="landing-divider"></div>
+
+                <p class="landing-subtitle">Get Actionable Insights on Any Trade Area</p>
                 
                 <div class="country-selector">
-                  <button class="btn-country" data-country="India">India</button>
-                  <button class="btn-country" data-country="UAE">UAE</button>
+                  <button class="btn-country" data-country="India">Mumbai</button>
+                  <button class="btn-country" data-country="India">Pune</button>
+                  <button class="btn-country" data-country="UAE">Dubai</button>
                 </div>
                 
                 <!-- Features removed for minimalism -->
@@ -602,10 +612,10 @@ export const Intelligence = {
       tourStops: [
         { 
           region: 'India',
-          // User wants map shifted right so Mumbai/Pune are visible on left side
-          // Moving center further WEST (lower longitude) shifts map right in view
-          center: [73.1, 18.87], 
-          zoom: 8.4, 
+          // Shift map right to avoid overlap with left panel content
+          // Higher longitude = map view shifted right
+          center: [73, 18.87], 
+          zoom: 8.2, 
           duration: 2500,
           stayDuration: 6000
         },
@@ -734,6 +744,18 @@ export const Intelligence = {
                     }
                 });
             });
+          }
+
+          // 1.5 Update Active State on Buttons (Highlight cities in current region)
+          if (wrapper) {
+              const buttons = wrapper.querySelectorAll('.btn-country');
+              buttons.forEach(btn => {
+                  if (btn.dataset.country === region) {
+                      btn.classList.add('active-tour');
+                  } else {
+                      btn.classList.remove('active-tour');
+                  }
+              });
           }
 
           // 2. Update Tip Box Content - Simplified (Dynamic based on region)
@@ -930,7 +952,9 @@ export const Intelligence = {
              // tipBox.classList.remove('visible'); // Let start() handle this
         }
         
-        // 5. Restart Tour
+        // No need to reapply map style - it's already applied globally
+        
+        // 6. Restart Tour
         if (MapTourController) MapTourController.start();
         if (LandingLogoAnimator) {
              // Force stop/reset before start
@@ -962,6 +986,8 @@ export const Intelligence = {
       if (landingSection) landingSection.style.display = 'none';
       if (statsCard) statsCard.style.display = 'none';
       if (scrollIndicator) scrollIndicator.style.display = 'none';
+      
+      // Map style is already clean globally, no need to restore
       
       // Show wizard
       if (wizardOverlay) {
@@ -1162,6 +1188,134 @@ export const Intelligence = {
       });
       console.log("Calculated bounds:", bounds.toArray());
       return bounds;
+    };
+
+    // --- Map Style Configuration ---
+    // Apply clean style globally (for both landing and dashboard)
+    const applyCleanMapStyle = () => {
+      if (!map) return;
+      
+      console.log("Applying clean map style (hiding highway labels, highlighting serviceable cities)");
+      
+      // Get all layers from the style and hide highway labels
+      const style = map.getStyle();
+      if (style && style.layers) {
+        // Patterns to match layers we want to hide
+        // Keep roads, buildings, water, and place names - only remove road/highway labels
+        const layerPatternsToHide = [
+          // AGGRESSIVE highway label hiding (shields, numbers, text)
+          /road.*label/i, /road.*shield/i, /road.*text/i, /road.*name/i, /road.*number/i,
+          /highway/i,  // Hide anything with 'highway' in the name
+          /motorway.*label/i, /motorway.*shield/i, /motorway.*text/i,
+          /trunk.*label/i, /trunk.*shield/i, /trunk.*text/i,
+          /primary.*label/i, /primary.*shield/i, /primary.*text/i,
+          /secondary.*label/i, /secondary.*shield/i,
+          /street.*label/i, /street.*name/i, /street.*text/i,
+          // Hide transit labels
+          /railway.*label/i, /transit.*label/i, /ferry.*label/i,
+          // Hide aeroway labels
+          /aeroway.*label/i, /airport.*label/i,
+          // Hide POI labels only
+          /poi.*label/i, /poi.*name/i,
+          // Hide water and natural labels
+          /water.*name/i, /water.*label/i, /waterway.*label/i,
+          /ocean.*label/i, /sea.*label/i, /bay.*label/i,
+          /mountain.*label/i, /natural.*label/i, /peak.*label/i,
+          // Hide land use labels
+          /landuse.*label/i, /park.*label/i, /park.*name/i,
+          // Hide building labels (keep building shapes)
+          /building.*label/i, /building.*name/i, /housenumber/i,
+          // Hide admin boundaries labels
+          /admin.*label/i, /boundary.*label/i,
+          // Hide bridge and tunnel labels
+          /bridge.*label/i, /tunnel.*label/i
+        ];
+        
+        // Get all base map layer IDs that match our hide patterns
+        const baseLayers = style.layers
+          .filter(layer => {
+            // Don't hide our custom layers
+            if (layer.id.startsWith('country-') || 
+                layer.id.startsWith('india-') || 
+                layer.id.startsWith('cities-') || 
+                layer.id.startsWith('trade-') ||
+                layer.id === '3d-buildings') {
+              return false;
+            }
+            // Check if layer ID matches any pattern to hide
+            return layerPatternsToHide.some(pattern => pattern.test(layer.id));
+          })
+          .map(layer => layer.id);
+        
+        console.log(`Hiding ${baseLayers.length} base map layers for cleaner look`);
+        
+        // Hide all matched layers
+        baseLayers.forEach(layerId => {
+          try {
+            map.setLayoutProperty(layerId, 'visibility', 'none');
+          } catch (e) {
+            console.warn(`Could not hide layer ${layerId}:`, e);
+          }
+        });
+      }
+      
+      // Highlight city name labels for serviceable cities (Mumbai, Pune, Dubai)
+      const serviceableCities = ['Mumbai', 'Pune', 'Dubai'];
+      const mapStyle = map.getStyle();
+      if (mapStyle && mapStyle.layers) {
+        const placeLabelLayers = mapStyle.layers
+          .filter(layer => 
+            (layer.id.includes('place') && layer.id.includes('label')) ||
+            layer.id.includes('city_label') ||
+            layer.id.includes('town_label')
+          )
+          .map(layer => layer.id);
+        
+        // For each place label layer, filter and highlight our cities
+        placeLabelLayers.forEach(layerId => {
+          try {
+            // Make it visible
+            map.setLayoutProperty(layerId, 'visibility', 'visible');
+            
+            // Filter to show only our serviceable cities
+            const filter = [
+              'in',
+              ['get', 'name'],
+              ['literal', serviceableCities]
+            ];
+            
+            try {
+              map.setFilter(layerId, filter);
+              
+              // Add subtle highlight styling
+              // Increase text size slightly
+              map.setLayoutProperty(layerId, 'text-size', [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                6, 14,  // Slightly larger at low zoom
+                10, 18  // Slightly larger at high zoom
+              ]);
+              
+              // Make text bold
+              map.setLayoutProperty(layerId, 'text-font', ['Noto Sans Bold']);
+              
+              // Enhance halo for better readability
+              map.setPaintProperty(layerId, 'text-halo-width', 2.5);
+              map.setPaintProperty(layerId, 'text-halo-color', 'rgba(255, 255, 255, 0.9)');
+              
+              // Slightly darker text
+              map.setPaintProperty(layerId, 'text-color', '#1a1a1a');
+              
+              console.log(`Highlighted serviceable cities in ${layerId}`);
+            } catch (e) {
+              console.log(`Could not filter ${layerId}, keeping default`);
+            }
+          } catch (e) {
+            console.warn(`Could not configure layer ${layerId}:`, e);
+          }
+        });
+      }
     };
 
     // --- Map Initialization ---
@@ -1666,6 +1820,8 @@ export const Intelligence = {
               if (topBar) topBar.classList.add('visible');
               if (legend) legend.classList.add('visible');
               
+              // Map style is already clean globally
+              
               // Stop tour
               if (MapTourController) MapTourController.stop();
           }
@@ -1721,6 +1877,15 @@ export const Intelligence = {
           map.on('mouseenter', layer, () => map.getCanvas().style.cursor = 'pointer');
           map.on('mouseleave', layer, () => map.getCanvas().style.cursor = '');
         });
+
+        // Apply clean map style once after style is fully loaded
+        map.once('styledata', () => {
+          console.log("Style fully loaded, applying clean map style");
+          applyCleanMapStyle();
+        });
+        
+        // Also apply immediately in case styledata already fired
+        setTimeout(() => applyCleanMapStyle(), 100);
 
         // Initial View with URL State Handling
         const urlParams = new URLSearchParams(window.location.search);
@@ -1858,6 +2023,9 @@ export const Intelligence = {
         // Show UI bars
         if (topBar) topBar.classList.add('visible');
         if (legend) legend.classList.add('visible');
+        
+        // Map style is already clean globally
+        
         if (tipBox) {
            tipBox.classList.add('visible');
            const countryCities = geoData.cities.features.filter(f => f.properties.country === selectedCountryName);
