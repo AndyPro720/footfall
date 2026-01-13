@@ -17,7 +17,7 @@ export const Intelligence = {
         
         <!-- Legend -->
         <div id="legend">
-          <div class="legend-title">Map Layers</div>
+          <div class="legend-title">Trade Area Tiers</div>
           <div id="legend-content"></div>
         </div>
 
@@ -2198,6 +2198,18 @@ export const Intelligence = {
       }
       legendContent.innerHTML = '';
       
+      // Update legend title based on level
+      const legendTitle = legend.querySelector('.legend-title');
+      if (legendTitle) {
+        if (level === 'TradeArea') {
+          legendTitle.textContent = 'Trade Area View';
+        } else if (level === 'City') {
+          legendTitle.textContent = 'Trade Area Tiers';
+        } else {
+          legendTitle.textContent = 'Trade Area Tiers';
+        }
+      }
+      
       // Wrapper for scrolling content (applies padding & max-height)
       const wrapper = document.createElement('div');
       wrapper.className = 'legend-scroll-wrapper';
@@ -2241,19 +2253,19 @@ export const Intelligence = {
         // TAT Category definitions with colors and explanations
         const TAT_CATEGORIES = {
           'CBD': { 
-            label: 'TAT-1 (CBD)', 
+            label: 'Central Business District', 
             color: '#E53935', 
             description: 'Central Business District - The core commercial hub with highest footfall, premium brands, and established retail presence.'
           },
           'PBD': { 
-            label: 'TAT-2 (PBD)', 
+            label: 'Peripheral Business District', 
             color: '#FF9800', 
             description: 'Peripheral Business District - A secondary commercial hub surrounding the CBD, offering strong growth potential at relatively lower costs.'
           },
           'TBD': { 
-            label: 'TAT-3 (TBD)', 
+            label: 'Tertiary Business District', 
             color: '#2196F3', 
-            description: 'To Be Developed - An emerging business zone serving local catchments today, with strong potential to become a future commercial hotspot.'
+            description: 'Tertiary Business District - An emerging business zone serving local catchments today, with strong potential to become a future commercial hotspot.'
           },
           'Nightlife': { 
             label: 'Nightlife', 
@@ -2267,18 +2279,13 @@ export const Intelligence = {
           }
         };
         
-        // Map areas to standardized categories
+        // Map areas to standardized categories by PRIMARY TIER only
         const categorizeArea = (area) => {
-          const subCat = area.properties.subCategory || '';
-          const corridor = (area.properties.corridor || '').toLowerCase();
-          
-          if (subCat === 'nightlife' || corridor.includes('nightlife') || corridor.includes('high-energy')) return 'Nightlife';
-          if (subCat === 'mall' || corridor.includes('mall')) return 'Mall';
-          
           const type = area.properties.type || '';
           if (type.includes('TAT-1')) return 'CBD';
           if (type.includes('TAT-3') || type.includes('Growth')) return 'TBD';
-          return 'PBD'; // Default to TAT-2
+          if (type.includes('TAT-2')) return 'PBD';
+          return 'PBD'; // Default to PBD
         };
         
         // Group areas by standardized category
@@ -2290,7 +2297,7 @@ export const Intelligence = {
         });
 
         // Generate HTML with standardized categories (in order)
-        const categoryOrder = ['CBD', 'PBD', 'TBD', 'Nightlife', 'Mall'];
+        const categoryOrder = ['CBD', 'PBD', 'TBD'];
         wrapper.innerHTML = categoryOrder.filter(cat => grouped[cat]?.length).map(category => {
           const cat = TAT_CATEGORIES[category];
           // Style: Text is black (#222), Dot keeps the color
@@ -2389,9 +2396,9 @@ export const Intelligence = {
           if (areaData) {
             // Determine standardized category
             const TAT_CATEGORIES = {
-              'CBD': { label: 'TAT-1 (CBD)', color: '#E53935' },
-              'PBD': { label: 'TAT-2 (PBD)', color: '#FF9800' },
-              'TBD': { label: 'TAT-3 (TBD)', color: '#2196F3' },
+              'CBD': { label: 'Central Business District', color: '#E53935' },
+              'PBD': { label: 'Peripheral Business District', color: '#FF9800' },
+              'TBD': { label: 'Tertiary Business District', color: '#2196F3' },
               'Nightlife': { label: 'Nightlife', color: '#9C27B0' },
               'Mall': { label: 'Mall Catchment', color: '#424242' }
             };
@@ -2400,21 +2407,43 @@ export const Intelligence = {
             const corridor = (currentTradeArea.properties.corridor || '').toLowerCase();
             const type = currentTradeArea.properties.type || '';
             
-            let category = 'PBD';
-            if (subCat === 'nightlife' || corridor.includes('nightlife') || corridor.includes('high-energy')) category = 'Nightlife';
-            else if (subCat === 'mall' || corridor.includes('mall')) category = 'Mall';
-            else if (type.includes('TAT-1')) category = 'CBD';
-            else if (type.includes('TAT-3') || type.includes('Growth')) category = 'TBD';
+            // Primary category is ALWAYS based on tier (TAT-1/2/3)
+            let primaryCategory = 'PBD'; // Default
+            if (type.includes('TAT-1')) primaryCategory = 'CBD';
+            else if (type.includes('TAT-3') || type.includes('Growth')) primaryCategory = 'TBD';
+            else if (type.includes('TAT-2')) primaryCategory = 'PBD';
             
-            const cat = TAT_CATEGORIES[category];
+            // Sub-category is separately determined (Nightlife, Mall, or none)
+            let subTradeArea = null;
+            if (subCat === 'nightlife' || corridor.includes('nightlife') || corridor.includes('high-energy')) {
+              subTradeArea = 'Nightlife';
+            } else if (subCat === 'mall' || corridor.includes('mall')) {
+              subTradeArea = 'Mall';
+            }
             
-            // Area type header with correct color
+            const cat = TAT_CATEGORIES[primaryCategory];
+            
+            // Primary Trade Area tier header
             const typeDiv = document.createElement('div');
             typeDiv.className = 'legend-item';
-            typeDiv.style.fontWeight = 'bold';
-            typeDiv.style.color = cat.color;
+            typeDiv.style.cssText = 'font-weight: 700; font-size: 0.95rem; color: #222;';
             typeDiv.innerHTML = `<div class="legend-dot" style="background: ${cat.color};"></div>${cat.label}`;
             wrapper.appendChild(typeDiv);
+            
+            // Sub Trade Areas section (for Nightlife/Mall)
+            if (subTradeArea) {
+              const subCatInfo = TAT_CATEGORIES[subTradeArea];
+              const subHeader = document.createElement('div');
+              subHeader.style.cssText = 'font-size: 0.75rem; color: #555; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;';
+              subHeader.textContent = 'Sub Trade Area';
+              wrapper.appendChild(subHeader);
+              
+              const subDiv = document.createElement('div');
+              subDiv.className = 'legend-item';
+              subDiv.style.cssText = 'font-size: 0.9rem; font-weight: 500; color: #333;';
+              subDiv.innerHTML = `<div class="legend-dot" style="background: ${subCatInfo.color};"></div>${subCatInfo.label}`;
+              wrapper.appendChild(subDiv);
+            }
             
             // Stats section
             const statsDiv = document.createElement('div');
@@ -2422,8 +2451,8 @@ export const Intelligence = {
             statsDiv.style.borderTop = '1px solid rgba(0,0,0,0.1)';
             statsDiv.style.marginTop = '8px';
             statsDiv.innerHTML = `
-              <div style="font-size: 0.8rem; color: #666; margin-bottom: 4px;">📊 Footfall: <strong>${areaData.stats.footfall}</strong></div>
-              <div style="font-size: 0.8rem; color: #666;">👥 ${areaData.demographics.segment}</div>
+              <div style="font-size: 0.85rem; color: #333; margin-bottom: 6px;">📊 Footfall: <strong style="color: #000;">${areaData.stats.footfall}</strong></div>
+              <div style="font-size: 0.85rem; color: #333;">👥 ${areaData.demographics.segment}</div>
             `;
             wrapper.appendChild(statsDiv);
             
@@ -2441,6 +2470,18 @@ export const Intelligence = {
               });
               wrapper.appendChild(brandsDiv);
             }
+            
+            // Find My Location button
+            const findLocationBtn = document.createElement('button');
+            findLocationBtn.className = 'btn-legend-location';
+            findLocationBtn.style.cssText = 'width: 100%; margin-top: 12px; padding: 10px; background: linear-gradient(135deg, #d4af37, #c9a227); color: #000; border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;';
+            findLocationBtn.textContent = ' Find My Location';
+            findLocationBtn.onclick = () => {
+              sidebar.classList.remove('visible');
+              const customPanel = document.getElementById('customisation-panel');
+              if (customPanel) customPanel.classList.add('visible');
+            };
+            wrapper.appendChild(findLocationBtn);
           }
         }
       }
@@ -2960,7 +3001,7 @@ export const Intelligence = {
         <div class="sidebar-quick-stats">
           <div class="quick-stat-card">
             <span class="quick-stat-value">${availableUnits}</span>
-            <span class="quick-stat-label">Available Units</span>
+            <span class="quick-stat-label">Available Retail Units</span>
           </div>
           <div class="quick-stat-card highlight">
             <span class="quick-stat-value">${rentText}</span>

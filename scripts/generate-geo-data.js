@@ -66,12 +66,12 @@ async function generate() {
         }
 
         // Determine Pin Color based on Tier/Corridor - UPDATED TAT COLOR SCHEME
-        // 🔴 TAT-1 (CBD) = Red #E53935
-        // 🟠 TAT-2 (PBD) = Orange #FF9800
-        // 🔵 TAT-3 (TBD/Growth) = Blue #2196F3
+        // 🔴 Central Business District = Red #E53935
+        // 🟠 Peripheral Business District = Orange #FF9800
+        // 🔵 Tertiary Business District = Blue #2196F3
         // 🟣 Nightlife = Purple #9C27B0
         // ⚫ Mall = Dark #424242
-        let pinColor = "#FF9800"; // Default: Orange (TAT-2)
+        let pinColor = "#FF9800"; // Default: Orange (Peripheral Business District)
         let subCategory = "family"; // Default subCategory
         
         const corridor = (row.corridor_type || '').toLowerCase();
