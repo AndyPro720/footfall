@@ -179,6 +179,113 @@ Powered by **MapLibre GL** using **OpenFreeMap** tiles and **OSM** data.
 
 **Customisation Panel**: Users can filter trade areas by category, property size, and ticket size. Matched results appear in a separate panel.
 
+### Primary CTA Button Flows
+
+The application has two primary Call-To-Action buttons that drive user engagement and lead capture:
+
+#### 1. Find My Trade Area Button
+
+**Purpose**: Helps users find matching trade areas based on their business profile.
+
+**Trigger Points**:
+- Landing page stats card ("Find My Trade Area" button)
+- City View legend (prepended at top of TAT categories)
+
+**Flow**:
+```
+User Click → SlideModal Opens
+     ↓
+[If from Landing] Step 1: City Selection (Mumbai, Pune, Dubai)
+     ↓
+Step 2: Filter Preferences
+  - Business Category (F&B, Fashion, etc.)
+  - Property Size
+  - Ticket Size (Currency dynamically adapts: INR for India cities, AED for Dubai)
+     ↓
+On Complete:
+  1. Save to UserProfileService (localStorage)
+  2. Update filterState
+  3. Call applyFiltersAndShowResultsWithCount()
+  4. Display matched trade areas in results panel
+  5. Send lead email via EmailService
+```
+
+**Dynamic Currency Adaptation**: When a city is selected, the modal reopens with the correct currency options (INR for Mumbai/Pune, AED for Dubai).
+
+**Background Navigation**: When a city is selected in Step 1, the map flies to that city in the background.
+
+#### 2. Find My Location Button
+
+**Purpose**: Comprehensive questionnaire for personalized location recommendations.
+
+**Trigger Points**:
+- Sidebar "Find My Location" button (in Trade Area View)
+- Trade Area View legend (bottom of legend)
+
+**Flow**:
+```
+User Click → SlideModal Opens
+     ↓
+Step 1: Contact Info (Name, Brand, Phone, Email)
+     ↓
+Step 2: Filter Preferences (Category, Size, Spend)
+     ↓
+Step 3: Your People (Demographics targeting)
+     ↓
+Step 4: Your Business (Years, Scale)
+     ↓
+Step 5: Your Footprint (Optional - HQ, Store count)
+     ↓
+Step 6: Your Aspiration (Growth plans, Competitors)
+     ↓
+On Complete:
+  1. Save full profile to UserProfileService
+  2. Mark lead as "warm"
+  3. Send detailed inquiry email
+  4. Show acknowledgement slide
+```
+
+#### Supporting Services
+
+| Service | File | Purpose |
+|---------|------|---------|
+| `UserProfileService` | `src/utils/userProfileService.js` | Persists user data in `localStorage` |
+| `EmailService` | `src/utils/emailService.js` | Sends HTML emails via FormSubmit.co |
+| `SlideModal` | `src/components/slideModal.js` | Reusable multi-step modal component |
+
+#### Soft Lead Capture
+
+A floating micro-form appears after ~18 seconds on the landing page. Collects:
+- Name (optional)
+- Brand Name (optional)  
+- Phone Number (optional)
+
+At least one field must be filled to submit.
+
+**Display Logic:**
+- ✅ Show if user has NOT submitted any soft lead data AND
+- ✅ 24+ hours have passed since last dismissal (or never dismissed)
+- ❌ Never show if user already submitted data or is a warm lead
+
+**Storage (Tiered):**
+| Data | Storage | Persists Across Reloads |
+|------|---------|------------------------|
+| Submitted data | `localStorage` | ✅ Yes (until reset) |
+| Dismissal timestamp | `localStorage` | ✅ Yes (24h cooldown) |
+| Intro animation | `sessionStorage` | ❌ No (per session) |
+
+**Reset Mechanism:**
+Press `Ctrl+Shift+D` to clear all persistent user data. A toast notification confirms the reset.
+
+**Lead Status Classification:**
+| Status | Trigger | Effect |
+|--------|---------|--------|
+| `null` | Initial state | Soft lead popup can appear |
+| `cold` | User dismisses popup | Popup hidden for 24h cooldown, then can reappear |
+| `warm` | User submits any form (soft lead, Find My Trade Area, Find My Location) | Popup never shown again |
+
+> **Note:** The soft lead popup will never show for `warm` leads regardless of time elapsed.
+
 **Intro Optimization**:
 - **First Visit**: Full "FOOTFALL" scanner animation plays.
 - **Return Visit**: Logic checks `sessionStorage`. If intro has played, it fast-tracks to the map tour, skipping the full scanner but keeping the small logo animation.

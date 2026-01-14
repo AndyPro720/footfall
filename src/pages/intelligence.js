@@ -4,6 +4,10 @@ import { geoData, tradeData } from '../data/geoData.js';
 import Chart from 'chart.js/auto';
 import Papa from 'papaparse';
 import { DataManager } from '../data/dataManager.js';
+import { UserProfileService } from '../utils/userProfileService.js';
+import { EmailService } from '../utils/emailService.js';
+import { SlideModal } from '../components/slideModal.js';
+import '../styles/slideModal.css';
 
 export const Intelligence = {
   render: () => {
@@ -41,60 +45,7 @@ export const Intelligence = {
           <div class="breadcrumb-item" id="bc-global">Global</div>
         </div>
         
-        <!-- Wizard Overlay (Fixed on top) -->
-        <div id="wizard-overlay" class="hidden">
-           <!-- ... wizard content ... -->
-           <div class="wizard-card">
-              <!-- Slide 1 -->
-              <div class="wizard-slide active" id="slide-1">
-                <h2 class="wizard-title">Welcome</h2>
-                <p class="wizard-subtitle">Enter details to access Footfall market intelligence™</p>
-                <input type="text" class="wizard-input" id="input-name" placeholder="Your Name">
-                <input type="text" class="wizard-input" id="input-brand" placeholder="Brand Name">
-                <button class="wizard-btn" id="btn-next-1">Continue</button>
-              </div>
-              <!-- Slide 2 -->
-              <div class="wizard-slide" id="slide-2">
-                <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
-                  <button class="wizard-back" id="btn-back-2">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                  </button>
-                  <h2 class="wizard-title" style="margin:0;">Select Market</h2>
-                </div>
-                <p class="wizard-subtitle">Where would you like to scout today?</p>
-                <select class="wizard-input" id="country-select">
-                  <option value="" disabled selected>Select Country</option>
-                  <option value="India">India</option>
-                  <option value="UAE">UAE</option>
-                </select>
-                <select class="wizard-input" id="city-select" disabled>
-                  <option value="" disabled selected>Select City</option>
-                </select>
-                <button class="wizard-btn" id="btn-next-2" disabled>Personalize My View</button>
-                <button class="wizard-btn secondary" id="btn-explore-all">Launch Satellite View</button>
-              </div>
-              <!-- Slide 3 -->
-              <div class="wizard-slide" id="slide-3">
-                 <div class="wizard-header-row" style="display:flex; align-items:center; margin-bottom:1rem;">
-                   <button class="wizard-back" id="btn-back-3">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                  </button>
-                  <h2 class="wizard-title" style="margin:0;">Refine Search</h2>
-                </div>
-                <p class="wizard-subtitle">Customize intelligence parameters.</p>
-                <select class="wizard-input" id="sector-select">
-                  <option value="retail">Retail</option>
-                  <option value="fnb">Food & Beverage</option>
-                  <option value="fashion">Fashion</option>
-                </select>
-                <select class="wizard-input" id="aov-select">
-                  <option value="high">High AOV (Premium)</option>
-                  <option value="med">Medium AOV</option>
-                </select>
-                <button class="wizard-btn" id="btn-finish">Initialize Dashboard</button>
-              </div>
-           </div>
-        </div>
+        <!-- Wizard Overlay REMOVED -->
 
         <!-- Sidebar (Fixed) -->
         <div id="sidebar">
@@ -143,14 +94,17 @@ export const Intelligence = {
             </div>
           </div>
           
-          <button class="btn-apply-filters" id="apply-filters">Find Matching Areas</button>
+          <button class="btn-apply-filters" id="apply-filters">Find My Trade Area</button>
         </div>
 
         <!-- Matched Results Panel -->
         <div id="matched-results" class="matched-results-panel">
           <div class="results-header">
-            <h3>🎯 <span id="match-count">0</span> Matched Areas</h3>
-            <button class="btn-edit-filters" id="edit-filters">Edit Filters</button>
+            <h3><span id="match-count">0</span> Matched Areas</h3>
+            <div class="results-header-actions">
+              <button class="btn-edit-filters" id="edit-filters">Edit Filters</button>
+              <button class="btn-close-results" id="close-results">&times;</button>
+            </div>
           </div>
           <div class="results-list" id="results-list">
             <!-- Dynamically populated -->
@@ -255,7 +209,7 @@ export const Intelligence = {
               </div>
               
               <div class="stats-footer">
-                <button class="btn-get-insights" id="btn-stats-explore">Find me my location</button>
+                <button class="btn-get-insights" id="btn-stats-explore">Find My Trade Area</button>
               </div>
             </div>
 
@@ -1016,17 +970,7 @@ export const Intelligence = {
       });
     }
     
-    // Stats card button handler - "Find me my location"
-    const btnStatsExplore = document.getElementById('btn-stats-explore');
-    if (btnStatsExplore) {
-      btnStatsExplore.addEventListener('click', () => {
-        // Always open customisation panel when clicking "Find me my location"
-        const customPanel = document.getElementById('customisation-panel');
-        if (customPanel) {
-          customPanel.classList.add('visible');
-        }
-      });
-    }
+    // Stats card button handler wired up in Phase 3 (Slide Modal section)
 
     // --- DOM Elements ---
     const wizardOverlay = document.getElementById('wizard-overlay');
@@ -2388,6 +2332,37 @@ export const Intelligence = {
             }
           });
         });
+        
+        // Add "Find My Trade Area" CTA button to legend at TOP
+        const ctaWrapper = document.createElement('div');
+        ctaWrapper.className = 'legend-cta-wrapper legend-cta-top';
+        ctaWrapper.innerHTML = `
+          <button class="legend-cta-btn" id="legend-find-trade-area">
+            Find My Trade Area
+          </button>
+        `;
+        // Prepend to top of wrapper
+        wrapper.insertBefore(ctaWrapper, wrapper.firstChild);
+        
+        // Wire up the button - pass city name in event detail
+        const legendCta = wrapper.querySelector('#legend-find-trade-area');
+        if (legendCta) {
+          legendCta.addEventListener('click', () => {
+            // Get city name from breadcrumbs global variable efficiently
+            // The global breadcrumbs variable should be up to date
+            // If not available, fallback to DOM
+            let cityName = '';
+            if (typeof breadcrumbs !== 'undefined' && breadcrumbs.length >= 3) {
+                cityName = breadcrumbs[breadcrumbs.length - 1]; 
+            } else {
+                 const bcItems = document.querySelectorAll('.breadcrumb-item');
+                 if (bcItems.length >= 3) {
+                   cityName = bcItems[2]?.textContent?.trim() || '';
+                 }
+            }
+            window.dispatchEvent(new CustomEvent('openFindMyTradeAreaModal', { detail: { city: cityName } }));
+          });
+        }
 
       } else if (level === 'TradeArea') {
         // Show trade area details in legend
@@ -2474,12 +2449,11 @@ export const Intelligence = {
             // Find My Location button
             const findLocationBtn = document.createElement('button');
             findLocationBtn.className = 'btn-legend-location';
-            findLocationBtn.style.cssText = 'width: 100%; margin-top: 12px; padding: 10px; background: linear-gradient(135deg, #d4af37, #c9a227); color: #000; border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;';
-            findLocationBtn.textContent = ' Find My Location';
+            findLocationBtn.style.cssText = 'width: 100%; margin-top: 12px; padding: 10px; background: linear-gradient(135deg, #15803d, #16a34a); color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;';
+            findLocationBtn.textContent = 'Find My Location';
             findLocationBtn.onclick = () => {
-              sidebar.classList.remove('visible');
-              const customPanel = document.getElementById('customisation-panel');
-              if (customPanel) customPanel.classList.add('visible');
+              // Open the Find My Location modal
+              window.dispatchEvent(new CustomEvent('openFindMyLocationModal'));
             };
             wrapper.appendChild(findLocationBtn);
           }
@@ -2487,31 +2461,8 @@ export const Intelligence = {
       }
     };
 
-    // --- Logic: Check Incoming Data ---
-    // Only auto-populate brand if it was set in this session (not persisted across sessions)
-    const storedBrand = sessionStorage.getItem('footfall_brand');
-    if (storedBrand) {
-      inputBrand.value = storedBrand;
-    }
 
-    // --- Logic: Country-City Filtering ---
-    countrySelect.addEventListener('change', (e) => {
-      const country = e.target.value;
-      citySelect.innerHTML = '<option value="" disabled selected>Select City</option>';
-      citySelect.disabled = false;
-
-      const cities = geoData.cities.features.filter(f => f.properties.country === country);
-      cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city.properties.name;
-        option.innerText = city.properties.name;
-        citySelect.appendChild(option);
-      });
-    });
-
-    citySelect.addEventListener('change', () => {
-      btnNext2.disabled = false;
-    });
+    // --- Wizard form logic REMOVED ---
 
     // --- Navigation Logic ---
     const updateBreadcrumbs = (path) => {
@@ -3172,126 +3123,20 @@ export const Intelligence = {
         });
       });
       
-      // Find Me My Location button in sidebar
+      // Find My Location button in sidebar - wired to new modal flow
       const btnFindLocation = document.getElementById('btn-find-location');
       if (btnFindLocation) {
         btnFindLocation.addEventListener('click', () => {
-          // Close sidebar and open customisation panel
+          // Close sidebar and open Find My Location modal
           sidebar.classList.remove('visible');
-          const customPanel = document.getElementById('customisation-panel');
-          if (customPanel) customPanel.classList.add('visible');
+          // The openFindMyLocationModal function is defined in Phase 3
+          // We'll dispatch a custom event to trigger it
+          window.dispatchEvent(new CustomEvent('openFindMyLocationModal'));
         });
       }
     };
 
-    // --- Wizard Logic ---
-    const slide1 = document.getElementById('slide-1');
-    const slide2 = document.getElementById('slide-2');
-    const slide3 = document.getElementById('slide-3');
-
-    document.getElementById('btn-next-1').onclick = () => {
-      if (!inputName.value) {
-        inputName.style.borderColor = 'red';
-        return;
-      }
-      slide1.classList.remove('active');
-      slide2.classList.add('active');
-    };
-
-    document.getElementById('btn-next-2').onclick = () => {
-      // Preload Map Logic
-      const selectedCityName = document.getElementById('city-select').value;
-      const selectedCountryName = document.getElementById('country-select').value;
-      
-      const city = geoData.cities.features.find(f => f.properties.name === selectedCityName);
-      const country = geoData.countries.features.find(f => f.properties.name === selectedCountryName);
-
-      if (city) {
-        loadCityView(city);
-      } else if (country) {
-        loadCountryView(country);
-      }
-
-      // Ensure wizard stays on top (loadCityView usually hides sidebar, checking wizard visibility)
-      // Since default loadCityView doesn't hide wizard-overlay, just sidebar, this is safe.
-      // But we just want to update the view in background.
-
-      slide2.classList.remove('active');
-      slide3.classList.add('active');
-    };
-
-    // Back Button Logic
-    document.getElementById('btn-back-2').onclick = () => {
-      // User requested back button on wizard to go back to Landing
-      // Check if we skipped slide 1 (usually true if country pre-selected)
-      if (countrySelect.value) { // We have a selected country
-          returnToLanding();
-      } else {
-          // Normal behavior? Or always return to Landing?
-          // "Take us back to landing" - usually implies exiting the wizard flow
-          returnToLanding();
-      }
-    };
-
-    document.getElementById('btn-back-3').onclick = () => {
-      slide3.classList.remove('active');
-      slide2.classList.add('active');
-    };
-
-    document.getElementById('btn-explore-all').onclick = () => {
-      wizardOverlay.classList.add('hidden');
-      loadGlobalView();
-    };
-
-    document.getElementById('btn-finish').onclick = () => {
-      const btnFinish = document.getElementById('btn-finish');
-      const originalText = btnFinish.innerText;
-      btnFinish.innerText = 'Initializing...';
-      btnFinish.disabled = true;
-
-      userCriteria = {
-        sector: document.getElementById('sector-select').value,
-        aov: document.getElementById('aov-select').value
-      };
-      
-      const selectedCity = document.getElementById('city-select').value;
-      const selectedCountry = document.getElementById('country-select').value;
-      const name = document.getElementById('input-name').value;
-      const brand = document.getElementById('input-brand').value;
-
-      // Prepare payload for FormSubmit
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('brand', brand);
-      formData.append('country', selectedCountry);
-      formData.append('city', selectedCity);
-      formData.append('sector', userCriteria.sector);
-      formData.append('aov', userCriteria.aov);
-      formData.append('_subject', `New Intelligence Lead: ${brand} (${name})`);
-
-      // Send Data
-      fetch("https://formsubmit.co/ajax/info@foottfall.com", {
-          method: "POST",
-          body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log('Lead captured successfully');
-      })
-      .catch(error => {
-          console.error('Error capturing lead:', error);
-      })
-      .finally(() => {
-          // Always proceed to dashboard
-          wizardOverlay.classList.add('hidden');
-          // Map is already preloaded, but just in case or if logic changes:
-          const city = geoData.cities.features.find(f => f.properties.name === selectedCity);
-          if (city && currentLevel !== 'City') loadCityView(city);
-          
-          btnFinish.innerText = originalText;
-          btnFinish.disabled = false;
-      });
-    };
+    // --- Wizard Logic REMOVED ---
 
     // Auto-hide hero on button clicks
     const countryBtns = document.querySelectorAll('.btn-country');
@@ -3367,11 +3212,19 @@ export const Intelligence = {
       });
     }
     
-    // Edit filters - reopen customisation
+    // Edit filters - open the new modal instead of old customisation panel
     if (editFiltersBtn) {
       editFiltersBtn.addEventListener('click', () => {
         matchedResultsPanel.classList.remove('visible');
-        customisationPanel.classList.add('visible');
+        window.dispatchEvent(new CustomEvent('openFindMyTradeAreaModal'));
+      });
+    }
+    
+    // Close results button
+    const closeResultsBtn = document.getElementById('close-results');
+    if (closeResultsBtn) {
+      closeResultsBtn.addEventListener('click', () => {
+        matchedResultsPanel.classList.remove('visible');
       });
     }
     
@@ -3500,6 +3353,633 @@ export const Intelligence = {
         alert('Thank you for your interest! Our advisory team will contact you shortly.');
       });
     }
+    
+    // ============================================
+    // PHASE 3: SLIDE MODAL FLOWS & LEAD CAPTURE
+    // ============================================
+    
+    // Get available cities for dropdown
+    const getAvailableCities = () => {
+      const cities = geoData.cities?.features || [];
+      return cities.map(c => ({
+        value: c.properties.name,
+        label: c.properties.name
+      }));
+    };
+    
+    // Get current city from breadcrumbs or state
+    const getCurrentCity = () => {
+      if (currentLevel === 'City' || currentLevel === 'TradeArea') {
+        // Get from breadcrumbs
+        const bcItems = document.querySelectorAll('.breadcrumb-item');
+        if (bcItems.length >= 3) {
+          return bcItems[2]?.textContent || '';
+        }
+      }
+      return '';
+    };
+    
+    // --- SLIDE CONFIGURATIONS ---
+    
+    // Find My Trade Area - Contact Capture Slide
+    const contactSlideConfig = {
+      section: 'Contact Information',
+      optional: false,
+      fields: [
+        { name: 'name', label: 'Your Name', type: 'text', required: true, placeholder: 'Enter your full name' },
+        { name: 'brandName', label: 'Brand Name', type: 'text', required: true, placeholder: 'Enter your brand/company name' },
+        { name: 'contact', label: 'Phone Number', type: 'tel', required: true, placeholder: '+91 XXXXXXXXXX' },
+        { name: 'email', label: 'Email (Optional)', type: 'email', required: false, placeholder: 'you@company.com' }
+      ]
+    };
+    
+    // City Selection Slide (for landing page flow)
+    const citySlideConfig = {
+      section: 'Select City',
+      optional: false,
+      fields: [
+        { 
+          name: 'selectedCity', 
+          label: 'Which city are you interested in?', 
+          type: 'select', 
+          required: true,
+          options: getAvailableCities()
+        }
+      ]
+    };
+    
+    // Filter Slide (shared between flows)
+    const filterSlideConfig = {
+      section: 'Your Requirements',
+      optional: false,
+      fields: [
+        {
+          name: 'categories',
+          label: 'Business Category',
+          type: 'checkbox-group',
+          required: true,
+          options: [
+            { value: 'fb', label: 'F&B' },
+            { value: 'fashion', label: 'Fashion' },
+            { value: 'electronics', label: 'Electronics' },
+            { value: 'wellness', label: 'Wellness' },
+            { value: 'lifestyle', label: 'Lifestyle' }
+          ]
+        },
+        {
+          name: 'propertySize',
+          label: 'Property Size',
+          type: 'radio-group',
+          required: true,
+          options: [
+            { value: '<500', label: '< 500 sqft' },
+            { value: '500-2000', label: '500-2000 sqft' },
+            { value: '2000-5000', label: '2000-5000 sqft' },
+            { value: '5000+', label: '5000+ sqft' }
+          ]
+        },
+        {
+          name: 'ticketSize',
+          label: 'Avg. Customer Spend',
+          type: 'radio-group',
+          required: true,
+          options: [
+            { value: '<200', label: '< 200' },
+            { value: '<1000', label: '< 1000' },
+            { value: '1000-3000', label: '1000-3000' },
+            { value: '3000+', label: '3000+' }
+          ]
+        }
+      ]
+    };
+    
+    // Your People Slide (Find My Location flow)
+    const yourPeopleSlideConfig = {
+      section: 'Your People',
+      optional: false,
+      fields: [
+        {
+          name: 'catchmentType',
+          label: 'Your main customers come from',
+          type: 'checkbox-group',
+          required: true,
+          options: [
+            { value: 'residential', label: 'Residential Areas' },
+            { value: 'offices', label: 'Offices' },
+            { value: 'institutes', label: 'Institutes' },
+            { value: 'factories', label: 'Factories' },
+            { value: 'transit', label: 'Transit Points' },
+            { value: 'medical', label: 'Medical Services' }
+          ]
+        },
+        {
+          name: 'genderMix',
+          label: 'Gender Mix (% Male)',
+          type: 'slider',
+          leftLabel: 'Female',
+          rightLabel: 'Male',
+          min: 0,
+          max: 100,
+          default: 50
+        },
+        {
+          name: 'ageGroups',
+          label: 'Primary Age Groups',
+          type: 'checkbox-group',
+          required: true,
+          options: [
+            { value: '18-25', label: '18-25' },
+            { value: '25-35', label: '25-35' },
+            { value: '35-50', label: '35-50' },
+            { value: '50+', label: '50+' },
+            { value: 'all', label: 'All Ages' }
+          ]
+        },
+        {
+          name: 'rentalBracket',
+          label: 'Customer Residential Rental Bracket',
+          type: 'select',
+          required: false,
+          options: [
+            { value: '<15000', label: '< ₹15,000/month' },
+            { value: '15000-30000', label: '₹15,000 - 30,000' },
+            { value: '30000-50000', label: '₹30,000 - 50,000' },
+            { value: '50000+', label: '₹50,000+' }
+          ]
+        }
+      ]
+    };
+    
+    // Your Business Slide (Find My Location flow)
+    const yourBusinessSlideConfig = {
+      section: 'Your Business',
+      optional: false,
+      fields: [
+        { 
+          name: 'yearsInBusiness', 
+          label: 'Years in Business', 
+          type: 'select', 
+          required: true,
+          options: [
+            { value: 'new', label: 'New / Launching' },
+            { value: '1-3', label: '1-3 years' },
+            { value: '3-5', label: '3-5 years' },
+            { value: '5-10', label: '5-10 years' },
+            { value: '10+', label: '10+ years' }
+          ]
+        }
+      ]
+    };
+    
+    // Your Footprint Slide (Find My Location flow - Optional)
+    const yourFootprintSlideConfig = {
+      section: 'Your Footprint',
+      optional: true,
+      fields: [
+        { name: 'hqCity', label: 'First Store/HQ City', type: 'text', required: false, placeholder: 'e.g., Mumbai' },
+        { 
+          name: 'storeCount', 
+          label: 'Number of Stores', 
+          type: 'select', 
+          required: false,
+          options: [
+            { value: '0', label: 'None (First Store)' },
+            { value: '1-5', label: '1-5 stores' },
+            { value: '5-20', label: '5-20 stores' },
+            { value: '20-50', label: '20-50 stores' },
+            { value: '50+', label: '50+ stores' }
+          ]
+        },
+        { name: 'totalLeasedSqft', label: 'Total Leased Area (sqft)', type: 'text', required: false, placeholder: 'e.g., 50000' },
+        { name: 'toplineRevenue', label: 'Annual Topline Revenue', type: 'text', required: false, placeholder: 'e.g., 5 Cr' },
+        { name: 'viableRentRange', label: 'Viable Rent Range (per sqft)', type: 'text', required: false, placeholder: 'e.g., 100-200' }
+      ],
+      skipIf: (data) => false // Never auto-skip, but it's optional
+    };
+    
+    // Your Aspiration Slide (Find My Location flow)
+    const yourAspirationSlideConfig = {
+      section: 'Your Aspiration',
+      optional: false,
+      fields: [
+        {
+          name: 'businessFormat',
+          label: 'Business Format',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'qsr', label: 'QSR / Fast Food' },
+            { value: 'casual-dining', label: 'Casual Dining' },
+            { value: 'fine-dining', label: 'Fine Dining' },
+            { value: 'cafe', label: 'Cafe' },
+            { value: 'retail-fashion', label: 'Retail - Fashion' },
+            { value: 'retail-electronics', label: 'Retail - Electronics' },
+            { value: 'salon', label: 'Salon / Spa' },
+            { value: 'gym', label: 'Gym / Fitness' },
+            { value: 'clinic', label: 'Clinic / Healthcare' },
+            { value: 'other', label: 'Other' }
+          ]
+        },
+        { name: 'competingBrands', label: 'Similar/Competing Brands', type: 'text', required: false, placeholder: 'Comma separated' },
+        { name: 'aspirationalAreas', label: 'Aspirational Trade Areas', type: 'text', required: false, placeholder: 'e.g., Bandra, Powai' },
+        { 
+          name: 'growthPlan', 
+          label: 'Growth Plan (Next 12 months)', 
+          type: 'select',
+          required: true,
+          options: [
+            { value: '1-2', label: '1-2 new locations' },
+            { value: '3-5', label: '3-5 new locations' },
+            { value: '5-10', label: '5-10 new locations' },
+            { value: '10+', label: '10+ new locations' }
+          ]
+        }
+      ]
+    };
+    
+    // --- FIND MY TRADE AREA BUTTON HANDLER ---
+    const openFindMyTradeAreaModal = (fromLanding = false, passedCity = '') => {
+      // 1. Determine City
+      // Priority: Passed arg > Global Breadcrumbs > DOM Breadcrumbs > ''
+      let currentCity = passedCity;
+      if (!currentCity && typeof breadcrumbs !== 'undefined' && breadcrumbs.length >= 3) {
+         currentCity = breadcrumbs[breadcrumbs.length - 1]; // Last item usually city
+      }
+      
+      const needsCitySelection = fromLanding || !currentCity;
+      
+      console.log('Open Modal Debug:', { fromLanding, passedCity, breadcrumbs: typeof breadcrumbs !== 'undefined' ? breadcrumbs : 'N/A', currentCity });
+      
+      // 2. Dynamic Filter Config based on City
+      const getAdaptedFilterConfig = (city) => {
+        const config = JSON.parse(JSON.stringify(filterSlideConfig)); // Deep clone
+        const ticketField = config.fields.find(f => f.name === 'ticketSize');
+        const isDubai = city && city.toLowerCase().trim() === 'dubai';
+        
+        if (isDubai && ticketField) {
+          ticketField.label = 'Avg. Customer Spend (AED)';
+          ticketField.options = [
+            { value: '<50', label: '< 50 AED' },
+            { value: '50-150', label: '50-150 AED' },
+            { value: '150-500', label: '150-500 AED' },
+            { value: '500+', label: '500+ AED' }
+          ];
+        } else if (ticketField) {
+           // Default to INR
+           ticketField.label = 'Avg. Customer Spend (INR)';
+           ticketField.options = [
+            { value: '<200', label: '< ₹200' },
+            { value: '<1000', label: '< ₹1000' },
+            { value: '1000-3000', label: '₹1000-3000' },
+            { value: '3000+', label: '₹3000+' }
+          ];
+        }
+        return config;
+      };
+
+      // Helper to navigate to city
+      const handleCityNavigation = (cityName) => {
+        console.log('Navigating to city:', cityName);
+        const cityFeature = geoData.cities?.features.find(c => c.properties.name === cityName);
+        
+        if (cityFeature) {
+          // Hide landing elements
+          const landingHero = document.getElementById('landing-hero-section');
+          const statsCard = document.getElementById('stats-card');
+          if (landingHero) landingHero.classList.add('hidden');
+          if (statsCard) {
+            statsCard.classList.remove('visible');
+            statsCard.classList.add('hidden');
+          }
+          if (MapTourController) MapTourController.stop();
+
+          // Use loadCityView if available, else manual flyTo
+          if (typeof loadCityView === 'function') {
+            loadCityView(cityFeature);
+          } else {
+             // Manual fallback
+             const [lng, lat] = cityFeature.geometry.coordinates;
+             map.flyTo({
+               center: [lng, lat],
+               zoom: 12, // City view zoom
+               pitch: 45,
+               duration: 2000
+             });
+             // Set global state
+             currentLevel = 'City';
+             currentCityFeature = cityFeature;
+             updateBreadcrumbs(['Home', activeCountry || 'India', cityName]);
+             updateLegend('City');
+          }
+        }
+      };
+      
+      // Build slides based on context
+      const slides = [];
+      
+      // Add city slide if needed
+      if (needsCitySelection) {
+        slides.push(citySlideConfig);
+      } else {
+        // Pre-save current city
+        UserProfileService.save({ selectedCity: currentCity });
+      }
+      
+      // Add filter slide (adapted for city)
+      slides.push(getAdaptedFilterConfig(currentCity));
+      
+      // Contact slide REMOVED - soft lead capture handles contact info collection
+      
+      const modal = new SlideModal({
+        title: 'Find My Trade Area',
+        slides: slides,
+        onSlideChange: (index, data) => {
+          // If we just finished step 0 (City Selection) and it was a city slide
+          if (needsCitySelection && index === 1) {
+             const selectedCity = data.selectedCity;
+             if (selectedCity) {
+               handleCityNavigation(selectedCity);
+               // Close current modal and reopen with correct currency adaptation
+               modal.close();
+               setTimeout(() => {
+                 openFindMyTradeAreaModal(false, selectedCity);
+               }, 350);
+             }
+          }
+        },
+        onComplete: async (data) => {
+          // Save to profile
+          UserProfileService.save(data);
+          
+          // Update filter state
+          filterState.categories = data.categories || [];
+          filterState.propertySize = data.propertySize || '';
+          filterState.ticketSize = data.ticketSize || '';
+          
+          // Send email in background
+          const matchedCount = applyFiltersAndShowResultsWithCount(data.selectedCity || currentCity);
+          
+          EmailService.sendLeadEmail('trade_area_filter', {
+            ...data,
+            selectedCity: data.selectedCity || currentCity,
+            matchedCount: matchedCount,
+            source: fromLanding ? 'Landing Stats Card' : 'City View Legend'
+          });
+        }
+      });
+      
+      modal.show();
+    };
+    
+    // Modified filter function that returns count
+    const applyFiltersAndShowResultsWithCount = (cityName) => {
+      if (!cityName) {
+        console.log('No city selected, cannot filter');
+        return 0;
+      }
+      
+      // Get trade areas for city
+      const cityTradeAreas = geoData.tradeAreas.features.filter(f => 
+        f.properties.city === cityName
+      );
+      
+      // Apply filters
+      const matched = cityTradeAreas.filter(area => {
+        const props = area.properties;
+        const suitableFor = props.suitableFor || [];
+        const categoryMatch = filterState.categories.length === 0 || 
+          filterState.categories.some(cat => suitableFor.includes(cat));
+        const propertySizes = props.propertySizes || [];
+        const sizeMatch = propertySizes.length === 0 || 
+          propertySizes.includes(filterState.propertySize);
+        return categoryMatch && sizeMatch;
+      });
+      
+      // Show results
+      renderMatchedResults(matched, cityName);
+      
+      return matched.length;
+    };
+    
+    // --- FIND MY LOCATION BUTTON HANDLER (FULL JOURNEY) ---
+    const openFindMyLocationModal = () => {
+      const currentCity = getCurrentCity();
+      const currentArea = currentTradeArea?.properties?.name || '';
+      
+      const slides = [
+        contactSlideConfig,
+        { 
+          ...filterSlideConfig,
+          fields: [
+            {
+              name: 'selectedCity',
+              label: 'Target City',
+              type: 'select',
+              required: true,
+              options: getAvailableCities()
+            },
+            ...filterSlideConfig.fields
+          ]
+        },
+        yourPeopleSlideConfig,
+        yourBusinessSlideConfig,
+        yourFootprintSlideConfig,
+        yourAspirationSlideConfig
+      ];
+      
+      // Pre-fill city if known
+      if (currentCity) {
+        UserProfileService.save({ selectedCity: currentCity });
+      }
+      
+      const modal = new SlideModal({
+        title: 'Find My Location',
+        slides: slides,
+        onComplete: async (data) => {
+          // Save all data
+          UserProfileService.save(data);
+          UserProfileService.setLeadStatus('warm');
+          UserProfileService.markContactCaptured();
+          
+          // Send full inquiry email
+          await EmailService.sendLeadEmail('find_location', {
+            ...data,
+            currentTradeArea: currentArea,
+            source: currentArea ? 'Trade Area Sidebar' : 'City View Legend'
+          });
+          
+          // Show acknowledgement
+          modal.showAcknowledgement("Thank you! Our advisory team will contact you within 24 hours to discuss the best locations for your brand.");
+        }
+      });
+      
+      modal.show();
+    };
+    
+    // --- WIRE UP BUTTONS ---
+    
+    // Stats card button (landing page) - Find My Trade Area
+    const btnStatsExplore = document.getElementById('btn-stats-explore');
+    if (btnStatsExplore) {
+      btnStatsExplore.addEventListener('click', () => {
+        // Stop tour if running
+        if (MapTourController) MapTourController.stop();
+        
+        // Check if we're on landing (no city selected yet)
+        const isLanding = !getCurrentCity();
+        openFindMyTradeAreaModal(isLanding);
+      });
+    }
+    
+    // Sidebar Find My Location button (trade area view)
+    // Listen for custom event from sidebar button click
+    window.addEventListener('openFindMyLocationModal', () => {
+      openFindMyLocationModal();
+    });
+    
+    // Listen for custom event from legend button click (Find My Trade Area)
+    window.addEventListener('openFindMyTradeAreaModal', (e) => {
+      const passedCity = e?.detail?.city || '';
+      openFindMyTradeAreaModal(false, passedCity);
+    });
+    
+    // --- SOFT LEAD CAPTURE ---
+    let softLeadShown = false;
+    let softLeadTimeout = null;
+    
+    const showSoftLeadCapture = () => {
+      // Use consolidated check from UserProfileService
+      const shouldShow = UserProfileService.shouldShowSoftLead();
+      
+      console.log('Soft lead conditions:', { shouldShow, softLeadShown });
+      
+      if (!shouldShow || softLeadShown) {
+        console.log('Soft lead blocked by conditions');
+        return;
+      }
+      
+      softLeadShown = true;
+      
+      // Create soft lead card
+      const card = document.createElement('div');
+      card.className = 'soft-lead-capture';
+      card.innerHTML = `
+        <div class="soft-lead-header">
+          <h4 class="soft-lead-title">Get Tailored Insights</h4>
+          <button class="soft-lead-close">&times;</button>
+        </div>
+        <form class="soft-lead-form">
+          <input type="text" name="name" placeholder="Your Name">
+          <input type="text" name="brandName" placeholder="Brand Name">
+          <input type="tel" name="contact" placeholder="Phone Number (optional)" pattern="[0-9]*" inputmode="numeric">
+          <button type="submit" class="soft-lead-submit">Get in Touch</button>
+        </form>
+      `;
+      
+      document.body.appendChild(card);
+      console.log('Soft lead card appended to body', card);
+      
+      // Animate in
+      setTimeout(() => {
+        card.classList.add('visible');
+        console.log('Soft lead card visible class added');
+      }, 100);
+      
+      // Close handler - mark as dismissed (starts 24h cooldown)
+      card.querySelector('.soft-lead-close').addEventListener('click', () => {
+        UserProfileService.markSoftLeadDismissed();
+        card.classList.remove('visible');
+        setTimeout(() => card.remove(), 400);
+      });
+      
+      // Submit handler
+      card.querySelector('.soft-lead-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+          name: formData.get('name') || '',
+          brandName: formData.get('brandName') || '',
+          contact: formData.get('contact') || '',
+          selectedCity: getCurrentCity(),
+          currentPage: window.location.pathname
+        };
+        
+        // Validate at least one field is filled
+        if (!data.name && !data.brandName && !data.contact) {
+          return; // Don't submit empty form
+        }
+        
+        // Save and mark as warm
+        UserProfileService.save(data);
+        UserProfileService.setLeadStatus('warm');
+        UserProfileService.markContactCaptured();
+        
+        // Send email
+        await EmailService.sendLeadEmail('soft_lead', data);
+        
+        // Close with success feedback
+        card.innerHTML = `
+          <div class="ack-slide" style="padding: 20px;">
+            <div class="ack-icon" style="width: 50px; height: 50px; font-size: 24px;">✓</div>
+            <p style="color: #d4af37; margin-top: 10px;">Thanks! We'll be in touch.</p>
+          </div>
+        `;
+        
+        setTimeout(() => {
+          card.classList.remove('visible');
+          setTimeout(() => card.remove(), 400);
+        }, 2000);
+      });
+    };
+    
+    // Trigger soft lead after 10 seconds on landing page (reduced from 30s for better engagement)
+    const isOnLandingPage = window.location.pathname === '/' || window.location.pathname === '/intelligence';
+    const landingHero = document.getElementById('landing-hero-section');
+    const heroVisible = landingHero && !landingHero.classList.contains('hidden');
+    
+    console.log('Soft lead check:', { isOnLandingPage, heroVisible, alreadyCaptured: UserProfileService.isContactCaptured() });
+    
+    if (isOnLandingPage || heroVisible) {
+      softLeadTimeout = setTimeout(() => {
+        console.log('Triggering soft lead capture...');
+        showSoftLeadCapture();
+      }, 18000); // 18 seconds
+    }
+    
+    // --- HARD RESET KEYBOARD SHORTCUT ---
+    // Ctrl+Shift+D to clear all persistent user data
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        UserProfileService.hardReset();
+        
+        // Show brief visual feedback
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.85);
+          color: #4CAF50;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-family: 'Outfit', sans-serif;
+          font-size: 14px;
+          z-index: 10000;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(76, 175, 80, 0.3);
+        `;
+        toast.textContent = '🔄 All user data cleared';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transition = 'opacity 0.3s';
+          setTimeout(() => toast.remove(), 300);
+        }, 2000);
+      }
+    });
     
   }
 };
