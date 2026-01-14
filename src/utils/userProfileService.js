@@ -49,6 +49,7 @@ const defaultProfile = {
   growthPlan: '',
   
   // Meta
+  userId: null,               // Persistent random UUID for machine tracking
   leadStatus: null,           // 'warm', 'cold', or null
   contactCapturedAt: null,
   softLeadDismissedAt: null,  // Timestamp when user dismissed soft lead
@@ -64,9 +65,27 @@ export const UserProfileService = {
   get() {
     try {
       const stored = localStorage.getItem(PERSIST_STORAGE_KEY);
+      let profile = { ...defaultProfile };
+      
       if (stored) {
-        return { ...defaultProfile, ...JSON.parse(stored) };
+        profile = { ...profile, ...JSON.parse(stored) };
       }
+
+      // Generate persistent User ID if missing
+      // Format: user_<randomString>_<timestamp>
+      if (!profile.userId) {
+        profile.userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+        // We don't save immediately here to avoid side effects in a getter, 
+        // but it will be saved on next write.
+        // Actually, for consistency, let's force a save of just the ID if we generated it,
+        // so it doesn't change on next reload if no other save happened.
+        try {
+          const toSave = { ...profile, lastUpdated: new Date().toISOString() };
+          localStorage.setItem(PERSIST_STORAGE_KEY, JSON.stringify(toSave));
+        } catch (e) { /* ignore write error */ }
+      }
+
+      return profile;
     } catch (e) {
       console.warn('Failed to parse user profile:', e);
     }

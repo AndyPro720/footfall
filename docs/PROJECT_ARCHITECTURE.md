@@ -250,8 +250,20 @@ On Complete:
 | Service | File | Purpose |
 |---------|------|---------|
 | `UserProfileService` | `src/utils/userProfileService.js` | Persists user data in `localStorage` |
-| `EmailService` | `src/utils/emailService.js` | Sends HTML emails via FormSubmit.co |
+| `EmailService` | `src/utils/emailService.js` | Sends structured table emails via FormSubmit.co |
 | `SlideModal` | `src/components/slideModal.js` | Reusable multi-step modal component |
+
+#### Lead Tracking & Email Context
+
+**Persistent User ID**:
+Every user (browser) is assigned a persistent UUID (e.g., `user_x8k...`) stored in `localStorage`. This allows tracking unique users across sessions even if they don't sign in.
+
+**Enriched Email Metadata**:
+All lead emails sent via `EmailService` now include a header with:
+- **Lead Status**: Explicitly labels 'Warm', 'Cold', or 'Converted Cold'.
+- **User ID**: The persistent UUID.
+- **Device Info**: Browser, Platform, and Screen Resolution.
+- **Context**: Current URL and timestamp.
 
 #### Soft Lead Capture
 
