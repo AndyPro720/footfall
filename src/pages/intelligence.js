@@ -3852,6 +3852,9 @@ export const Intelligence = {
             matchedCount: matchedCount,
             source: fromLanding ? 'Landing Stats Card' : 'City View Legend'
           });
+          
+          // Close immediately as we show results on map
+          modal.close();
         }
       });
       
@@ -3928,15 +3931,42 @@ export const Intelligence = {
           UserProfileService.setLeadStatus('warm');
           UserProfileService.markContactCaptured();
           
-          // Send full inquiry email
-          await EmailService.sendLeadEmail('find_location', {
+          // Send full inquiry email (async)
+          EmailService.sendLeadEmail('find_location', {
             ...data,
             currentTradeArea: currentArea,
             source: currentArea ? 'Trade Area Sidebar' : 'City View Legend'
           });
           
-          // Show acknowledgement
-          modal.showAcknowledgement("Thank you! Our advisory team will contact you within 24 hours to discuss the best locations for your brand.");
+          // --- OPEN MATCHED RESULTS ---
+          
+          // 1. Update filter state
+          if (data.categories) filterState.categories = Array.isArray(data.categories) ? data.categories : [data.categories];
+          if (data.propertySize) filterState.propertySize = data.propertySize;
+          
+          // 2. Navigate to city if needed
+          const targetCity = data.selectedCity || currentCity;
+          const activeCity = getCurrentCity();
+          
+          if (targetCity && targetCity !== activeCity) {
+            console.log(`Navigating to target city: ${targetCity}`);
+            const cityFeature = geoData.cities?.features.find(c => c.properties.name === targetCity);
+            if (cityFeature) {
+              loadCityView(cityFeature);
+            }
+          }
+          
+          // 3. Trigger matched results (with small delay to allow view transition)
+          setTimeout(() => {
+            // Force matched results for the active city
+            applyFiltersAndShowResults();
+            
+            // Show acknowledgement with matched areas hint
+            modal.showAcknowledgement(
+              "Your curated data has been forwarded to our team, and they will get in touch with you shortly.",
+              { title: 'Hold Tight!', showMatchedAreas: true }
+            );
+          }, 800);
         }
       });
       

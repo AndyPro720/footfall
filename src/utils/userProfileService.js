@@ -28,7 +28,7 @@ const defaultProfile = {
   
   // Your People
   catchmentType: [],      // residential, offices, institutes, factories, transit, medical
-  genderMix: { male: 50, female: 50 },
+  genderMix: 50,          // Changed from object to number (0-100 representing % Male)
   ageGroups: [],          // 18-25, 25-35, 35-50, 50+, all
   rentalBracket: '',
   

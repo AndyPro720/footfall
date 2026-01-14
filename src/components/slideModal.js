@@ -16,6 +16,7 @@ export class SlideModal {
     this.formData = {};
     this.modal = null;
     this.skipConditions = options.skipConditions || {};
+    this.sliderTouched = {}; // Track which sliders have been interacted with
   }
 
   /**
@@ -101,7 +102,7 @@ export class SlideModal {
           
           ${this.currentSlide < totalSlides - 1 ? `
             <button class="slide-btn slide-btn-next">
-              ${slide.optional ? 'Skip' : 'Next'}
+              ${this.getNextButtonText(slide)}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6"></polyline>
               </svg>
@@ -132,17 +133,51 @@ export class SlideModal {
 
       switch (field.type) {
         case 'text':
+          return `
+            <div class="field-group">
+              <label for="${field.name}">${field.label}${requiredStar}</label>
+              <input 
+                type="text" 
+                id="${field.name}" 
+                name="${field.name}" 
+                value="${value}"
+                placeholder="${field.placeholder || ''}"
+                ${field.pattern ? `pattern="${field.pattern}"` : ''}
+                ${required}
+              >
+            </div>
+          `;
+        
         case 'email':
+          return `
+            <div class="field-group">
+              <label for="${field.name}">${field.label}${requiredStar}</label>
+              <input 
+                type="email" 
+                id="${field.name}" 
+                name="${field.name}" 
+                value="${value}"
+                placeholder="${field.placeholder || ''}"
+                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                title="Please enter a valid email address"
+                ${required}
+              >
+            </div>
+          `;
+
         case 'tel':
           return `
             <div class="field-group">
               <label for="${field.name}">${field.label}${requiredStar}</label>
               <input 
-                type="${field.type}" 
+                type="tel" 
                 id="${field.name}" 
                 name="${field.name}" 
                 value="${value}"
                 placeholder="${field.placeholder || ''}"
+                pattern="[+]?[0-9\s-]{7,15}"
+                title="Please enter a valid phone number"
+                inputmode="tel"
                 ${required}
               >
             </div>
@@ -165,9 +200,10 @@ export class SlideModal {
 
         case 'checkbox-group':
           const selectedValues = Array.isArray(value) ? value : [];
+          const multiSelectHint = field.options && field.options.length > 1 ? ' <span class="multi-select-hint">(multi-select)</span>' : '';
           return `
             <div class="field-group">
-              <label>${field.label}${requiredStar}</label>
+              <label>${field.label}${multiSelectHint}${requiredStar}</label>
               <div class="checkbox-group" data-name="${field.name}">
                 ${field.options.map(opt => `
                   <label class="checkbox-item ${selectedValues.includes(opt.value) ? 'checked' : ''}">
@@ -205,7 +241,23 @@ export class SlideModal {
           `;
 
         case 'slider':
-          const sliderValue = value || field.default || 50;
+          let sliderValue = 50;
+          if (value !== undefined && value !== null && value !== '') {
+            sliderValue = parseInt(value);
+            // Safety check for NaN (legacy data support)
+            if (isNaN(sliderValue)) sliderValue = 50;
+          } else if (field.default !== undefined) {
+            sliderValue = field.default;
+          }
+          
+          // Slider is touched if value is present AND different from default "untouched" state
+          const isDefault = field.default !== undefined ? field.default : 50;
+          const parsedVal = parseInt(value);
+          // Ensure we don't treat NaN as touched
+          const sliderTouched = this.sliderTouched[field.name] || 
+            (value !== undefined && value !== '' && !isNaN(parsedVal) && parsedVal !== isDefault);
+          
+          const sliderDisplayText = sliderTouched ? `${100 - sliderValue}% / ${sliderValue}%` : 'Drag to set';
           return `
             <div class="field-group">
               <label>${field.label}</label>
@@ -218,10 +270,11 @@ export class SlideModal {
                   min="${field.min || 0}" 
                   max="${field.max || 100}" 
                   value="${sliderValue}"
+                  data-touched="${sliderTouched}"
                 >
                 <span class="slider-label-right">${field.rightLabel || 'Max'}</span>
               </div>
-              <div class="slider-value">${sliderValue}%</div>
+              <div class="slider-value" data-slider-display="${field.name}">${sliderDisplayText}</div>
             </div>
           `;
 
@@ -249,6 +302,18 @@ export class SlideModal {
    * Attach event listeners
    */
   attachEventListeners() {
+    // Input Sanitization (Mobile Number)
+    this.modal.addEventListener('input', (e) => {
+      if (e.target.type === 'tel') {
+        const val = e.target.value;
+        // Allow numbers, spaces, +, -
+        const clean = val.replace(/[^0-9+\s-]/g, '');
+        if (val !== clean) {
+          e.target.value = clean;
+        }
+      }
+    });
+
     // Close button
     this.modal.querySelector('.slide-modal-close').addEventListener('click', () => this.close());
     
@@ -291,11 +356,38 @@ export class SlideModal {
 
     // Slider value display
     this.modal.querySelectorAll('input[type="range"]').forEach(slider => {
+      const fieldName = slider.name;
+      const leftLabel = slider.parentElement.querySelector('.slider-label-left')?.textContent || '';
+      const rightLabel = slider.parentElement.querySelector('.slider-label-right')?.textContent || '';
+      
       slider.addEventListener('input', (e) => {
-        const valueDisplay = slider.parentElement.nextElementSibling;
-        if (valueDisplay) valueDisplay.textContent = `${e.target.value}%`;
+        const val = parseInt(e.target.value);
+        const display = this.modal.querySelector(`[data-slider-display="${fieldName}"]`);
+        if (display) {
+          // Mark as touched
+          this.sliderTouched[fieldName] = true;
+          // Display as Left% / Right%
+          display.textContent = `${100 - val}% / ${val}%`;
+        }
       });
     });
+  }
+
+  /**
+   * Get the text for the Next button (Skip vs Next based on optional slide data)
+   */
+  getNextButtonText(slide) {
+    if (!slide.optional) return 'Next';
+    
+    // Check if any field in this optional slide has data
+    const fields = slide.fields || [];
+    for (const field of fields) {
+      const value = this.formData[field.name];
+      if (value && (typeof value === 'string' ? value.trim() : (Array.isArray(value) ? value.length > 0 : true))) {
+        return 'Next';
+      }
+    }
+    return 'Skip';
   }
 
   /**
@@ -331,6 +423,30 @@ export class SlideModal {
     } else {
       this.formData[name] = value;
     }
+    
+    // Remove error class on change
+    if (e.target.classList.contains('error')) {
+      e.target.classList.remove('error');
+    }
+    
+    // Dynamic Button Update
+    // Check if we need to switch between "Skip" and "Next"
+    const slide = this.slides[this.currentSlide];
+    if (slide && slide.optional) {
+      const nextBtn = this.modal.querySelector('.slide-btn-next');
+      if (nextBtn) {
+        const text = this.getNextButtonText(slide);
+        // Only update if changed to prevent flickering/SVG reload
+        if (!nextBtn.textContent.includes(text)) {
+           nextBtn.innerHTML = `
+            ${text}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          `;
+        }
+      }
+    }
   }
 
   /**
@@ -338,23 +454,69 @@ export class SlideModal {
    */
   validateCurrentSlide() {
     const slide = this.slides[this.currentSlide];
-    if (slide.optional) return true;
-
-    const requiredFields = (slide.fields || []).filter(f => f.required);
+    let isValid = true;
     
-    for (const field of requiredFields) {
-      const value = this.formData[field.name];
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        // Highlight missing field
-        const input = this.modal.querySelector(`[name="${field.name}"]`);
-        if (input) {
-          input.classList.add('error');
-          input.focus();
+    // 1. Native Browser Validation (Email, Pattern, Required on Inputs)
+    // We check ALL inputs, even for optional slides, if data is entered it must be valid
+    const inputs = this.modal.querySelectorAll('.slide-modal-content input, .slide-modal-content select, .slide-modal-content textarea');
+    inputs.forEach(input => {
+      // Reset previous error
+      input.classList.remove('error');
+      
+      // If optional slide and empty, it's valid (browser handles 'required' attr logic)
+      // But we manually manage 'required' for optional slides in the previous logic which was flawed
+      // Here: if input has 'required', checkValidity() returns false if empty.
+      
+      // Special case: If slide is optional, we might want to allow empty required fields?
+      // No, if the field is marked required in config, it implies "if you answer this slide, this field is needed".
+      // But if slide is optional, usually fields shouldn't be required unless they depend on each other.
+      // For now, relies on standard checkValidity()
+      
+      if (!input.checkValidity()) {
+        // Only block if:
+        // 1. Slide is NOT optional OR
+        // 2. Slide IS optional BUT value is not empty (i.e. partial invalid data)
+        // Actually, if slide is optional, "required" attribute shouldn't be on inputs if we allow skipping empty.
+        // But our render logic adds 'required' based on config.
+        
+        // Revised Logic:
+        // If slide is optional, ignore 'value missing' error. Respect other errors (type mismatch).
+        if (slide.optional && input.validity.valueMissing) {
+           return;
         }
-        return false;
+        
+        input.classList.add('error');
+        // Only report validity on the first error to avoid spam
+        if (isValid) input.reportValidity();
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return false;
+
+    // 2. Custom Validation (Checkbox Groups)
+    if (!slide.optional) {
+      const requiredFields = (slide.fields || []).filter(f => f.required);
+      
+      for (const field of requiredFields) {
+        if (field.type === 'checkbox-group') {
+          const value = this.formData[field.name];
+          if (!value || (Array.isArray(value) && value.length === 0)) {
+             // Highlight group
+             const group = this.modal.querySelector(`.checkbox-group[data-name="${field.name}"]`);
+             if (group) {
+                // Flash effect or error class
+                group.style.border = '1px solid #dc2626';
+                group.style.borderRadius = '12px';
+                setTimeout(() => group.style.border = '', 2000);
+             }
+             isValid = false;
+          }
+        }
       }
     }
-    return true;
+    
+    return isValid;
   }
 
   /**
@@ -432,8 +594,7 @@ export class SlideModal {
     // Call completion handler
     this.onComplete(this.formData);
     
-    // Close modal
-    this.close();
+    // Do NOT close modal automatically - let onComplete handle next steps (like acknowledgement)
   }
 
   /**
@@ -449,26 +610,33 @@ export class SlideModal {
   }
 
   /**
-   * Show acknowledgement slide
+   * Show acknowledgement slide with beautiful animation
    */
-  showAcknowledgement(message = "Thank you! Our team will contact you within 24 hours.") {
+  showAcknowledgement(message = "Our team will contact you within 24 hours.", options = {}) {
     const content = this.modal.querySelector('.slide-modal-content');
     const footer = this.modal.querySelector('.slide-modal-footer');
     const progress = this.modal.querySelector('.slide-modal-progress');
     
     if (progress) progress.style.display = 'none';
     
+    const title = options.title || 'Hold Tight!';
+    const showMatchedAreas = options.showMatchedAreas !== false;
+    
     content.innerHTML = `
-      <div class="ack-slide">
-        <div class="ack-icon">✓</div>
-        <h3 class="ack-title">Request Submitted!</h3>
+      <div class="ack-slide ack-slide-animated">
+        <div class="ack-icon-wrapper">
+          <div class="ack-icon-ring"></div>
+          <div class="ack-icon">✓</div>
+        </div>
+        <h3 class="ack-title">${title}</h3>
         <p class="ack-message">${message}</p>
+        ${showMatchedAreas ? '<p class="ack-hint">Your best fit trade areas are shown beside!</p>' : ''}
       </div>
     `;
     
     footer.innerHTML = `
       <div></div>
-      <button class="slide-btn slide-btn-done">Done</button>
+      <button class="slide-btn slide-btn-done">Got it!</button>
     `;
     
     footer.querySelector('.slide-btn-done').addEventListener('click', () => this.close());
