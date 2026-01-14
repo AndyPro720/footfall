@@ -103,14 +103,15 @@ export const Intelligence = {
             <h3><span id="match-count">0</span> Matched Areas</h3>
             <div class="results-header-actions">
               <button class="btn-edit-filters" id="edit-filters">Edit Filters</button>
-              <button class="btn-close-results" id="close-results">&times;</button>
+              <button class="btn-minimize-results" id="minimize-results" title="Minimize">−</button>
+              <button class="btn-close-results" id="close-results" title="Close">&times;</button>
             </div>
           </div>
           <div class="results-list" id="results-list">
             <!-- Dynamically populated -->
           </div>
           <div class="results-footer">
-            <button class="btn-contact-advisory" id="btn-contact-advisory">Contact Advisory Team</button>
+            <button class="btn-contact-advisory" id="btn-contact-advisory">Find My Location</button>
           </div>
         </div>
 
@@ -531,7 +532,7 @@ export const Intelligence = {
   }, 300);
 },
       
-      startRotation(region, intervalMs = 3000) {
+      startRotation(region, intervalMs = 5000) {
         this.stopRotation();
         const areas = this.getTradeAreasByRegion(region);
         if (areas.length === 0) return;
@@ -781,7 +782,7 @@ export const Intelligence = {
         
         setTimeout(() => {
           if (!this.isPaused && viewMode === 'landing') {
-            StatsCardController.startRotation(stop.region, 3000);
+            StatsCardController.startRotation(stop.region, 5000);
           }
         }, stop.duration);
         
@@ -3171,7 +3172,65 @@ export const Intelligence = {
     });
 
 
-    document.getElementById('close-sidebar').onclick = () => sidebar.classList.remove('visible');
+    // --- SIDEBAR CLOSE WITH FLOATING RESTORE ---
+    let currentTradeAreaName = '';
+    
+    // Helper to remove sidebar restore button
+    const removeSidebarRestoreBtn = () => {
+      const restoreBtn = document.getElementById('btn-restore-sidebar');
+      if (restoreBtn) {
+        restoreBtn.classList.remove('visible');
+        setTimeout(() => restoreBtn.remove(), 300);
+      }
+    };
+    
+    // When sidebar opens (becomes visible), remove the restore button
+    const sidebarObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isVisible = sidebar.classList.contains('visible');
+          if (isVisible) {
+            removeSidebarRestoreBtn();
+          }
+        }
+      });
+    });
+    sidebarObserver.observe(sidebar, { attributes: true });
+    
+    // Also store original currentLevel setter to track level changes
+    // We'll check at intervals and remove button if not in TradeArea view
+    setInterval(() => {
+      if (currentLevel !== 'TradeArea') {
+        const restoreBtn = document.getElementById('btn-restore-sidebar');
+        if (restoreBtn) {
+          removeSidebarRestoreBtn();
+        }
+      }
+    }, 500);
+    
+    document.getElementById('close-sidebar').onclick = () => {
+      sidebar.classList.remove('visible');
+      
+      // Create floating restore button if in Trade Area view
+      if (currentLevel === 'TradeArea' && !document.getElementById('btn-restore-sidebar')) {
+        currentTradeAreaName = document.getElementById('sidebar-title')?.textContent || 'Details';
+        
+        const restoreBtn = document.createElement('button');
+        restoreBtn.id = 'btn-restore-sidebar';
+        restoreBtn.className = 'btn-restore-sidebar';
+        restoreBtn.innerHTML = '◀';
+        restoreBtn.title = `Show ${currentTradeAreaName}`;
+        restoreBtn.addEventListener('click', () => {
+          sidebar.classList.add('visible');
+          restoreBtn.classList.remove('visible');
+          setTimeout(() => restoreBtn.remove(), 300);
+        });
+        document.body.appendChild(restoreBtn);
+        
+        // Animate in
+        setTimeout(() => restoreBtn.classList.add('visible'), 50);
+      }
+    };
     
     // Watermark Home Link
     document.getElementById('watermark-home').onclick = () => {
@@ -3220,13 +3279,7 @@ export const Intelligence = {
       });
     }
     
-    // Close results button
-    const closeResultsBtn = document.getElementById('close-results');
-    if (closeResultsBtn) {
-      closeResultsBtn.addEventListener('click', () => {
-        matchedResultsPanel.classList.remove('visible');
-      });
-    }
+    // Close results button - handler defined later with minimize/restore logic
     
     // Apply filters
     if (applyFiltersBtn) {
@@ -3337,6 +3390,8 @@ export const Intelligence = {
             const areaId = card.dataset.areaId;
             const feature = geoData.tradeAreas.features.find(f => f.properties.id === areaId);
             if (feature) {
+              // Minimize the matched results panel (don't close)
+              minimizeMatchedResults();
               loadTradeAreaView(feature);
             }
           });
@@ -3345,12 +3400,84 @@ export const Intelligence = {
       
       // Show results panel
       matchedResultsPanel.classList.add('visible');
+      matchedResultsPanel.classList.remove('minimized');
+      // Remove floating button if it exists
+      const existingFloatBtn = document.getElementById('btn-show-matches');
+      if (existingFloatBtn) existingFloatBtn.remove();
     };
     
-    // Contact advisory - for now just show alert
+    // Find My Location button - opens full location modal
     if (btnContactAdvisory) {
       btnContactAdvisory.addEventListener('click', () => {
-        alert('Thank you for your interest! Our advisory team will contact you shortly.');
+        openFindMyLocationModal();
+      });
+    }
+    
+    // --- MATCHED RESULTS MINIMIZE/RESTORE LOGIC ---
+    let matchedResultsMinimized = false;
+    let currentMatchCount = 0;
+    
+    const minimizeMatchedResults = () => {
+      if (!matchedResultsPanel) return;
+      
+      // Store current count for the floating button
+      currentMatchCount = parseInt(matchCountEl?.innerText || '0');
+      
+      // Hide the panel
+      matchedResultsPanel.classList.remove('visible');
+      matchedResultsMinimized = true;
+      
+      // Create floating restore button if it doesn't exist
+      if (!document.getElementById('btn-show-matches')) {
+        const floatBtn = document.createElement('button');
+        floatBtn.id = 'btn-show-matches';
+        floatBtn.className = 'btn-show-matches';
+        floatBtn.innerHTML = `📋 ${currentMatchCount} Matches`;
+        floatBtn.addEventListener('click', restoreMatchedResults);
+        document.body.appendChild(floatBtn);
+        
+        // Animate in
+        setTimeout(() => floatBtn.classList.add('visible'), 50);
+      }
+    };
+    
+    const restoreMatchedResults = () => {
+      if (!matchedResultsPanel) return;
+      
+      // Show the panel
+      matchedResultsPanel.classList.add('visible');
+      matchedResultsMinimized = false;
+      
+      // Remove floating button
+      const floatBtn = document.getElementById('btn-show-matches');
+      if (floatBtn) {
+        floatBtn.classList.remove('visible');
+        setTimeout(() => floatBtn.remove(), 300);
+      }
+    };
+    
+    // Update close button to also remove floating button
+    const closeResultsBtn = document.getElementById('close-results');
+    if (closeResultsBtn) {
+      // Remove any existing listeners by replacing the element
+      const newCloseBtn = closeResultsBtn.cloneNode(true);
+      closeResultsBtn.parentNode.replaceChild(newCloseBtn, closeResultsBtn);
+      
+      newCloseBtn.addEventListener('click', () => {
+        matchedResultsPanel.classList.remove('visible');
+        matchedResultsMinimized = false;
+        
+        // Also remove the floating button
+        const floatBtn = document.getElementById('btn-show-matches');
+        if (floatBtn) floatBtn.remove();
+      });
+    }
+    
+    // Minimize button handler
+    const minimizeResultsBtn = document.getElementById('minimize-results');
+    if (minimizeResultsBtn) {
+      minimizeResultsBtn.addEventListener('click', () => {
+        minimizeMatchedResults();
       });
     }
     
@@ -3943,7 +4070,7 @@ export const Intelligence = {
       softLeadTimeout = setTimeout(() => {
         console.log('Triggering soft lead capture...');
         showSoftLeadCapture();
-      }, 18000); // 18 seconds
+      }, 23000); // 23 seconds
     }
     
     // --- HARD RESET KEYBOARD SHORTCUT ---

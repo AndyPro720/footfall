@@ -206,7 +206,7 @@ On Complete:
   1. Save to UserProfileService (localStorage)
   2. Update filterState
   3. Call applyFiltersAndShowResultsWithCount()
-  4. Display matched trade areas in results panel
+  4. Display matched trade areas in results panel -> also has CTA find my location button
   5. Send lead email via EmailService
 ```
 
@@ -255,7 +255,7 @@ On Complete:
 
 #### Soft Lead Capture
 
-A floating micro-form appears after ~18 seconds on the landing page. Collects:
+A floating micro-form appears after ~23 seconds on the landing page. Collects:
 - Name (optional)
 - Brand Name (optional)  
 - Phone Number (optional)
