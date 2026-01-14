@@ -75,13 +75,28 @@ export const UserProfileService = {
 
   /**
    * Save partial profile updates (merges with existing) to localStorage
+   * Note: Empty strings and empty arrays are IGNORED to prevent overwriting existing values
    */
   save(data) {
     try {
       const current = this.get();
+      
+      // Filter out empty strings and empty arrays to prevent overwriting existing data
+      const filteredData = {};
+      for (const [key, value] of Object.entries(data)) {
+        // Skip empty strings
+        if (value === '') continue;
+        // Skip empty arrays
+        if (Array.isArray(value) && value.length === 0) continue;
+        // Skip null/undefined
+        if (value === null || value === undefined) continue;
+        
+        filteredData[key] = value;
+      }
+      
       const updated = {
         ...current,
-        ...data,
+        ...filteredData,
         lastUpdated: new Date().toISOString()
       };
       localStorage.setItem(PERSIST_STORAGE_KEY, JSON.stringify(updated));
